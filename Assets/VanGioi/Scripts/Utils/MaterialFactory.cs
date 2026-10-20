@@ -85,6 +85,20 @@ namespace VanGioi.Utils
             return mat;
         }
 
+        /// <summary>
+        /// Vật liệu không chiếu sáng, trong suốt, dùng màu đỉnh (vertex color) – cho vệt kiếm,
+        /// tia lửa, vệt khí. "Sprites/Default" chạy được trên cả URP lẫn Built-in.
+        /// </summary>
+        public static Material UnlitTransparent(string name, Color color, Texture texture = null)
+        {
+            var shader = Shader.Find("Sprites/Default");
+            if (shader == null) shader = Shader.Find("Unlit/Transparent");
+            var mat = new Material(shader) { name = name };
+            if (mat.HasProperty("_Color")) mat.SetColor("_Color", color);
+            if (texture != null) mat.mainTexture = texture;
+            return mat;
+        }
+
         /// <summary>Vật liệu terrain. Trả về null với Built-in (Unity tự dùng vật liệu mặc định).</summary>
         public static Material TerrainMaterial()
         {

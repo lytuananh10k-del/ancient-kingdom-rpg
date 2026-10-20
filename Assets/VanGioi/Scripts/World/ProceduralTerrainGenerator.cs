@@ -47,7 +47,7 @@ namespace VanGioi.World
 
         public static Terrain Generate(TerrainGenerationSettings s, Transform parent = null)
         {
-            var data = new TerrainData { name = "TD_Phase1_Prototype" };
+            var data = new TerrainData { name = "TD_VanGioi_Prototype" };
             // Thứ tự quan trọng: đặt resolution TRƯỚC size.
             data.heightmapResolution = s.heightmapResolution;
             data.alphamapResolution = s.alphamapResolution;

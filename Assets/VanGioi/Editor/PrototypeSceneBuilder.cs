@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using VanGioi.Data;
 using VanGioi.Utils;
 using VanGioi.World;
 
@@ -11,17 +12,20 @@ namespace VanGioi.EditorTools
 {
     /// <summary>
     /// Menu "Vân Giới" trên thanh menu Unity:
-    ///  • Dựng Scene Prototype – sinh scene Giai đoạn 1 và lưu toàn bộ asset sinh ra
-    ///    (TerrainData, TerrainLayer, texture, material, mesh) vào Assets/VanGioi/Generated/Phase1.
+    ///  • Dựng Scene Prototype – sinh scene (địa hình, làng, nhân vật, camera, khu quái) và lưu
+    ///    asset sinh ra (TerrainData, TerrainLayer, texture, material, mesh) vào Assets/VanGioi/Generated/Prototype.
+    ///  • Dữ liệu thiết kế (vũ khí, combo, quái) được lưu thành ScriptableObject trong Assets/VanGioi/Data
+    ///    – chỉnh trong Inspector, dựng lại scene không ghi đè.
     ///  • Kiểm tra / áp dụng cấu hình dự án cho Windows & Android.
     /// </summary>
     public static class PrototypeSceneBuilder
     {
-        const string GeneratedFolder = "Assets/VanGioi/Generated/Phase1";
+        const string GeneratedFolder = "Assets/VanGioi/Generated/Prototype";
         const string ScenesFolder = "Assets/VanGioi/Scenes";
-        const string ScenePath = ScenesFolder + "/Phase1_Prototype.unity";
+        const string ScenePath = ScenesFolder + "/VanGioi_Prototype.unity";
+        public const string DataFolder = "Assets/VanGioi/Data";
 
-        [MenuItem("Vân Giới/Giai đoạn 1/Dựng Scene Prototype (500×500 m)", priority = 1)]
+        [MenuItem("Vân Giới/Dựng Scene Prototype (Giai đoạn 1–2)", priority = 1)]
         public static void BuildPrototypeScene()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)
@@ -46,8 +50,11 @@ namespace VanGioi.EditorTools
                 EnsureFolder(GeneratedFolder);
                 EnsureFolder(ScenesFolder);
 
-                EditorUtility.DisplayProgressBar("Vân Giới", "Sinh địa hình, làng Tàn Lão Thôn, rừng cây…", 0.25f);
-                var result = PrototypeWorldBuilder.Build(new TerrainGenerationSettings());
+                EditorUtility.DisplayProgressBar("Vân Giới", "Nạp dữ liệu vũ khí / quái…", 0.15f);
+                var data = LoadOrCreateGameData();
+
+                EditorUtility.DisplayProgressBar("Vân Giới", "Sinh địa hình, làng Tàn Lão Thôn, rừng cây, khu quái…", 0.25f);
+                var result = PrototypeWorldBuilder.Build(new TerrainGenerationSettings(), data);
 
                 EditorUtility.DisplayProgressBar("Vân Giới", "Lưu asset sinh ra…", 0.7f);
                 var saver = new GeneratedAssetSaver(GeneratedFolder);
@@ -70,7 +77,7 @@ namespace VanGioi.EditorTools
             }
         }
 
-        [MenuItem("Vân Giới/Giai đoạn 1/Mở Scene Prototype", priority = 2)]
+        [MenuItem("Vân Giới/Mở Scene Prototype", priority = 2)]
         public static void OpenPrototypeScene()
         {
             if (!File.Exists(ScenePath))
@@ -82,13 +89,54 @@ namespace VanGioi.EditorTools
             if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) EditorSceneManager.OpenScene(ScenePath);
         }
 
-        [MenuItem("Vân Giới/Giai đoạn 1/Thêm PrototypeBootstrap vào Scene hiện tại", priority = 3)]
+        [MenuItem("Vân Giới/Thêm PrototypeBootstrap vào Scene hiện tại", priority = 3)]
         public static void AddBootstrap()
         {
             var go = new GameObject("PrototypeBootstrap");
             go.AddComponent<PrototypeBootstrap>();
             Undo.RegisterCreatedObjectUndo(go, "Add PrototypeBootstrap");
             Selection.activeGameObject = go;
+        }
+
+        [MenuItem("Vân Giới/Dữ liệu/Tạo dữ liệu mặc định còn thiếu", priority = 10)]
+        public static void CreateMissingData()
+        {
+            LoadOrCreateGameData();
+            Selection.activeObject = AssetDatabase.LoadAssetAtPath<Object>(DataFolder);
+            Debug.Log($"[Vân Giới] Dữ liệu nằm trong {DataFolder}. Chỉnh trong Inspector rồi dựng lại scene.");
+        }
+
+        /// <summary>
+        /// Nạp ScriptableObject từ Assets/VanGioi/Data; file nào chưa có thì tạo từ DefaultGameData.
+        /// Không ghi đè chỉnh sửa của designer.
+        /// </summary>
+        public static GameDataSet LoadOrCreateGameData()
+        {
+            var d = DefaultGameData.Create();
+            var set = new GameDataSet
+            {
+                SwordCombo = LoadOrCreate($"{DataFolder}/Combat/{d.SwordCombo.name}.asset", d.SwordCombo),
+                Sword = LoadOrCreate($"{DataFolder}/Weapons/{d.Sword.name}.asset", d.Sword),
+                GreyWolf = LoadOrCreate($"{DataFolder}/Enemies/{d.GreyWolf.name}.asset", d.GreyWolf),
+                AlphaWolf = LoadOrCreate($"{DataFolder}/Enemies/{d.AlphaWolf.name}.asset", d.AlphaWolf),
+                IronTuskBoar = LoadOrCreate($"{DataFolder}/Enemies/{d.IronTuskBoar.name}.asset", d.IronTuskBoar),
+            };
+            if (set.Sword.combo == null || !EditorUtility.IsPersistent(set.Sword.combo))
+            {
+                set.Sword.combo = set.SwordCombo;
+                EditorUtility.SetDirty(set.Sword);
+            }
+            AssetDatabase.SaveAssets();
+            return set;
+        }
+
+        static T LoadOrCreate<T>(string path, T fallback) where T : ScriptableObject
+        {
+            var existing = AssetDatabase.LoadAssetAtPath<T>(path);
+            if (existing != null) return existing;
+            EnsureFolder(Path.GetDirectoryName(path)?.Replace('\\', '/'));
+            AssetDatabase.CreateAsset(fallback, path);
+            return fallback;
         }
 
         [MenuItem("Vân Giới/Kiểm tra cấu hình dự án", priority = 20)]

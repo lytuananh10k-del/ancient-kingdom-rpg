@@ -100,12 +100,12 @@ Dữ liệu kỹ năng lưu trong **`SkillData` (ScriptableObject)**: tên, icon
 | `GameManager` | Vòng đời game, trạng thái, frame rate, con trỏ | 1 ✅ |
 | `PlayerInputHub` + `DesktopInputReader` + `MobileInputController` | Gộp input mọi thiết bị | 1 ✅ |
 | `PlayerController` | Di chuyển vật lý (CharacterController) | 1 ✅ (bơi & bay: 5) |
-| `ThirdPersonCamera` | Camera orbit, va chạm, khoá mục tiêu | 1 ✅ (lock-on: 2) |
+| `ThirdPersonCamera` | Camera orbit, va chạm, khoá mục tiêu, rung | 1–2 ✅ |
 | `PlayerAnimationController` | Animator / rig placeholder | 1 ✅ |
 | `GraphicsQualityManager` | Low / Medium / High | 1 ✅ |
-| `CombatSystem` | Combo, hitbox, né, đỡ, phản công, sát thương | 2 |
-| `CharacterStats` | Chỉ số, HP/MP, buff | 2–3 |
-| `EnemyAI` | State machine quái + boss | 2–3 |
+| `CombatSystem` | Combo, hitbox, né, đỡ, phản công, sát thương | 2 ✅ |
+| `CharacterStats` | Chỉ số, HP/MP/thể lực, modifier | 2 ✅ |
+| `EnemyAI` | State machine quái (boss: 3) | 2 ✅ |
 | `SkillSystem` | Kỹ năng, hồi chiêu, linh lực, VFX | 3 |
 | `InventorySystem` | Túi đồ, trang bị, hiển thị trên nhân vật | 4 |
 | `QuestSystem` | Nhiệm vụ, sự kiện, phần thưởng | 4 |
@@ -140,7 +140,7 @@ Kỹ thuật: Object Pooling (đạn, VFX, số sát thương, quái), giới h�
 | Giai đoạn | Sản phẩm bàn giao |
 |---|---|
 | **1** | Prototype 500×500 m, nhân vật, camera, di chuyển, nhảy, va chạm, PC + Android ✅ |
-| **2** | Animator thật, combo, né/đỡ/phản công, lock-on, `CharacterStats`, `EnemyAI` + 2 loại quái, Object Pool |
+| **2** | Combo 4 đòn + phản kích, né/đỡ/đỡ hoàn hảo, lock-on, `CharacterStats`, `EnemyAI` + 3 loại quái, Object Pool, HUD, Animator Controller mẫu ✅ |
 | **3** | `SkillSystem` + 4 kỹ năng chiến đấu + VFX, boss 3 giai đoạn, số sát thương, HUD HP/MP |
 | **4** | NPC hội thoại & cửa hàng, `QuestSystem`, `InventorySystem` + trang bị hiển thị, `CultivationSystem` |
 | **5** | 10 khu vực tải động, cổng dịch chuyển, minimap & bản đồ, Ngự Kiếm Phi Hành, bơi, chu kỳ ngày đêm & thời tiết |

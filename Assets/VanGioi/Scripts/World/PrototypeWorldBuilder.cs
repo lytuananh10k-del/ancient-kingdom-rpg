@@ -2,9 +2,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using VanGioi.CameraSystem;
+using VanGioi.Combat;
 using VanGioi.Core;
+using VanGioi.Data;
+using VanGioi.Enemies;
 using VanGioi.Input;
 using VanGioi.Player;
+using VanGioi.Stats;
 using VanGioi.UI;
 using VanGioi.Utils;
 
@@ -12,8 +16,8 @@ namespace VanGioi.World
 {
     /// <summary>
     /// Dựng toàn bộ scene prototype Giai đoạn 1 bằng code:
-    /// Systems (GameManager, Input, Graphics, HUD) → Môi trường (mặt trời, bầu trời, sương)
-    /// → Địa hình → Làng Tàn Lão Thôn, cây, đá, nước, ranh giới → Nhân vật → Camera.
+    /// Systems (GameManager, Input, Graphics, HUD, chiến đấu, quái) → Môi trường (mặt trời, bầu trời, sương)
+    /// → Địa hình → Làng Tàn Lão Thôn, cây, đá, nước, ranh giới → Khu sinh quái → Nhân vật → Camera.
     ///
     /// Dùng được ở Edit Mode (menu "Vân Giới/…", sau đó lưu asset) lẫn Play Mode (PrototypeBootstrap).
     /// </summary>
@@ -36,7 +40,9 @@ namespace VanGioi.World
             public Material Plaster, Wood, DarkWood, RoofTile, Stone, Water, Bark, Leaf, LeafDark, Pine, Crate, Lantern, Gold;
         }
 
-        public static Result Build(TerrainGenerationSettings settings)
+        public static Result Build(TerrainGenerationSettings settings) => Build(settings, DefaultGameData.Create());
+
+        public static Result Build(TerrainGenerationSettings settings, GameDataSet data)
         {
             MeshFactory.ClearCache();
             var result = new Result { WaterLevel = settings.waterLevel };
@@ -56,12 +62,13 @@ namespace VanGioi.World
             BuildVillage(terrain, center, result.Props.transform, mats);
             BuildTrees(settings, terrain, result.Props.transform, mats, rng);
             BuildRocks(settings, terrain, result.Props.transform, mats, rng);
+            BuildEnemyZones(settings, terrain, data);
 
             var spawn = center + new Vector3(0, 0, -20f);
             spawn.y = Height(terrain, spawn) + 0.1f;
             result.SpawnPoint = spawn;
 
-            result.Player = BuildPlayer(spawn, Quaternion.identity);
+            result.Player = BuildPlayer(spawn, Quaternion.identity, data.Sword);
             result.Camera = BuildCamera(result.Player.transform);
             result.Player.SetCameraTransform(result.Camera.transform);
             result.Player.SetRespawnPoint(spawn);
@@ -78,6 +85,10 @@ namespace VanGioi.World
             var mobile = new GameObject("MobileInput").AddComponent<MobileInputController>();
             mobile.transform.SetParent(go.transform, false);
             go.AddComponent<PlayerInputHub>();
+            go.AddComponent<EnemyManager>();
+            go.AddComponent<CombatFeedback>();
+            go.AddComponent<WorldUI>();
+            go.AddComponent<PlayerHUD>();
             go.AddComponent<GameManager>();
             return go;
         }
@@ -414,15 +425,39 @@ namespace VanGioi.World
             }
         }
 
+        // ------------------------------------------------------------------ Enemies
+
+        /// <summary>Khu quái Đồng Cỏ Đại Khư quanh làng: bầy sói (đông nam), lợn rừng (tây nam), sói đầu đàn (tây bắc).</summary>
+        static void BuildEnemyZones(TerrainGenerationSettings s, Terrain terrain, GameDataSet data)
+        {
+            var root = new GameObject("EnemyZones").transform;
+            float minH = s.waterLevel + 1f;
+            AddZone(root, terrain, "Zone_SoiXam_DongNam", new Vector3(300f, 0, 175f), data.GreyWolf, 4, 14f, minH);
+            AddZone(root, terrain, "Zone_LonRung_TayNam", new Vector3(175f, 0, 170f), data.IronTuskBoar, 3, 16f, minH);
+            AddZone(root, terrain, "Zone_SoiDauDan_TayBac", new Vector3(215f, 0, 350f), data.AlphaWolf, 1, 4f, minH);
+            AddZone(root, terrain, "Zone_BaySoi_TayBac", new Vector3(222f, 0, 342f), data.GreyWolf, 2, 8f, minH);
+        }
+
+        static void AddZone(Transform parent, Terrain terrain, string name, Vector3 position, EnemyData enemy, int count, float radius, float minHeight)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(parent, false);
+            position.y = Height(terrain, position);
+            go.transform.position = position;
+            go.AddComponent<EnemySpawnZone>().Configure(enemy, count, radius, minHeight);
+        }
+
         // ------------------------------------------------------------------ Player & camera
 
         /// <summary>
         /// Player
-        ///  ├─ CharacterController + PlayerController + PlayerAnimationController
+        ///  ├─ CharacterController, PlayerController, CharacterStats, LockOnSystem,
+        ///  │  CombatSystem, PlayerAnimationController
         ///  └─ Visual            ← thay model ở đây
-        ///      └─ PlaceholderModel (PlaceholderRig)
+        ///      └─ PlaceholderModel (PlaceholderRig, WeaponHolder)
+        ///          └─ Weapon_ThanhPhongKiem (đổi chỗ giữa Socket_Back ↔ Socket_RightHand)
         /// </summary>
-        public static PlayerController BuildPlayer(Vector3 position, Quaternion rotation)
+        public static PlayerController BuildPlayer(Vector3 position, Quaternion rotation, WeaponData weapon = null)
         {
             var go = new GameObject("Player");
             go.tag = "Player";
@@ -441,7 +476,12 @@ namespace VanGioi.World
             cc.skinWidth = 0.02f;
             cc.minMoveDistance = 0f;
 
+            // Thứ tự quan trọng khi dựng lúc chạy (Awake chạy ngay khi AddComponent).
             var controller = go.AddComponent<PlayerController>();
+            go.AddComponent<CharacterStats>();
+            go.AddComponent<LockOnSystem>();
+            var combat = go.AddComponent<CombatSystem>();
+            if (weapon != null) combat.SetWeapon(weapon);
             go.AddComponent<PlayerAnimationController>();
             return controller;
         }

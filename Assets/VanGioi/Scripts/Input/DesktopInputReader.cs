@@ -52,7 +52,12 @@ namespace VanGioi.Input
                 if (cursorLocked || mouse.rightButton.isPressed) s.Look += mouse.delta.ReadValue();
                 float scroll = mouse.scroll.ReadValue().y;
                 if (Mathf.Abs(scroll) > 0.01f) s.Zoom += Mathf.Sign(scroll);
-                if (cursorLocked) s.AttackPressed |= mouse.leftButton.wasPressedThisFrame;
+                if (cursorLocked)
+                {
+                    s.AttackPressed |= mouse.leftButton.wasPressedThisFrame;
+                    s.BlockHeld |= mouse.rightButton.isPressed;
+                    s.BlockPressed |= mouse.rightButton.wasPressedThisFrame;
+                }
                 s.LockOnPressed |= mouse.middleButton.wasPressedThisFrame;
             }
 
@@ -66,6 +71,8 @@ namespace VanGioi.Input
                 s.JumpHeld |= pad.buttonSouth.isPressed;
                 s.DodgePressed |= pad.buttonEast.wasPressedThisFrame;
                 s.AttackPressed |= pad.buttonWest.wasPressedThisFrame;
+                s.BlockHeld |= pad.rightShoulder.isPressed;
+                s.BlockPressed |= pad.rightShoulder.wasPressedThisFrame;
                 s.Skill1Pressed |= pad.buttonNorth.wasPressedThisFrame;
                 s.LockOnPressed |= pad.rightStickButton.wasPressedThisFrame;
                 s.PausePressed |= pad.startButton.wasPressedThisFrame;
@@ -95,6 +102,11 @@ namespace VanGioi.Input
             s.DebugTogglePressed |= UnityEngine.Input.GetKeyDown(KeyCode.F1);
             s.QualityCyclePressed |= UnityEngine.Input.GetKeyDown(KeyCode.F2);
 
+            if (cursorLocked)
+            {
+                s.BlockHeld |= UnityEngine.Input.GetMouseButton(1);
+                s.BlockPressed |= UnityEngine.Input.GetMouseButtonDown(1);
+            }
             if (cursorLocked || UnityEngine.Input.GetMouseButton(1))
             {
                 // Trục "Mouse X/Y" mặc định có hệ số 0.1 → nhân 10 để xấp xỉ pixel.

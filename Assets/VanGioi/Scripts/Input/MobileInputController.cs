@@ -85,7 +85,7 @@ namespace VanGioi.Input
         Vector2 lookDelta;
 
         bool sprintToggled;
-        TouchButton btnAttack, btnJump, btnDodge, btnSprint, btnQ, btnE, btnR, btnF, btnBag, btnMap;
+        TouchButton btnAttack, btnJump, btnDodge, btnBlock, btnSprint, btnQ, btnE, btnR, btnF, btnBag, btnMap, btnLock;
 
         void Awake()
         {
@@ -156,6 +156,9 @@ namespace VanGioi.Input
             s.JumpHeld |= btnJump.Held;
             s.AttackPressed |= btnAttack.Pressed;
             s.DodgePressed |= btnDodge.Pressed;
+            s.BlockHeld |= btnBlock.Held;
+            s.BlockPressed |= btnBlock.Pressed;
+            s.LockOnPressed |= btnLock.Pressed;
             s.Skill1Pressed |= btnQ.Pressed;
             s.Skill2Pressed |= btnE.Pressed;
             s.Skill3Pressed |= btnR.Pressed;
@@ -355,6 +358,7 @@ namespace VanGioi.Input
             btnAttack = AddButton("Đánh", br, new Vector2(-200, 200), 190, gold, circle, font);
             btnJump = AddButton("Nhảy", br, new Vector2(-410, 110), 130, jade, circle, font);
             btnDodge = AddButton("Né", br, new Vector2(-180, 420), 120, jade, circle, font);
+            btnBlock = AddButton("Đỡ", br, new Vector2(-200, 585), 110, jade, circle, font);
             btnSprint = AddButton("Chạy", br, new Vector2(-600, 80), 110, jade, circle, font);
             btnQ = AddButton("Q", br, new Vector2(-400, 290), 110, azure, circle, font);
             btnE = AddButton("E", br, new Vector2(-330, 450), 110, azure, circle, font);
@@ -365,6 +369,7 @@ namespace VanGioi.Input
             var tr = new Vector2(1, 1);
             btnBag = AddButton("Túi", tr, new Vector2(-90, -80), 100, Color.white, circle, font);
             btnMap = AddButton("Bản đồ", tr, new Vector2(-210, -80), 100, Color.white, circle, font);
+            btnLock = AddButton("Khoá", tr, new Vector2(-330, -80), 100, new Color(1f, 0.6f, 0.5f), circle, font);
         }
 
         TouchButton AddButton(string label, Vector2 anchor, Vector2 pos, float size, Color color, Sprite sprite, Font font)

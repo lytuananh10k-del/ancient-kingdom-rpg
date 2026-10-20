@@ -21,10 +21,10 @@ Nếu dự án **không** tạo từ template Universal 3D:
 ## 2. Dựng scene
 
 ### Cách A — tự động (khuyến nghị)
-**Vân Giới → Giai đoạn 1 → Dựng Scene Prototype (500×500 m)**. Mất vài giây. Kết quả:
+**Vân Giới → Dựng Scene Prototype (Giai đoạn 1–2)**. Mất vài giây. Kết quả:
 
 ```
-Phase1_Prototype (scene)
+VanGioi_Prototype (scene)
 ├── _Systems              GraphicsQualityManager, DebugHUD, PlayerInputHub, GameManager
 │   └── MobileInput       MobileInputController (tự dựng UI cảm ứng khi chạy)
 ├── Environment
@@ -42,7 +42,7 @@ Phase1_Prototype (scene)
 └── Main Camera           Camera, AudioListener, ThirdPersonCamera
 ```
 
-Asset sinh ra (TerrainData, TerrainLayer, texture, material, mesh) nằm ở `Assets/VanGioi/Generated/Phase1/`. Chạy lại menu sẽ xoá thư mục đó và sinh lại.
+Asset sinh ra (TerrainData, TerrainLayer, texture, material, mesh) nằm ở `Assets/VanGioi/Generated/Prototype/`. Chạy lại menu sẽ xoá thư mục đó và sinh lại.
 
 ### Cách B — lúc chạy
 Scene trống → GameObject rỗng → Add Component **PrototypeBootstrap** → Play. Có thể chỉnh seed, kích thước, số cây… trong Inspector của `PrototypeBootstrap`.
@@ -193,7 +193,7 @@ Ba mức **Low / Medium / High** chỉnh: render scale (0.7 / 0.85 / 1.0), kho�
 Socket vũ khí placeholder: `Socket_RightHand`, `Socket_BackSword` — Giai đoạn 4 sẽ thay bằng hệ thống trang bị gắn vào xương `RightHand` của Humanoid (`animator.GetBoneTransform(HumanBodyBones.RightHand)`).
 
 ### Địa hình
-- Texture đất: mở các file `TL_*.terrainlayer` trong `Generated/Phase1`, thay Diffuse bằng texture PBR thật (thêm Normal Map + Mask Map) — hoặc copy layer ra thư mục khác vì menu dựng lại sẽ ghi đè.
+- Texture đất: mở các file `TL_*.terrainlayer` trong `Generated/Prototype`, thay Diffuse bằng texture PBR thật (thêm Normal Map + Mask Map) — hoặc copy layer ra thư mục khác vì menu dựng lại sẽ ghi đè.
 - Dùng địa hình riêng: thay `Terrain_TanLaoThon` bằng Terrain của bạn (Terrain Tools, Gaia, World Machine heightmap 513×513 RAW…). Mọi script khác không phụ thuộc cách sinh địa hình.
 - Cây: thay cây primitive bằng prefab cây thật có **LOD Group** (SpeedTree hoặc cây low-poly), dùng Terrain → Paint Trees để tận dụng instancing của terrain.
 

@@ -1,10 +1,11 @@
 using UnityEngine;
+using VanGioi.Combat;
 using VanGioi.Utils;
 
 namespace VanGioi.Player
 {
     /// <summary>
-    /// Dựng nhân vật placeholder: một tu sĩ áo trắng-lam, đeo kiếm sau lưng,
+    /// Dựng nhân vật placeholder: một tu sĩ áo trắng-lam, kiếm đeo sau lưng (rút ra tay khi chiến đấu),
     /// cao ~1.78 m, làm từ primitive có hệ khớp kiểu Humanoid.
     /// </summary>
     public static class PlaceholderCharacterBuilder
@@ -62,13 +63,6 @@ namespace VanGioi.Player
             var lLeg = BuildLeg("LeftUpperLeg", hips, -1f, palette);
             var rLeg = BuildLeg("RightUpperLeg", hips, 1f, palette);
 
-            // Kiếm đeo sau lưng (sẽ thay bằng hệ thống trang bị ở Giai đoạn 4).
-            var swordSocket = ObjectUtil.Pivot("Socket_BackSword", spine, new Vector3(0, 0.30f, -0.17f));
-            swordSocket.localRotation = Quaternion.Euler(0, 0, 35f);
-            ObjectUtil.Primitive(PrimitiveType.Cube, "Blade", swordSocket, new Vector3(0, -0.05f, 0), new Vector3(0.05f, 0.85f, 0.012f), palette.Blade);
-            ObjectUtil.Primitive(PrimitiveType.Cube, "Guard", swordSocket, new Vector3(0, 0.38f, 0), new Vector3(0.16f, 0.03f, 0.04f), palette.Hilt);
-            ObjectUtil.Primitive(PrimitiveType.Cylinder, "Grip", swordSocket, new Vector3(0, 0.49f, 0), new Vector3(0.03f, 0.09f, 0.03f), palette.Hilt);
-
             var rig = model.gameObject.AddComponent<PlaceholderRig>();
             rig.hips = hips;
             rig.spine = spine;
@@ -78,9 +72,40 @@ namespace VanGioi.Player
             rig.leftUpperLeg = lLeg;
             rig.rightUpperLeg = rLeg;
 
-            // Socket vũ khí tay phải – dùng cho Giai đoạn 2.
-            ObjectUtil.Pivot("Socket_RightHand", rArm, new Vector3(0, -0.58f, 0.02f));
+            // Vũ khí là object riêng, được WeaponHolder chuyển giữa lưng ↔ tay phải.
+            var backSocket = ObjectUtil.Pivot("Socket_Back", spine, new Vector3(0, 0.30f, -0.17f));
+            var handSocket = ObjectUtil.Pivot("Socket_RightHand", rArm, new Vector3(0.02f, -0.58f, 0.02f));
+            var sword = BuildSword(model, palette, out var trail);
+            var holder = model.gameObject.AddComponent<WeaponHolder>();
+            holder.Configure(sword, handSocket, backSocket, trail);
             return rig;
+        }
+
+        /// <summary>Kiếm placeholder: gốc ở chuôi, lưỡi kiếm dọc trục +Y. Có TrailRenderer làm vệt kiếm.</summary>
+        static Transform BuildSword(Transform parent, Palette p, out TrailRenderer trail)
+        {
+            var sword = new GameObject("Weapon_ThanhPhongKiem").transform;
+            sword.SetParent(parent, false);
+            ObjectUtil.Primitive(PrimitiveType.Cylinder, "Grip", sword, Vector3.zero, new Vector3(0.032f, 0.09f, 0.032f), p.Hilt);
+            ObjectUtil.Primitive(PrimitiveType.Sphere, "Pommel", sword, new Vector3(0, -0.1f, 0), Vector3.one * 0.045f, p.Hilt);
+            ObjectUtil.Primitive(PrimitiveType.Cube, "Guard", sword, new Vector3(0, 0.11f, 0), new Vector3(0.17f, 0.03f, 0.045f), p.Hilt);
+            ObjectUtil.Primitive(PrimitiveType.Cube, "Blade", sword, new Vector3(0, 0.55f, 0), new Vector3(0.05f, 0.85f, 0.012f), p.Blade);
+
+            var tip = ObjectUtil.Pivot("TrailPoint", sword, new Vector3(0, 0.72f, 0));
+            trail = tip.gameObject.AddComponent<TrailRenderer>();
+            trail.time = 0.14f;
+            trail.minVertexDistance = 0.04f;
+            trail.widthMultiplier = 0.55f;
+            trail.widthCurve = new AnimationCurve(new Keyframe(0f, 1f), new Keyframe(1f, 0f));
+            trail.sharedMaterial = MaterialFactory.UnlitTransparent("M_VFX_SwordTrail", Color.white);
+            trail.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            trail.receiveShadows = false;
+            trail.emitting = false;
+            var g = new Gradient();
+            g.SetKeys(new[] { new GradientColorKey(new Color(0.6f, 0.85f, 1f), 0f), new GradientColorKey(Color.white, 1f) },
+                new[] { new GradientAlphaKey(0.8f, 0f), new GradientAlphaKey(0f, 1f) });
+            trail.colorGradient = g;
+            return sword;
         }
 
         static Transform BuildArm(string name, Transform spine, float side, Palette p)

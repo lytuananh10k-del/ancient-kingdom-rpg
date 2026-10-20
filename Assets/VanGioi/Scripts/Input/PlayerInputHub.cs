@@ -97,6 +97,8 @@ namespace VanGioi.Input
             a.WalkTogglePressed |= b.WalkTogglePressed;
             a.DodgePressed |= b.DodgePressed;
             a.AttackPressed |= b.AttackPressed;
+            a.BlockHeld |= b.BlockHeld;
+            a.BlockPressed |= b.BlockPressed;
             a.LockOnPressed |= b.LockOnPressed;
             a.Skill1Pressed |= b.Skill1Pressed;
             a.Skill2Pressed |= b.Skill2Pressed;

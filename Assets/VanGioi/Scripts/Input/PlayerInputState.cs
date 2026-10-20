@@ -24,6 +24,8 @@ namespace VanGioi.Input
         // Dành cho Giai đoạn 2–4 (đã nối phím sẵn).
         public bool DodgePressed;
         public bool AttackPressed;
+        public bool BlockHeld;     // chuột phải (khi đã khoá chuột) – đỡ đòn
+        public bool BlockPressed;  // frame bắt đầu đỡ – dùng cho đỡ hoàn hảo
         public bool LockOnPressed;
         public bool Skill1Pressed; // Q – Kiếm Khí Trảm
         public bool Skill2Pressed; // E – Vạn Kiếm Quy Tông

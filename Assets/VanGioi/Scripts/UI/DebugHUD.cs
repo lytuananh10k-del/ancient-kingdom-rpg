@@ -12,6 +12,10 @@ namespace VanGioi.UI
     {
         [SerializeField] bool visible = true;
         [SerializeField] bool showControls = true;
+        [Tooltip("Khoảng cách từ mép trên (chừa chỗ cho PlayerHUD).")]
+        [SerializeField] float top = 185f;
+
+        float Top => top;
 
         PlayerController player;
         GraphicsQualityManager graphics;
@@ -49,7 +53,7 @@ namespace VanGioi.UI
             float scale = Mathf.Max(1f, Screen.height / 1080f);
             GUI.matrix = Matrix4x4.Scale(new Vector3(scale, scale, 1f));
 
-            var text = $"<b>VÂN GIỚI TRUYỀN KỲ 3D</b> – Prototype Giai đoạn 1\n" +
+            var text = $"<b>VÂN GIỚI TRUYỀN KỲ 3D</b> – Prototype Giai đoạn 2\n" +
                        $"FPS: <b>{fpsSmoothed:0}</b>   (frame chậm nhất 2s: {worstFrameMs:0.0} ms)\n" +
                        $"Đồ hoạ: <b>{(graphics != null ? graphics.CurrentTier.ToString() : "-")}</b>";
             if (player != null)
@@ -65,17 +69,18 @@ namespace VanGioi.UI
             if (showControls)
             {
                 text += touch
-                    ? "\n\n<b>Cảm ứng</b>: joystick trái – vuốt phải xoay camera – nút Nhảy / Chạy"
+                    ? "\n\n<b>Cảm ứng</b>: joystick trái · vuốt phải xoay camera · Đánh / Né / Đỡ / Khoá"
                     : "\n\n<b>Phím</b>: WASD di chuyển · Chuột xoay · Lăn chuột zoom\n" +
                       "Shift chạy nhanh · Space nhảy · CapsLock đi bộ\n" +
+                      "Chuột trái đánh (combo 4 đòn) · Chuột phải đỡ · Ctrl né · T khoá mục tiêu\n" +
                       "Esc nhả/khoá chuột · F1 ẩn HUD · F2 đổi đồ hoạ";
             }
 
             var content = new GUIContent(text);
             float width = 470f;
             float height = label.CalcHeight(content, width - 20f) + 16f;
-            GUI.Box(new Rect(10, 10, width, height), GUIContent.none, box);
-            GUI.Label(new Rect(20, 16, width - 20f, height), content, label);
+            GUI.Box(new Rect(10, Top, width, height), GUIContent.none, box);
+            GUI.Label(new Rect(20, Top + 6, width - 20f, height), content, label);
         }
     }
 }

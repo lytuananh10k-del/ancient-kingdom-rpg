@@ -8,13 +8,14 @@ Game nhập vai hành động 3D thế giới mở, đề tài tu tiên phương
 |---|---|
 | [docs/GDD.md](docs/GDD.md) | Thiết kế tổng thể: 10 khu vực, cảnh giới, chiến đấu, kỹ năng, kiến trúc, lộ trình 6 giai đoạn |
 | [docs/PHASE1_GUIDE.md](docs/PHASE1_GUIDE.md) | Giai đoạn 1: cài đặt, Inspector, dựng scene thủ công, kiểm thử, lỗi thường gặp, thay placeholder |
+| [docs/PHASE2_GUIDE.md](docs/PHASE2_GUIDE.md) | Giai đoạn 2: chiến đấu, chỉ số, quái vật AI, Animator, dữ liệu ScriptableObject, kiểm thử & cân bằng |
 
 ## Trạng thái
 
 | Giai đoạn | Nội dung | Trạng thái |
 |---|---|---|
 | **1** | Địa hình 3D 500×500 m, nhân vật, camera góc nhìn thứ ba, đi/chạy/chạy nhanh/nhảy, va chạm, điều khiển PC + Android | ✅ Đã có mã nguồn |
-| 2 | Animation (Animator thật), combo, né/đỡ/phản công, khoá mục tiêu, quái vật AI | ⏳ |
+| **2** | Combo 4 đòn, né (i-frame), đỡ / đỡ hoàn hảo / phản kích, khoá mục tiêu, chỉ số & sát thương, 3 loại quái AI hồi sinh, HUD, hiệu ứng đánh trúng, Animator Controller mẫu | ✅ Đã có mã nguồn |
 | 3 | 5 kỹ năng, VFX, boss nhiều giai đoạn, chỉ số | ⏳ |
 | 4 | NPC, nhiệm vụ, trang bị, tu luyện & đột phá | ⏳ |
 | 5 | Thế giới mở 10 khu vực, ngự kiếm phi hành, tải khu vực động | ⏳ |
@@ -35,9 +36,9 @@ Game nhập vai hành động 3D thế giới mở, đề tài tu tiên phương
    ```
    (Hoặc tải ZIP rồi chép thư mục `Assets/VanGioi` vào `Assets/` của project.)
 3. Mở lại project trong Unity, đợi biên dịch xong.
-4. Thanh menu → **Vân Giới → Giai đoạn 1 → Dựng Scene Prototype (500×500 m)**.
-   Công cụ sẽ sinh địa hình, làng Tàn Lão Thôn, ~900 cây, đá, nước, nhân vật, camera và lưu scene
-   `Assets/VanGioi/Scenes/Phase1_Prototype.unity` (đã thêm vào Build Settings).
+4. Thanh menu → **Vân Giới → Dựng Scene Prototype (Giai đoạn 1–2)**.
+   Công cụ sẽ sinh địa hình, làng Tàn Lão Thôn, ~900 cây, đá, nước, 4 khu quái, nhân vật, camera và lưu scene
+   `Assets/VanGioi/Scenes/VanGioi_Prototype.unity` (đã thêm vào Build Settings).
 5. Bấm **Play**. Click vào cửa sổ Game để khoá chuột.
 
 Không muốn dùng menu? Tạo scene trống → thêm GameObject rỗng → gắn `PrototypeBootstrap` → Play.
@@ -52,7 +53,11 @@ Không muốn dùng menu? Tạo scene trống → thêm GameObject rỗng → g�
 | Chạy nhanh | Giữ Shift | Nhấn cần trái / LT | Nút **Chạy** (bật/tắt) |
 | Nhảy (giữ lâu nhảy cao hơn) | Space | A | Nút **Nhảy** |
 | Đi bộ (bật/tắt) | Caps Lock | – | Đẩy joystick nhẹ |
-| Đánh / Né / Kỹ năng Q E R F / Túi / Bản đồ | Chuột trái / Ctrl / Q E R F / Tab / M | X / B / Y / – / Back | Nút tương ứng (đã nối input, chức năng có từ Giai đoạn 2–5) |
+| Đánh thường (combo 4 đòn) | Chuột trái | X | Nút **Đánh** |
+| Đỡ đòn (bấm đúng lúc = đỡ hoàn hảo) | Giữ chuột phải | RB | Giữ nút **Đỡ** |
+| Né / lùi né | Ctrl (+ hướng) | B | Nút **Né** |
+| Khoá mục tiêu | T / chuột giữa | R3 | Nút **Khoá** |
+| Kỹ năng Q E R F / Túi / Bản đồ | Q E R F / Tab / M | Y / – / Back | Nút tương ứng (đã nối input, chức năng có từ Giai đoạn 3–5) |
 | Nhả / khoá chuột | Esc / click chuột trái | – | – |
 | HUD gỡ lỗi · đổi mức đồ hoạ | F1 · F2 | – | – |
 
@@ -61,7 +66,9 @@ Không muốn dùng menu? Tạo scene trống → thêm GameObject rỗng → g�
 ```
 Assets/VanGioi/
 ├── Editor/
-│   └── PrototypeSceneBuilder.cs     Menu "Vân Giới": dựng scene, lưu asset sinh ra, kiểm tra & áp dụng Player Settings
+│   ├── PrototypeSceneBuilder.cs     Menu "Vân Giới": dựng scene, lưu asset + dữ liệu, kiểm tra & áp dụng Player Settings
+│   └── AnimatorControllerGenerator.cs Sinh Animator Controller mẫu (người chơi, yêu thú)
+├── Data/                            Asset dữ liệu (vũ khí, combo, quái) – tạo bởi menu, chỉnh trong Inspector
 ├── Scripts/
 │   ├── Core/
 │   │   ├── GameManager.cs           Frame rate, khoá chuột, trạng thái game, phím hệ thống
@@ -82,7 +89,25 @@ Assets/VanGioi/
 │   │   ├── ProceduralTerrainGenerator.cs Địa hình 500×500 m: đồi, vòng núi, sông, hồ, nền làng, 5 lớp đất
 │   │   ├── PrototypeWorldBuilder.cs Dựng hệ thống, ánh sáng, làng, cây (LOD), đá, nước, nhân vật, camera
 │   │   └── PrototypeBootstrap.cs    Dựng prototype lúc chạy trong scene trống
-│   ├── UI/DebugHUD.cs               FPS, trạng thái nhân vật, bảng phím
+│   ├── Combat/
+│   │   ├── CombatSystem.cs          Combo, né, đỡ, đỡ hoàn hảo, phản kích, trúng đòn, tử vong (người chơi)
+│   │   ├── CombatTypes.cs           Team, HitInfo, HitResult, IDamageable, CombatEvents, DamageCalculator
+│   │   ├── LockOnSystem.cs          Khoá mục tiêu
+│   │   ├── TargetRegistry.cs        Danh sách mục tiêu + chọn mục tiêu tốt nhất
+│   │   ├── WeaponHolder.cs          Rút/tra kiếm, vệt kiếm
+│   │   └── CombatFeedback.cs        Hit-stop, rung camera, tia lửa, vệt kiếm khí (Object Pool)
+│   ├── Stats/                       StatBlock, CharacterStats (HP/linh lực/thể lực, hồi phục), bảng cảnh giới
+│   ├── Data/                        ScriptableObject: ComboData, WeaponData, EnemyData + DefaultGameData
+│   ├── Enemies/
+│   │   ├── EnemyAI.cs               Tuần tra → phát hiện → truy đuổi → tấn công → choáng → về nhà → chết → hồi sinh
+│   │   ├── EnemyManager.cs          Giới hạn quái hoạt động, lượt tấn công
+│   │   ├── EnemySpawnZone.cs        Khu sinh & hồi sinh quái (tái sử dụng object)
+│   │   ├── EnemyFactory.cs          Tạo quái từ EnemyData (prefab hoặc placeholder sói / lợn rừng)
+│   │   └── QuadrupedRig.cs          Animation thủ tục yêu thú 4 chân
+│   ├── UI/
+│   │   ├── PlayerHUD.cs             Thanh máu / linh lực / thể lực, cảnh giới, chiến lực, màn hình tử vong
+│   │   ├── WorldUI.cs               Số sát thương, thanh máu quái, dấu khoá mục tiêu, thông báo
+│   │   └── DebugHUD.cs              FPS, trạng thái nhân vật, bảng phím
 │   └── Utils/                       MaterialFactory (URP/Built-in), MeshFactory, ProceduralTextures, ObjectUtil
 └── Scenes/                          Scene được sinh vào đây
 ```

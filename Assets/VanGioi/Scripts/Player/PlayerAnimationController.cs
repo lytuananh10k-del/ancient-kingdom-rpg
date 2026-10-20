@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
+using VanGioi.Combat;
+using VanGioi.Data;
 
 namespace VanGioi.Player
 {
@@ -17,6 +19,17 @@ namespace VanGioi.Player
     ///   int    MoveState      (int)MovementState
     ///   trigger Jump          khi bắt đầu nhảy
     ///   trigger Land          khi chạm đất
+    ///   --- Chiến đấu (Giai đoạn 2) ---
+    ///   trigger Attack        bắt đầu một đòn; int ComboStep = 0..3, = -1 khi là Phản Kích
+    ///   int    ComboStep
+    ///   trigger Counter       đòn phản kích sau đỡ hoàn hảo
+    ///   trigger Dodge         né (bool Backstep = true khi lùi né)
+    ///   bool   Backstep
+    ///   bool   Blocking       đang đỡ đòn
+    ///   trigger Parry         đỡ hoàn hảo
+    ///   trigger Hit           trúng đòn / phá thế
+    ///   bool   Dead
+    /// Menu "Vân Giới > Giai đoạn 2 > Tạo Animator Controller mẫu" sinh sẵn controller đúng hợp đồng này.
     /// </summary>
     [RequireComponent(typeof(PlayerController))]
     public class PlayerAnimationController : MonoBehaviour
@@ -35,15 +48,26 @@ namespace VanGioi.Player
         static readonly int MoveStateHash = Animator.StringToHash("MoveState");
         static readonly int JumpHash = Animator.StringToHash("Jump");
         static readonly int LandHash = Animator.StringToHash("Land");
+        static readonly int AttackHash = Animator.StringToHash("Attack");
+        static readonly int ComboStepHash = Animator.StringToHash("ComboStep");
+        static readonly int CounterHash = Animator.StringToHash("Counter");
+        static readonly int DodgeHash = Animator.StringToHash("Dodge");
+        static readonly int BackstepHash = Animator.StringToHash("Backstep");
+        static readonly int BlockingHash = Animator.StringToHash("Blocking");
+        static readonly int ParryHash = Animator.StringToHash("Parry");
+        static readonly int HitHash = Animator.StringToHash("Hit");
+        static readonly int DeadHash = Animator.StringToHash("Dead");
 
         readonly HashSet<int> availableParams = new HashSet<int>();
         PlayerController controller;
+        CombatSystem combat;
 
         bool UseAnimator => animator != null && animator.runtimeAnimatorController != null && animator.isActiveAndEnabled;
 
         void Awake()
         {
             controller = GetComponent<PlayerController>();
+            combat = GetComponent<CombatSystem>();
             Rebind();
         }
 
@@ -57,12 +81,35 @@ namespace VanGioi.Player
             if (controller == null) controller = GetComponent<PlayerController>();
             controller.Jumped += OnJumped;
             controller.Landed += OnLanded;
+            if (combat == null) combat = GetComponent<CombatSystem>();
+            if (combat != null)
+            {
+                combat.AttackStarted += OnAttack;
+                combat.DodgeStarted += OnDodge;
+                combat.BlockChanged += OnBlock;
+                combat.Parried += OnParry;
+                combat.HitReacted += OnHit;
+                combat.GuardBroken += OnHit;
+                combat.Died += OnDied;
+                combat.Revived += OnRevived;
+            }
         }
 
         void OnDisable()
         {
             controller.Jumped -= OnJumped;
             controller.Landed -= OnLanded;
+            if (combat != null)
+            {
+                combat.AttackStarted -= OnAttack;
+                combat.DodgeStarted -= OnDodge;
+                combat.BlockChanged -= OnBlock;
+                combat.Parried -= OnParry;
+                combat.HitReacted -= OnHit;
+                combat.GuardBroken -= OnHit;
+                combat.Died -= OnDied;
+                combat.Revived -= OnRevived;
+            }
         }
 
         /// <summary>
@@ -82,6 +129,7 @@ namespace VanGioi.Player
             animator = newModelRoot != null ? newModelRoot.GetComponentInChildren<Animator>() : null;
             placeholderRig = newModelRoot != null ? newModelRoot.GetComponentInChildren<PlaceholderRig>() : null;
             Rebind();
+            if (combat != null) combat.RebindModel();
         }
 
         void CacheParameters()
@@ -117,6 +165,70 @@ namespace VanGioi.Player
         void OnJumped()
         {
             if (UseAnimator && Has(JumpHash)) animator.SetTrigger(JumpHash);
+        }
+
+        void OnAttack(int comboStep, AttackStep step, bool counter)
+        {
+            if (UseAnimator)
+            {
+                if (Has(ComboStepHash)) animator.SetInteger(ComboStepHash, comboStep);
+                if (counter && Has(CounterHash)) animator.SetTrigger(CounterHash);
+                else if (Has(AttackHash)) animator.SetTrigger(AttackHash);
+                return;
+            }
+            if (placeholderRig == null) return;
+            var rigAction = step.style switch
+            {
+                SwingStyle.SlashLeft => RigAction.SlashLeft,
+                SwingStyle.Overhead => RigAction.Overhead,
+                SwingStyle.Thrust => RigAction.Thrust,
+                SwingStyle.Spin => RigAction.Spin,
+                _ => RigAction.SlashRight
+            };
+            placeholderRig.PlayAction(rigAction, step.Duration, step.startup, step.ActiveEnd);
+        }
+
+        void OnDodge(bool backstep)
+        {
+            if (UseAnimator)
+            {
+                if (Has(BackstepHash)) animator.SetBool(BackstepHash, backstep);
+                if (Has(DodgeHash)) animator.SetTrigger(DodgeHash);
+            }
+            else if (placeholderRig != null)
+            {
+                placeholderRig.PlayAction(backstep ? RigAction.Backstep : RigAction.Dodge, 0.42f, 0.05f, 0.1f);
+            }
+        }
+
+        void OnBlock(bool blocking)
+        {
+            if (UseAnimator) { if (Has(BlockingHash)) animator.SetBool(BlockingHash, blocking); }
+            else if (placeholderRig != null) placeholderRig.SetBlocking(blocking);
+        }
+
+        void OnParry()
+        {
+            if (UseAnimator) { if (Has(ParryHash)) animator.SetTrigger(ParryHash); }
+            else if (placeholderRig != null) placeholderRig.PlayAction(RigAction.Parry, 0.35f, 0.02f, 0.12f);
+        }
+
+        void OnHit()
+        {
+            if (UseAnimator) { if (Has(HitHash)) animator.SetTrigger(HitHash); }
+            else if (placeholderRig != null) placeholderRig.PlayAction(RigAction.HitReact, 0.35f, 0.05f, 0.1f);
+        }
+
+        void OnDied()
+        {
+            if (UseAnimator) { if (Has(DeadHash)) animator.SetBool(DeadHash, true); }
+            else if (placeholderRig != null) placeholderRig.SetDead(true);
+        }
+
+        void OnRevived()
+        {
+            if (UseAnimator) { if (Has(DeadHash)) animator.SetBool(DeadHash, false); }
+            else if (placeholderRig != null) placeholderRig.SetDead(false);
         }
 
         void OnLanded(float impactSpeed)

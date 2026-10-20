@@ -50,6 +50,16 @@ namespace VanGioi.CameraSystem
         [SerializeField] float recoverSpeed = 6f;
         [SerializeField] float minTerrainClearance = 0.4f;
 
+        [Header("Khoá mục tiêu")]
+        [Tooltip("Tốc độ camera xoay về mục tiêu đang khoá.")]
+        [SerializeField] float lockOnTurnSharpness = 8f;
+        [Tooltip("Cộng thêm góc cúi khi khoá để thấy cả nhân vật lẫn mục tiêu.")]
+        [SerializeField] float lockOnPitchOffset = 12f;
+
+        [Header("Rung")]
+        [SerializeField] float shakeFrequency = 28f;
+        [SerializeField, Range(0f, 2f)] float shakeScale = 1f;
+
         float yaw, pitch;
         float targetDistance, zoomDistance, zoomVelocity, currentDistance;
         Vector3 smoothedPivot;
@@ -57,6 +67,8 @@ namespace VanGioi.CameraSystem
         float verticalVelocity;
         bool initialized;
         readonly RaycastHit[] hits = new RaycastHit[16];
+        Transform lockTarget;
+        float shakeAmplitude, shakeTime, shakeDuration;
 
         public Transform Target => target;
         public float Yaw => yaw;
@@ -69,6 +81,23 @@ namespace VanGioi.CameraSystem
         {
             target = newTarget;
             if (snap) Snap();
+        }
+
+        public Transform LockTarget => lockTarget;
+
+        /// <summary>Khoá camera vào mục tiêu (null = huỷ khoá). Khi khoá, input xoay camera bị bỏ qua.</summary>
+        public void SetLockTarget(Transform target) => lockTarget = target;
+
+        /// <summary>Rung camera (đánh trúng, bị đánh, nổ…). Biên độ tính bằng mét.</summary>
+        public void AddShake(float amplitude, float duration = 0.18f)
+        {
+            amplitude *= shakeScale;
+            if (amplitude <= 0f) return;
+            float remaining = shakeDuration > 0f ? shakeAmplitude * Mathf.Clamp01(1f - shakeTime / shakeDuration) : 0f;
+            if (amplitude < remaining) return;
+            shakeAmplitude = amplitude;
+            shakeDuration = Mathf.Max(0.05f, duration);
+            shakeTime = 0f;
         }
 
         /// <summary>Hướng camera theo yaw/pitch cho trước (dùng cho khoá mục tiêu ở Giai đoạn 2).</summary>
@@ -108,8 +137,24 @@ namespace VanGioi.CameraSystem
             float dt = Time.deltaTime;
 
             var input = PlayerInputHub.Instance != null ? PlayerInputHub.Instance.State : default;
-            yaw = Mathf.Repeat(yaw + input.Look.x * sensitivity, 360f);
-            pitch = Mathf.Clamp(pitch + input.Look.y * sensitivity * (invertY ? 1f : -1f), minPitch, maxPitch);
+            if (lockTarget != null && lockTarget.gameObject.activeInHierarchy)
+            {
+                Vector3 to = lockTarget.position - smoothedPivot;
+                float flat = new Vector2(to.x, to.z).magnitude;
+                if (flat > 0.5f)
+                {
+                    float wantYaw = Mathf.Atan2(to.x, to.z) * Mathf.Rad2Deg;
+                    float wantPitch = Mathf.Clamp(-Mathf.Atan2(to.y, flat) * Mathf.Rad2Deg + lockOnPitchOffset, minPitch, 45f);
+                    float k = 1f - Mathf.Exp(-lockOnTurnSharpness * dt);
+                    yaw = Mathf.Repeat(Mathf.LerpAngle(yaw, wantYaw, k), 360f);
+                    pitch = Mathf.Lerp(pitch, wantPitch, k);
+                }
+            }
+            else
+            {
+                yaw = Mathf.Repeat(yaw + input.Look.x * sensitivity, 360f);
+                pitch = Mathf.Clamp(pitch + input.Look.y * sensitivity * (invertY ? 1f : -1f), minPitch, maxPitch);
+            }
             if (Mathf.Abs(input.Zoom) > 0.01f)
                 targetDistance = Mathf.Clamp(targetDistance - input.Zoom * zoomStep, minDistance, maxDistance);
 
@@ -144,6 +189,16 @@ namespace VanGioi.CameraSystem
             {
                 float ground = terrain.SampleHeight(position) + terrain.transform.position.y + minTerrainClearance;
                 if (position.y < ground) position.y = ground;
+            }
+
+            if (shakeDuration > 0f)
+            {
+                shakeTime += Time.unscaledDeltaTime;
+                float fade = 1f - Mathf.Clamp01(shakeTime / shakeDuration);
+                if (fade <= 0f) shakeDuration = 0f;
+                float t = Time.unscaledTime * shakeFrequency;
+                var offset = new Vector3(Mathf.PerlinNoise(t, 0.3f) - 0.5f, Mathf.PerlinNoise(0.7f, t) - 0.5f, 0f) * (2f * shakeAmplitude * fade * fade);
+                position += rot * offset;
             }
 
             transform.SetPositionAndRotation(position, rot);

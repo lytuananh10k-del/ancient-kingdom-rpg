@@ -77,6 +77,9 @@ namespace VanGioi.Player
         bool walkToggled;
         Vector3 respawnPoint;
         float airborneMinVerticalVelocity;
+        Vector3 velocityOverride;
+        bool hasVelocityOverride;
+        bool rotationOverridden;
 
         // ---------------------------------------------------------------- Public API
 
@@ -96,8 +99,16 @@ namespace VanGioi.Player
 
         /// <summary>Khoá di chuyển (dùng cho đòn đánh có root lock, hội thoại, cutscene…).</summary>
         public bool MovementLocked { get; set; }
-        /// <summary>Nhân tốc độ từ buff / debuff (Giai đoạn 3–4).</summary>
+        /// <summary>Nhân tốc độ từ buff / debuff / đỡ đòn.</summary>
         public float SpeedMultiplier { get; set; } = 1f;
+        /// <summary>Chặn chạy nhanh (đang đỡ đòn…).</summary>
+        public bool SprintBlocked { get; set; }
+        /// <summary>
+        /// Mục tiêu đang khoá: nhân vật luôn quay mặt về mục tiêu khi di chuyển (strafe),
+        /// trừ khi đang chạy nhanh.
+        /// </summary>
+        public Transform FacingTarget { get; set; }
+        public Vector3 RespawnPoint => respawnPoint;
 
         public event Action Jumped;
         /// <summary>Tham số: tốc độ rơi lúc chạm đất (m/s, dương).</summary>
@@ -116,6 +127,28 @@ namespace VanGioi.Player
             planarVelocity = Vector3.zero;
             verticalVelocity = 0f;
         }
+
+        /// <summary>
+        /// Ghi đè vận tốc ngang CHO FRAME NÀY (lướt né, lao tới khi chém, bị đánh bật).
+        /// Phải gọi trước Update của PlayerController (CombatSystem chạy sớm hơn nhờ DefaultExecutionOrder).
+        /// </summary>
+        public void OverridePlanarVelocity(Vector3 velocity)
+        {
+            velocityOverride = Vector3.ProjectOnPlane(velocity, Vector3.up);
+            hasVelocityOverride = true;
+        }
+
+        /// <summary>Quay ngay về hướng cho trước (bỏ qua tốc độ xoay) – dùng khi ra đòn.</summary>
+        public void SnapFacing(Vector3 direction)
+        {
+            direction = Vector3.ProjectOnPlane(direction, Vector3.up);
+            if (direction.sqrMagnitude < 0.0001f) return;
+            transform.rotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
+            rotationOverridden = true;
+        }
+
+        /// <summary>Hướng thế giới tương ứng với input di chuyển (theo camera).</summary>
+        public Vector3 GetMoveDirection(Vector2 move) => CameraRelativeDirection(move);
 
         /// <summary>Thêm vận tốc tức thời (bị đánh bật, lướt né…).</summary>
         public void AddImpulse(Vector3 velocity)
@@ -157,19 +190,35 @@ namespace VanGioi.Player
             Vector2 moveInput = MovementLocked ? Vector2.zero : input.Move;
             float inputMagnitude = Mathf.Clamp01(moveInput.magnitude);
             Vector3 wishDir = CameraRelativeDirection(moveInput);
-            float targetSpeed = TargetSpeed(inputMagnitude, input.SprintHeld) * SpeedMultiplier;
+            bool sprint = input.SprintHeld && !SprintBlocked;
+            float targetSpeed = TargetSpeed(inputMagnitude, sprint) * SpeedMultiplier;
             Vector3 targetVelocity = wishDir * targetSpeed;
 
-            float rate = targetVelocity.sqrMagnitude >= planarVelocity.sqrMagnitude ? acceleration : deceleration;
-            if (!IsGrounded) rate *= airControl;
-            planarVelocity = Vector3.MoveTowards(planarVelocity, targetVelocity, rate * dt);
-
-            if (wishDir.sqrMagnitude > 0.0001f)
+            if (hasVelocityOverride)
             {
-                var targetRot = Quaternion.LookRotation(wishDir, Vector3.up);
-                float turn = turnSpeed * (IsGrounded ? 1f : 0.5f) * dt;
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, turn);
+                planarVelocity = velocityOverride;
             }
+            else
+            {
+                float rate = targetVelocity.sqrMagnitude >= planarVelocity.sqrMagnitude ? acceleration : deceleration;
+                if (!IsGrounded) rate *= airControl;
+                planarVelocity = Vector3.MoveTowards(planarVelocity, targetVelocity, rate * dt);
+            }
+
+            if (!rotationOverridden)
+            {
+                Vector3 faceDir = wishDir;
+                if (FacingTarget != null && !sprint && !MovementLocked)
+                    faceDir = Vector3.ProjectOnPlane(FacingTarget.position - transform.position, Vector3.up);
+                if (faceDir.sqrMagnitude > 0.0001f && !MovementLocked)
+                {
+                    var targetRot = Quaternion.LookRotation(faceDir.normalized, Vector3.up);
+                    float turn = turnSpeed * (IsGrounded ? 1f : 0.5f) * dt;
+                    transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, turn);
+                }
+            }
+            hasVelocityOverride = false;
+            rotationOverridden = false;
 
             // ---- Nhảy
             bool jumpedThisFrame = TryConsumeJump();

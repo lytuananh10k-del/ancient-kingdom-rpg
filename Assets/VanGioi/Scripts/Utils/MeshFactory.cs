@@ -54,6 +54,44 @@ namespace VanGioi.Utils
         }
 
         /// <summary>
+        /// Dải vòng cung nằm trong mặt phẳng XZ, tâm cung hướng +Z (dùng cho vệt kiếm khí).
+        /// Vertex color: alpha tăng từ mép trong ra mép ngoài và từ đầu cung tới cuối cung.
+        /// </summary>
+        public static Mesh Arc(float innerRadius, float outerRadius, float degrees, int segments)
+        {
+            string key = $"Arc_{innerRadius:F2}_{outerRadius:F2}_{degrees:F0}_{segments}";
+            if (Cache.TryGetValue(key, out var cached) && cached != null) return cached;
+
+            var verts = new List<Vector3>();
+            var colors = new List<Color>();
+            var uvs = new List<Vector2>();
+            var tris = new List<int>();
+            float start = -degrees * 0.5f * Mathf.Deg2Rad;
+            float step = degrees * Mathf.Deg2Rad / segments;
+            for (int i = 0; i <= segments; i++)
+            {
+                float a = start + step * i;
+                float u = (float)i / segments;
+                var dir = new Vector3(Mathf.Sin(a), 0f, Mathf.Cos(a));
+                float lead = Mathf.SmoothStep(0f, 1f, u);
+                verts.Add(dir * innerRadius); colors.Add(new Color(1, 1, 1, 0f)); uvs.Add(new Vector2(u, 0));
+                verts.Add(dir * outerRadius); colors.Add(new Color(1, 1, 1, lead)); uvs.Add(new Vector2(u, 1));
+                if (i == segments) continue;
+                int v = i * 2;
+                tris.Add(v); tris.Add(v + 1); tris.Add(v + 3);
+                tris.Add(v); tris.Add(v + 3); tris.Add(v + 2);
+            }
+            var mesh = new Mesh { name = "M_" + key };
+            mesh.SetVertices(verts);
+            mesh.SetColors(colors);
+            mesh.SetUVs(0, uvs);
+            mesh.SetTriangles(tris, 0);
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+            return Cache[key] = mesh;
+        }
+
+        /// <summary>
         /// Gom tam giác flat-shaded và tự lật mặt để pháp tuyến luôn hướng ra ngoài
         /// (chỉ đúng với khối lồi – đủ cho các khối placeholder).
         /// </summary>
