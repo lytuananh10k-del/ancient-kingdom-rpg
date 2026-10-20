@@ -1,0 +1,46 @@
+# Unity
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+
+# Asset sinh tự động bởi menu "Vân Giới > Giai đoạn 1 > Dựng Scene Prototype".
+# Kết quả sinh ra là tất định (cùng seed → cùng thế giới) nên không cần commit;
+# sau khi clone chỉ cần chạy lại menu. Xoá các dòng dưới nếu muốn commit kết quả.
+/Assets/VanGioi/Generated/
+/Assets/VanGioi/Generated.meta
+/Assets/VanGioi/Scenes/Phase1_Prototype.unity
+/Assets/VanGioi/Scenes/Phase1_Prototype.unity.meta
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.csproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# Build output
+*.apk
+*.aab
+*.unitypackage
+crashlytics-build.properties
+sysinfo.txt
+
+# OS
+.DS_Store
+Thumbs.db
