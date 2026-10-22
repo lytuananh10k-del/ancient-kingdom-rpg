@@ -31,8 +31,8 @@ const ui = {
     $('hint').textContent = prep ? 'Kéo tu sĩ giữa bàn cờ và hàng chờ · kéo vào cửa hàng để bán' : 'Kéo để xoay bàn cờ · Chụm hai ngón / lăn chuột để phóng to';
     if (prep) {
       renderShop(); renderSelActions(); renderItems(); renderOdds();
-      // Túi trang bị hiện / ẩn làm cửa hàng đổi chiều cao: căn lại khoảng cách camera (không xoay lại góc nhìn) để hàng chờ không bị che.
-      if (prepFit.dist && prepFit.items !== !$('items-row').hidden) requestAnimationFrame(() => { fitPrepCamera(); combatCam.tDist = prepFit.dist; });
+      // Mép trên cửa hàng dịch chuyển (túi trang bị hiện / ẩn…): căn lại khoảng cách camera (không xoay lại góc nhìn) để hàng chờ không bị che.
+      if (prepFit.dist && Math.abs($('prep-panel').getBoundingClientRect().top - prepFit.panelTop) > 6) requestAnimationFrame(() => { fitPrepCamera(); combatCam.tDist = prepFit.dist; });
     }
     renderTraits();
   },
@@ -135,7 +135,7 @@ function renderShop() {
     if (!key) { b.className = 'card sold'; b.disabled = true; b.setAttribute('aria-label', 'Đã mua'); el.appendChild(b); return; }
     const d = UNIT_DEFS[key], owned = countCopies(key, 1), left = poolLeft(key);
     b.className = 'card t' + d.cost + (game.gold < d.cost ? ' poor' : '') + (owned >= 2 ? ' ready' : '') + (left <= 2 ? ' empty-pool' : '');
-    b.innerHTML = `<span class="nm">${d.name}</span><span class="tr">${d.traits.map(t => TRAITS[t].name).join(' · ')}</span>` +
+    b.innerHTML = `<span class="nm">${d.short || d.name}</span><span class="tr">${d.traits.map(t => TRAITS[t].name).join(' · ')}</span>` +
       `<span class="ft"><span class="cost">${d.cost}</span><span class="pool" title="Số bản còn trong bể chung">còn ${left}</span>${owned ? `<span class="own">${owned}/3</span>` : ''}</span>`;
     b.setAttribute('aria-label', `Mua ${d.name}, giá ${d.cost} linh thạch${owned ? ', đang có ' + owned : ''}`);
     // Nhấn giữ (hoặc chuột phải) để xem thông tin trước khi mua; nhả sau khi giữ thì không mua.

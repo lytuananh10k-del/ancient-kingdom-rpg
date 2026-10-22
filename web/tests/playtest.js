@@ -112,6 +112,12 @@ async function main() {
         for (const u of allies) { const c = K.tileCenter(u.homeTile.c, u.homeTile.r); if (Math.hypot(u.pos.x - c.x, u.pos.z - c.z) > 0.01 || Math.abs(u.pos.y) > 0.001 || u.dragging) out.push('tướng lệch ô ' + u.key + ' @' + u.homeTile.c + ',' + u.homeTile.r); }
         K.benchUnits.forEach((u, i) => { if (!u) return; const c = K.benchSlotPos(i); if (Math.hypot(u.pos.x - c.x, u.pos.z - c.z) > 0.01 || Math.abs(u.pos.y) > 0.001 || u.dragging) out.push('tướng lệch ô hàng chờ ' + i); });
       }
+      // Hàng chờ không bị giao diện che (cửa hàng, nút…) – trừ khi bảng thông tin đang mở.
+      if (K.battle.phase === 'prep' && document.getElementById('unit-info').hidden && document.getElementById('settings').hidden) {
+        const cv = document.getElementById('game');
+        K.benchUnits.forEach((u, i) => { if (!u) return; const v = u.pos.clone(); v.y = 0.8; v.project(K.camera); const x = (v.x * 0.5 + 0.5) * innerWidth, y = (-v.y * 0.5 + 0.5) * innerHeight;
+          if (x > 4 && x < innerWidth - 4) { const e = document.elementFromPoint(x, y); if (e !== cv) out.push('tướng hàng chờ ô ' + i + ' bị che bởi ' + (e && (e.id || e.className))); } });
+      }
       // Tộc/hệ = số tướng khác nhau trên bàn.
       const want = {};
       new Set(allies.map(u => u.key)).forEach(k => K.UNIT_DEFS[k].traits.forEach(t => { want[t] = (want[t] || 0) + 1; }));
