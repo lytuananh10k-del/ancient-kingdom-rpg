@@ -10,8 +10,8 @@ const WEB = path.resolve(__dirname, '..');
 const ctx = { THREE: { Color: class { constructor(c) { this.c = c; } } }, SKILLS: {}, makeDataSkill: (id, s) => Object.assign({ id }, s), console };
 vm.createContext(ctx);
 const load = f => vm.runInContext(fs.readFileSync(path.join(WEB, f), 'utf8').replace(/^(const|let) /gm, 'var ').replace(/^'use strict';/m, ''), ctx, { filename: f });
-['js/data/champions.js', 'js/data/traits.js', 'js/data/skills.js'].forEach(load);
-const { CHAMPIONS, TRAITS, ORIGINS, ROLES, RARITY, STAR, SKILL_SPECS, SKILL_META, UNIT_DEFS, TraitRegistry, SUBCLASSES } = ctx;
+['js/data/balance.js', 'js/data/champions.js', 'js/data/traits.js', 'js/data/skills.js'].forEach(load);
+const { CHAMPIONS, TRAITS, ORIGINS, ROLES, RARITY, STAR, SKILL_SPECS, SKILL_META, UNIT_DEFS, TraitRegistry, SUBCLASSES, ROLE_STATS, DAMAGE } = ctx;
 
 // Tên kỹ năng viết tay (js/13-skills.js) – đọc từ mã nguồn để không phải nạp Three.js
 const src13 = fs.readFileSync(path.join(WEB, 'js/13-skills.js'), 'utf8');
@@ -32,13 +32,13 @@ let out = '# 24 tướng Tu Tiên – bảng chỉ số (V1.5 tuần 1)\n\n';
 out += '> Sinh tự động bởi `node tools/gen-docs.js` từ `js/data/champions.js`, `js/data/skills.js`, `js/data/traits.js`. Đừng sửa tay.\n\n';
 out += `Nâng sao (cấu hình \`STAR\`): máu ×${STAR.hp.slice(1).join(' / ')} · công ×${STAR.atk.slice(1).join(' / ')} · sức mạnh kỹ năng ×${STAR.skill.slice(1).join(' / ')} · kích thước mô hình ×${STAR.scale.slice(1).join(' / ')}. ` +
   '3 bản ★1 → ★2, 3 bản ★2 → ★3, tối đa ★3.\n\n';
-out += 'DPS ★1 = công × tốc đánh × (1 + chí mạng × (ST chí mạng − 1)). Máu hiệu dụng ★1 = máu × (1 + giáp/100) (giảm sát thương = giáp / (giáp + 100)).\n\n';
-out += '| # | id | Tên | Bậc | Phẩm | Tộc | Hệ | Vai trò | Máu | Công | Giáp | Tốc đánh | Tầm | Tốc chạy | Năng lượng | Chí mạng | Né | DPS ★1 | Máu hiệu dụng ★1 | Máu ★2/★3 | Công ★2/★3 | Kỹ năng |\n';
-out += '|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n';
+out += 'DPS ★1 = công × tốc đánh × (1 + chí mạng × (ST chí mạng − 1)). Máu hiệu dụng ★1 = máu × (1 + giáp/100) với sát thương vật lý (sát thương nhận = thô × 100 / (100 + giáp)); phép tính theo kháng phép. AP = sức mạnh phép thuật (100 = ×1 cho mọi hệ số kỹ năng).\n\n';
+out += '| # | id | Tên | Bậc | Phẩm | Tộc | Hệ | Vai trò | Máu | Công | Giáp | AP | Kháng phép | Tốc đánh | Tầm | Tốc chạy | Năng lượng | Chí mạng | Né | DPS ★1 | Máu hiệu dụng ★1 | Máu ★2/★3 | Công ★2/★3 | Kỹ năng | Loại sát thương kỹ năng |\n';
+out += '|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n';
 CHAMPIONS.forEach((c, i) => {
   const dps = c.atk * c.aspd * (1 + c.crit * (c.critDmg - 1)), ehp = c.hp * (1 + c.def / 100);
   const sk = SKILL_SPECS[c.skill] ? SKILL_SPECS[c.skill].name : handName(c.skill);
-  out += `| ${i + 1} | \`${c.id}\` | ${c.name} | ${c.cost} | ${RARITY[c.cost]} | ${ORIGINS[c.origin]} | ${c.traits.map(t => TRAITS[t].name).join(', ')}${(c.sub || []).length ? ' (phụ: ' + c.sub.map(s => SUBCLASSES[s]).join(', ') + ')' : ''} | ${ROLES[c.role].name} | ${c.hp} | ${c.atk} | ${c.def} | ${num(c.aspd)} | ${num(c.range)} | ${num(c.speed)} | ${c.mana0}/${c.mana} | ${pct(c.crit)} ×${num(c.critDmg)} | ${pct(c.dodge)} | ${Math.round(dps)} | ${Math.round(ehp)} | ${Math.round(c.hp * STAR.hp[2])}/${Math.round(c.hp * STAR.hp[3])} | ${Math.round(c.atk * STAR.atk[2])}/${Math.round(c.atk * STAR.atk[3])} | ${sk} |\n`;
+  out += `| ${i + 1} | \`${c.id}\` | ${c.name} | ${c.cost} | ${RARITY[c.cost]} | ${ORIGINS[c.origin]} | ${c.traits.map(t => TRAITS[t].name).join(', ')}${(c.sub || []).length ? ' (phụ: ' + c.sub.map(s => SUBCLASSES[s]).join(', ') + ')' : ''} | ${ROLES[c.role].name} | ${c.hp} | ${c.atk} | ${c.def} | ${c.ap} | ${c.mr} | ${num(c.aspd)} | ${num(c.range)} | ${num(c.speed)} | ${c.mana0}/${c.mana} | ${pct(c.crit)} ×${num(c.critDmg)} | ${pct(c.dodge)} | ${Math.round(dps)} | ${Math.round(ehp)} | ${Math.round(c.hp * STAR.hp[2])}/${Math.round(c.hp * STAR.hp[3])} | ${Math.round(c.atk * STAR.atk[2])}/${Math.round(c.atk * STAR.atk[3])} | ${sk} | ${DAMAGE.types[(c.skillType || ROLE_STATS[c.role].skillType)]} |\n`;
 });
 out += '\n(phụ: …) = phân loại phụ, chỉ hiển thị, chưa có cộng hưởng.\n\n';
 

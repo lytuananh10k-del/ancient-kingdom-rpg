@@ -13,7 +13,9 @@ class CombatCamera {
     this.target = new V3(0, 0.5, 0); this.focus = new V3(0, 0.5, 0);
     this.trauma = 0; this.impulse = new V3(); this.impulseVel = new V3();
     this.cine = null; this.cineW = 0; this.cineFocus = new V3();
-    this.enableCinematic = store.get('cine', true); this.enableShake = store.get('shake', true); this.reduceShake = store.get('reduce', false);
+    // Giảm chuyển động (prefers-reduced-motion): mặc định tắt camera điện ảnh và giảm rung; rung luôn bị chặn trần (trauma ≤ 1).
+    const prm = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+    this.enableCinematic = store.get('cine', !prm); this.enableShake = store.get('shake', true); this.reduceShake = store.get('reduce', prm);
   }
   reset() { this.tYaw = this.defaults.yaw; this.tPitch = this.defaults.pitch; this.tDist = battle.phase === 'prep' && prepFit.dist ? prepFit.dist : this.defaults.dist; }
   rotate(dx, dy) { this.tYaw = clamp(this.tYaw - dx * 0.005, -1.1, 1.1); this.tPitch = clamp(this.tPitch + dy * 0.004, 26 * DEG, 80 * DEG); }

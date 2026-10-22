@@ -21,8 +21,11 @@ và phải nạp đúng thứ tự số. Thêm file mới: đặt số thứ t�
 | `js/08-audio.js` | Âm thanh WebAudio |
 | `js/09-camera.js` | CombatCamera, khung camera lúc chuẩn bị, lens shift |
 | `js/10-world.js` | Vân Đài, bàn cờ, hàng chờ 3D |
+| `js/combat/rng.js` | `CombatRNG` – random có seed cho logic chiến đấu (tái hiện trận) |
+| `js/data/balance.js` | Hằng số công thức sát thương (`DAMAGE`, `defenseFactor`), luật trận (`BATTLE_RULES`: 60 s, hỗn loạn, hoà), mặc định theo vai trò |
 | `js/data/champions.js` | **Dữ liệu 24 tướng** + phe địch, ngoại hình (LOOKS), vai trò, cấu hình nâng sao `STAR`, preset animation, `validateChampions`, chuyển id bản lưu cũ |
-| `js/combat/effects.js` | EffectSet: buff / debuff chỉ số, làm chậm, giảm sát thương nhận, DoT / HoT; `healUnit`, `giveShield`, `applySlow` |
+| `js/combat/effects.js` | **StatusEffectManager** (19 loại trạng thái, quy tắc cộng dồn, thanh tẩy, đồng hồ mô phỏng); `healUnit`, `giveShield`, `applySlow`, `applyBurn` |
+| `js/combat/pathfinder.js` | `NavGrid` + A* 16×16, đặt chỗ ô đứng đánh, `navSteer` |
 | `js/11-units.js` | Unit, AnimationController, AI di chuyển / chọn mục tiêu (`RIG_FACTORIES` để gắn GLB từng tướng) |
 | `js/12-combat.js` | Sát thương, hit stop, đạn, phi kiếm |
 | `js/13-skills.js` | Kỹ năng viết tay (SkillTimeline): Vạn Kiếm Quy Tông, sét, hỏa phượng, lá chắn, kiếm khí |
@@ -36,6 +39,7 @@ và phải nạp đúng thứ tự số. Thêm file mới: đặt số thứ t�
 | `js/17-benchmark.js` | Kiểm tra hiệu năng (có nút sao chép kết quả) |
 | `js/18-glb-import.js` | Nhập GLB cho từng tướng |
 | `js/19-main.js` | Vòng lặp chính, khởi động, móc kiểm thử `window.__vkkt` |
+| `js/combat/test-runner.js` | **CombatTestRunner** – mô phỏng trận không render, seed cố định, báo cáo & bất thường |
 
 ## Kiểm thử tự động
 ```bash
@@ -57,6 +61,8 @@ dữ liệu hợp lệ, nâng sao cả 24 tướng (★1→★2→★3, không �
 (sát thương, choáng, đóng băng, làm chậm, thiêu, hồi máu, lá chắn, buff, phi kiếm, lướt, trận pháp), giết mục tiêu giữa lúc thi triển,
 không kẹt thi triển, máu / năng lượng hợp lệ, không rò rỉ VFX / object / geometry, bản lưu cũ tải được, không lỗi console.
 `tests/traits.js` (`npm run test:traits`) – 15 hạng mục của tộc/hệ (xem mục V1.5 – Tuần 2).
+`tests/combat3.js` (`npm run test:combat3`) – 14 hạng mục chiến đấu tuần 3 (công thức sát thương, 24 kỹ năng, trạng thái, AI, hoà, seed, ×1/×2, LOW/ULTRA…).
+`tests/balance.js` (`npm run balance`) – báo cáo cân bằng sơ bộ → `docs/BALANCE.md`.
 `node tools/gen-docs.js` sinh lại `docs/CHAMPIONS.md` (bảng chỉ số 24 tướng, kỹ năng, tộc/hệ, mô hình) từ dữ liệu.
 
 ## Cấu trúc mã (các module)
@@ -275,3 +281,21 @@ không đếm lại khi vẽ giao diện / trong trận; lá chắn Tiên Tộc 
 năng lượng Tiên Tộc; hồi máu Đan Tu ×1,15 / ×1,5 và cứu mệnh 12% chỉ 1 lần; Nhân Tộc toàn đội, Yêu Tộc máu; phi kiếm phụ 1 / 3 kiếm trúng đúng 1 lần, đổi mục tiêu khi mục tiêu chết;
 Pháp Tu (6) nổ 1 lần / mục tiêu / lần thi triển, đúng 5% máu; dọn sạch sự kiện / phi kiếm / hào quang / VFX sau trận; 4 đội hình kích hoạt nhiều mốc 6, giết mục tiêu giữa chiêu;
 tốc độ ×1 và ×2 (vòng lặp thời gian thực) cho cùng kết quả; bản lưu tuần 1 tải được; không lỗi console.
+
+## V1.5 – Tuần 3: Combat & Skills V3.0
+Chi tiết: [docs/COMBAT.md](docs/COMBAT.md) (công thức, trạng thái, AI, đối chiếu 24 kỹ năng) · [docs/BALANCE.md](docs/BALANCE.md) (báo cáo cân bằng, sinh tự động).
+
+**Thay đổi so với tuần 2**
+- Chỉ số mới: sức mạnh phép thuật (AP, 100 = ×1) và kháng phép; 3 loại sát thương vật lý / phép / chuẩn; giáp & kháng phép âm có công thức riêng (tối đa ×2).
+- StatusEffectManager thay EffectSet + các biến rời (choáng, đóng băng, thiêu, lá chắn): 19 loại, ID, nguồn, mốc bắt đầu / kết thúc theo thời gian mô phỏng, quy tắc cộng dồn, thanh tẩy.
+- FSM thêm SEARCH, RECOVER; A* trên lưới 16×16 với đặt chỗ ô đứng đánh; vùng báo trước để AI chạy ra; luật khống chế ngắt / trì hoãn rõ ràng.
+- Logic hoàn toàn trong bước mô phỏng + RNG có seed → cùng seed cùng kết quả, ×1 = ×2, LOW = ULTRA (đã kiểm thử bằng vòng lặp thời gian thực).
+- Kỹ năng: Thiên Lôi → sét liên hoàn; Hỗn Độn → vùng báo trước 3 đợt; Linh Y thanh tẩy; Ngự Kiếm phi kiếm va chạm riêng; Thanh Phong đòn cuối; Vô Cực giảm dần; Thiết Vệ giáp phát sáng; Thanh Mộc lá xanh; Linh Cung đổi mục tiêu.
+- Hoà: hết 60 s hoặc hai bên ngã cùng lúc → hoà, tính như thua (kinh tế không đổi). Hỗn loạn sau 40 s: sát thương +12%/s, hồi máu −50%.
+- Cân bằng: chỉnh 24 chỉ số / hệ số theo `npm run balance` (danh sách trong BALANCE.md và báo cáo); hệ số tộc/hệ tuần 2 giữ nguyên.
+- Giảm chuyển động: theo `prefers-reduced-motion` mặc định tắt camera điện ảnh, giảm rung, tắt khựng hình.
+- Bảng thông tin tướng: thêm Phép thuật, Kháng phép, Hút máu, loại sát thương kỹ năng, danh sách trạng thái đang dính (còn bao nhiêu giây).
+
+**Lỗi đã sửa trong tuần 3**: vùng lửa / phi kiếm triệu hồi tính sát thương theo FPS; điểm phóng đạn phụ thuộc tư thế animation; DoT của kỹ năng dữ liệu bị nhân sao 2 lần;
+Thiết Vệ không tung chiêu khi đứng ở rìa tầm đánh; bộ đếm "chờ 4 s" của kỹ năng có điều kiện chỉ chạy trong trạng thái di chuyển; Huyền Giáp tạo ~13.000 khiên / trận;
+mọi đòn nặng đều hất lùi (đấu sĩ mất 10–15% thời gian); trận "bế tắc" giữa các đỡ đòn hồi máu ★3 (20% trận ngẫu nhiên hoà → còn ~2–5%).

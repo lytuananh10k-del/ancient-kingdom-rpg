@@ -37,6 +37,12 @@ const TraitCounter = {
       this.cache = c; this.dirty = false; this.recounts++;
     }
     return this.cache;
+  },
+  /** Đếm cho một phe bất kỳ (không cache) – phe địch chỉ dùng khi battle.enemyTraits (thí nghiệm cân bằng đối xứng). */
+  compute(team) {
+    const seen = new Set(), c = {};
+    for (const u of units) { if (u.team !== team || seen.has(u.key)) continue; seen.add(u.key); for (const t of TraitRegistry.of(u.def)) c[t] = (c[t] || 0) + 1; }
+    return c;
   }
 };
 
@@ -52,7 +58,6 @@ const TraitEngine = {
   /** Tổng phần trăm tộc/hệ mà một tướng nhận được (cộng các tộc/hệ khác nhau, mỗi tộc/hệ lấy mốc cao nhất). */
   layerFor(u, active) {
     const s = { atk: 0, hp: 0, def: 0, aspd: 0, skill: 0, omni: 0, mana: 0, heal: 0 };
-    if (u.team !== 'ally') return s;
     for (const id in active) {
       const L = TRAITS[id].levels[active[id] - 1];
       if (L.scope === 'team' || isMember(u, id)) for (const k in L.stats) s[k] += L.stats[k];
@@ -64,14 +69,16 @@ const TraitEngine = {
     const b = defaultBonus(), s = this.layerFor(u, active);
     b.atk = 1 + s.atk; b.hp = 1 + s.hp; b.defMul = 1 + s.def; b.aspd = 1 + s.aspd; b.skill = 1 + s.skill;
     b.omni = s.omni; b.manaGain = 1 + s.mana; b.heal = 1 + s.heal; b.traitStats = s;
-    if (u.team === 'ally') for (const it of u.items || []) if (ITEMS[it]) ITEMS[it].apply(b);
+    for (const it of u.items || []) if (ITEMS[it]) ITEMS[it].apply(b);
     return b;
   },
   /** Áp lớp tộc/hệ cho mọi tướng theo đội hình hiện tại (giai đoạn chuẩn bị & lúc vào trận). announce: hiệu ứng khi mốc mới bật. */
   apply(announce) {
     const counts = TraitCounter.counts(), prev = this.active, active = this.levels(counts);
     this.active = active;
-    for (const u of units) u.bonus = this.computeBonus(u, active);
+    // Phe địch trong game không có tộc/hệ (đã nhân theo vòng); CombatTestRunner bật battle.enemyTraits để so đội hình đối xứng.
+    this.enemyActive = battle.enemyTraits ? this.levels(TraitCounter.compute('enemy')) : {};
+    for (const u of units) u.bonus = this.computeBonus(u, u.team === 'ally' ? active : this.enemyActive);
     if (announce && battle.phase === 'prep') for (const id in active) if ((prev[id] || 0) < active[id]) TraitVFX.activated(id);
     return counts;
   },
@@ -79,37 +86,41 @@ const TraitEngine = {
   battleStart() {
     this.battleEnd();
     this.inBattle = true; this.snapshot = Object.assign({}, TraitCounter.counts());
-    const allies = units.filter(u => u.team === 'ally');
     for (const u of units) u.tstate = { castSeq: 0, burst: null, lowHpUsed: false };
-    for (const id in this.active) {
-      const L = this.cfg(id), members = allies.filter(u => isMember(u, id));
+    for (const [team, act] of [['ally', this.active], ['enemy', this.enemyActive || {}]]) this.startTeam(team, act);
+    TraitEvents.emit('onBattleStart', units.filter(u => u.team === 'ally'));
+  },
+  /** Lá chắn đầu trận + đăng ký hiệu ứng theo sự kiện + VFX cho một phe. */
+  startTeam(team, active) {
+    const allies = units.filter(u => u.team === team);
+    for (const id in active) {
+      const L = TRAITS[id].levels[active[id] - 1], members = allies.filter(u => isMember(u, id));
       if (L.startShield) {
         const sh = L.startShield;
         const who = sh.to === 'adjacent' ? allies.filter(a => members.some(g => adjacent(g, a))) : members;
         // Lá chắn không cộng dồn: giveShield giữ giá trị lớn hơn (Tiên Tộc + Hộ Pháp cùng lúc → lấy lá chắn lớn nhất).
         for (const a of who) { giveShield(a, a.maxHp * sh.pct, sh.dur); combatLog.traitShields = (combatLog.traitShields || 0) + 1; }
       }
-      if (L.swords) TraitEvents.on('onSkillCast', (u, sk, tg) => { if (u.team === 'ally' && isMember(u, id)) TraitSwords.launch(u, tg, L.swords); });
+      if (L.swords) TraitEvents.on('onSkillCast', (u, sk, tg) => { if (u.team === team && isMember(u, id)) TraitSwords.launch(u, tg, L.swords); });
       if (L.mageBurst) TraitEvents.on('onHit', (src, dst, dmg, opts) => {
-        if (!opts.skill || opts.proc || src.team !== 'ally' || !dst.alive || !src.tstate || !isMember(src, id)) return;
+        if (!opts.skill || opts.proc || src.team !== team || !dst.alive || !src.tstate || !isMember(src, id)) return;
         const m = src.tstate.burst || (src.tstate.burst = new Map());
         if (m.get(dst) === src.tstate.castSeq) return;            // 1 lần / mục tiêu / lần thi triển
         m.set(dst, src.tstate.castSeq);
-        dealDamage(src, dst, 0, { proc: true, flat: dst.maxHp * L.mageBurst.pct, pen: 1, crit: false, color: TraitVFX.col.arcane });
+        dealDamage(src, dst, 0, { proc: true, flat: dst.maxHp * L.mageBurst.pct, type: 'magic', crit: false, color: TraitVFX.col.arcane });   // sát thương phép: trừ theo kháng phép
         combatLog.traitBursts = (combatLog.traitBursts || 0) + 1;
       });
       if (L.lowHpHeal) TraitEvents.on('onDamageTaken', dst => {
         const h = L.lowHpHeal;
-        if (dst.team !== 'ally' || !dst.alive || !dst.tstate || dst.tstate.lowHpUsed || dst.hp >= dst.maxHp * h.below) return;
+        if (dst.team !== team || !dst.alive || !dst.tstate || dst.tstate.lowHpUsed || dst.hp >= dst.maxHp * h.below) return;
         dst.tstate.lowHpUsed = true;
         dst.fx.push({ stat: 'hot', hot: dst.maxHp * h.pct * 0.5 / h.dur, dur: h.dur, tick: 0.5, src: dst, raw: true, tag: 'trait:dantu' });
         combatLog.traitLowHeals = (combatLog.traitLowHeals || 0) + 1;
         TraitVFX.lotus(dst);
       });
     }
-    if (this.active.phaptu) TraitEvents.on('onSkillCast', u => { if (u.team === 'ally' && isMember(u, 'phaptu')) TraitVFX.arcane(u); });
-    TraitVFX.battleStart(this.active, allies);
-    TraitEvents.emit('onBattleStart', allies);
+    if (active.phaptu) TraitEvents.on('onSkillCast', u => { if (u.team === team && isMember(u, 'phaptu')) TraitVFX.arcane(u); });
+    TraitVFX.battleStart(active, allies);
   },
   /** Kết thúc trận (hoặc dọn trước vòng mới): gỡ mọi đăng ký sự kiện, phi kiếm, hào quang, hiệu ứng tạm thời của tộc/hệ. */
   battleEnd() {

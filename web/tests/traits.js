@@ -264,7 +264,7 @@ async function main() {
     sp.stop();
     // Độ lớn: 5% máu tối đa (bỏ qua giáp)
     const foe = K.units.find(u => u.team === 'enemy' && u.alive);
-    if (foe) { foe.shield = 0; const h0 = foe.hp; const sp2 = TT.spy((s, d, m, o) => o.flat !== undefined); cv.tstate.castSeq++; K.dealDamage(cv, foe, 0.01, { skill: true, crit: false }); sp2.stop(); out.burstSize = +(sp2.dmg / foe.maxHp).toFixed(4); }
+    if (foe) { foe.shield = 0; const h0 = foe.hp; const sp2 = TT.spy((s, d, m, o) => o.flat !== undefined); cv.tstate.castSeq++; K.dealDamage(cv, foe, 0.01, { skill: true, crit: false }); sp2.stop(); out.burstSize = +(sp2.dmg / foe.maxHp).toFixed(4); out.burstWant = +(0.05 * K.defenseFactor(foe.mrNow()) * foe.fx.mul('dmgTaken')).toFixed(4); }
     TT.end();
     return out;
   });
@@ -274,7 +274,7 @@ async function main() {
   check(procs.kiem4.left === 0 && procs.kiem6.left === 0 && procs.retarget.left === 0, 'phi kiếm không còn sót lại; mục tiêu chết giữa đường thì kiếm đổi mục tiêu / tự huỷ', procs.retarget);
   check(procs.mage1.zoneTicks >= 4 && procs.mage1.perTarget.every(n => n === 1) && procs.mage1.bursts >= 1, 'Pháp Tu (6): hỏa trận nhiều nhịp nhưng mỗi mục tiêu chỉ nổ 1 lần / lần thi triển', procs.mage1);
   check(procs.mage2.perTarget.every(n => n <= 2) && procs.mage2.bursts > procs.mage1.bursts, 'lần thi triển thứ 2 được nổ lại (mỗi mục tiêu tối đa 1 lần / lần)', procs.mage2);
-  check(Math.abs(procs.burstSize - 0.05) < 0.003, 'sát thương nổ = 5% máu tối đa mục tiêu, bỏ qua giáp', procs.burstSize);
+  check(Math.abs(procs.burstSize - procs.burstWant) < 0.003, 'sát thương nổ = 5% máu tối đa mục tiêu, sát thương phép (trừ theo kháng phép)', { got: procs.burstSize, want: procs.burstWant });
 
   // ---------- 10. Dọn dẹp
   console.log('\n10. Dọn VFX / sự kiện sau trận');

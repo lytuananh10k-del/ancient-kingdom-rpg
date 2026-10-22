@@ -94,10 +94,10 @@ function renderUnitInfo() {
   const u = info.unit;
   if (u && !units.includes(u) && !benchUnits.includes(u)) { closeUnitInfo(); return; }   // quân đã bán / gộp / huỷ
   const d = UNIT_DEFS[info.key], star = info.star, enemy = !!u && u.team === 'enemy', onBench = !!u && benchUnits.includes(u);
-  let hp, maxHp, atk, def, aspd, mana, maxMana, shield = 0;
+  let hp, maxHp, atk, def, aspd, mana, maxMana, shield = 0, ap = (d.ap || 100) * (STAR.skill[star] || 1), mr = d.mr || 0, ls = 0;
   if (u) { hp = Math.max(0, u.hp); maxHp = u.maxHp; atk = u.atk; def = u.def_; aspd = d.aspd * u.bonus.aspd; mana = u.mana; maxMana = u.maxMana; shield = u.shield; }
   else { maxHp = Math.round(d.hp * STAR.hp[star]); hp = maxHp; atk = d.atk * STAR.atk[star]; def = d.def; aspd = d.aspd; mana = d.mana0; maxMana = d.mana; }
-  if (u) { atk = u.atkNow(); def = u.defNow(); aspd = u.aspdNow(); }   // chỉ số hiện hành (gồm buff / debuff đang có)
+  if (u) { const S = u.statsNow(); atk = S.atk; def = S.armor; aspd = S.aspd; ap = S.ap; mr = S.mr; ls = S.lifesteal + S.omnivamp; }   // chỉ số hiện hành (gồm buff / debuff đang có)
   const box = $('unit-info'); box.classList.toggle('enemy', enemy);
   $('ui-name').textContent = d.name; $('ui-stars').textContent = '★'.repeat(star);
   const counts = traitCounts(), tags = [];
@@ -113,19 +113,22 @@ function renderUnitInfo() {
   // Phần cộng thêm từ tộc/hệ đang áp lên tướng này (đọc từ bonus thật, không tính lại)
   const ts = u && u.team === 'ally' && !onBench && u.bonus.traitStats, tl = [];
   if (ts) for (const k in ts) if (ts[k] > 0) tl.push('+' + Math.round(ts[k] * 100) + '% ' + TRAIT_STATS[k]);
-  const traitLine = tl.length ? 'Tộc/hệ: ' + tl.join(' · ') : '';
+  const traitLine = (tl.length ? 'Tộc/hệ: ' + tl.join(' · ') : '') +
+    (u && u.fx && u.fx.list.length ? (tl.length ? '\n' : '') + 'Trạng thái: ' + u.fx.describe().map(e => `${e.name}${e.type === 'shield' ? ' ' + Math.round(e.power) : ''} ${e.left.toFixed(1)}s`).join(' · ') : '');
   const its = u ? u.items || [] : [];
   $('ui-items').innerHTML = its.map(k => `<span style="--c:${ITEMS[k].color}" title="${ITEMS[k].desc}">${ITEMS[k].name}: ${ITEMS[k].desc}</span>`).join('');
   $('ui-bars').innerHTML = `<div class="ui-bar hp"><i style="width:${(hp / maxHp * 100).toFixed(1)}%"></i><span>Máu ${Math.round(hp)}/${maxHp}${shield > 0 ? ' · khiên ' + Math.round(shield) : ''}</span></div>` +
     `<div class="ui-bar mana"><i style="width:${(mana / maxMana * 100).toFixed(1)}%"></i><span>Linh lực ${Math.round(mana)}/${maxMana}</span></div>`;
   const range = d.range > 3 ? 'Xa ' + Math.round(d.range / BOARD.tile) + ' ô' : 'Cận';
   $('ui-stats').innerHTML = `<dt>Công</dt><dd>${Math.round(atk)}</dd><dt>Giáp</dt><dd>${Math.round(def)}</dd>` +
+    `<dt>Phép thuật</dt><dd>${Math.round(ap)}</dd><dt>Kháng phép</dt><dd>${Math.round(mr)}</dd>` + (ls > 0 ? `<dt>Hút máu</dt><dd>${Math.round(ls * 100)}%</dd><dt></dt><dd></dd>` : '') +
     `<dt>Tốc đánh</dt><dd>${aspd.toFixed(2)}/s</dd><dt>Tầm</dt><dd>${range}</dd>` +
     `<dt>Chí mạng</dt><dd>${Math.round(d.crit * 100)}% ×${d.critDmg}</dd><dt>Linh lực</dt><dd>${d.mana0}/${d.mana}</dd>` +
     `<dt>Né</dt><dd>${Math.round((d.dodge || 0) * 100)}%</dd><dt>Kháng choáng</dt><dd>${Math.round((1 - (ROLES[d.role] ? ROLES[d.role].tenacity : 1)) * 100)}%</dd>`;
   const sk = SKILLS[d.skill];
   $('ui-skill-name').textContent = (!enemy && sk.allyName) || sk.name;
-  $('ui-skill-mana').textContent = 'Cần ' + d.mana + ' linh lực' + (sk.meta ? ' · ' + sk.meta.type + ' · ' + sk.meta.target : '');
+  const stype = d.skillType || (ROLE_STATS[d.role] || {}).skillType || 'physical';
+  $('ui-skill-mana').textContent = 'Cần ' + d.mana + ' linh lực · sát thương ' + DAMAGE.types[stype].toLowerCase() + (sk.meta ? ' · ' + sk.meta.type + ' · ' + sk.meta.target : '');
   $('ui-skill-desc').textContent = sk.desc || '';
   let foot = '';
   const poolTxt = d.cost ? ` · bể chung còn ${poolLeft(info.key)}/${POOL_SIZE[d.cost]}` + (game.rivals[info.key] ? ` (đối thủ giữ ${game.rivals[info.key]})` : '') : '';

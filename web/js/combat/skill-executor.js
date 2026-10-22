@@ -20,11 +20,14 @@ const TARGETING = {
 };
 /* ---------- Điều kiện tung chiêu (chờ tối đa 4 s, xem Unit.castReady) ---------- */
 // Tầm "địch ở gần": chiêu nổ quanh mình thì phải nằm trong bán kính nổ (trừ hao thân người), không thì chiêu trượt hết.
-const readyRange = s => s.readyRange || (s.center === 'self' && s.radius ? s.radius - 0.3 : 3.5);
+// (tuần 3: bán kính − 0,1 m – trước là − 0,3 m nên Thiết Vệ đứng đánh ở 2,95 m không bao giờ thấy địch "trong tầm" và không tung chiêu)
+const readyRange = s => s.readyRange || (s.center === 'self' && s.radius ? s.radius - 0.1 : 3.5);
 const READY = {
   allyHurt: (c, s) => c.allies().some(a => a.hp < a.maxHp * (s.hurtPct || 0.75)),
   enemyNear: (c, s) => SkillAI.countNear(c, readyRange(s)) >= 1,
-  hurtOrNear: (c, s) => c.hp < c.maxHp * 0.5 || SkillAI.countNear(c, readyRange(s)) >= 1
+  hurtOrNear: (c, s) => c.hp < c.maxHp * 0.5 || SkillAI.countNear(c, readyRange(s)) >= 1,
+  /** Hỗ trợ: có đồng minh bị thương HOẶC đang dính hiệu ứng bất lợi thanh tẩy được (choáng, đóng băng, thiêu…). */
+  allyNeed: (c, s) => c.allies().some(a => a.hp < a.maxHp * (s.hurtPct || 0.75) || a.fx.list.some(e => e.debuff && e.cleanse))
 };
 const SKILL_TYPE_LABEL = { strike: 'Đơn mục tiêu', multi: 'Liên kích đơn mục tiêu', projectile: 'Phóng đạn', volley: 'Phóng nhiều mục tiêu', line: 'Xuyên tuyến', area: 'Diện rộng', zone: 'Vùng duy trì', dash: 'Đột kích', summon: 'Triệu hồi phi kiếm', support: 'Hỗ trợ' };
 const SKILL_TARGET_LABEL = { nearest: 'Kẻ gần nhất', densest: 'Vùng địch đông nhất', weakest: 'Kẻ yếu nhất', line: 'Hướng trúng nhiều nhất', backline: 'Tuyến sau', self: 'Bản thân / đồng minh' };
@@ -38,11 +41,16 @@ function hitEnemies(caster, list, effects, ctx) {
     for (const e of effects) {
       if (!u.alive) break;
       switch (e.kind) {
-        case 'damage': dealt += dealDamage(caster, u, e.mult, { skill: true, pen: e.pen || 0, knock: e.knock || 0, from: ctx.center || caster.pos, color: ctx.color, heavy: !!e.heavy }); break;
-        case 'dot': u.fx.push({ stat: 'dot', dot: e.mult * (STAR.skill[caster.star] || 1), dur: e.dur, tick: e.tick || 0.5, src: caster, tag: ctx.id + ':dot' }); break;
-        case 'slow': applySlow(u, e.amount, e.dur); break;
-        case 'stun': applyStun(u, e.dur); break;
-        case 'freeze': applyStun(u, e.dur, 'freeze'); break;
+        case 'damage': {
+          const m = e.mult * (ctx.multScale || 1);
+          dealt += dealDamage(caster, u, m, { skill: true, type: e.type, pen: e.pen || 0, knock: e.knock || 0, from: ctx.center || caster.pos, color: ctx.color, heavy: !!e.heavy });
+          break;
+        }
+        // DoT: hệ số theo công, nhân AP khi gây sát thương (dealDamage skill) – trước tuần 3 bị nhân sao 2 lần (đã sửa).
+        case 'dot': u.fx.push({ type: 'dot', dot: e.mult, dur: e.dur, tick: e.tick || 0.5, src: caster, tag: ctx.id + ':dot', dtype: e.type || 'magic' }); break;
+        case 'slow': applySlow(u, e.amount, e.dur, caster); break;
+        case 'stun': if (!e.first || ctx.pulse === 0) applyStun(u, e.dur, 'stun', caster); break;
+        case 'freeze': applyStun(u, e.dur, 'freeze', caster); break;
         case 'debuff':
           if (!u.fx.has(ctx.id + ':debuff')) floatText(u.chest(_v2.clone()), e.label || '−' + e.stat, '#ffb0a0', 0.75);
           u.fx.push({ stat: e.stat, mul: e.mul, add: e.add, dur: e.dur, tag: ctx.id + ':debuff' });
@@ -60,6 +68,8 @@ function allyTargets(caster, e) {
   const allies = caster.allies();
   switch (e.targets || 'self') {
     case 'lowest': return allies.sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp).slice(0, e.count || 1);
+    // cần thanh tẩy nhất: nhiều hiệu ứng bất lợi thanh tẩy được nhất (khống chế tính gấp đôi)
+    case 'needy': return allies.map(a => [a, a.fx.list.reduce((n, x) => n + (x.debuff && x.cleanse ? (x.type === 'stun' || x.type === 'freeze' ? 2 : 1) : 0), 0)]).filter(p => p[1] > 0).sort((x, y) => y[1] - x[1]).slice(0, e.count || 1).map(p => p[0]);
     case 'near': return allies.filter(a => a.pos.distanceTo(caster.pos) <= (e.radius || 3.5));
     case 'all': return allies;
     default: return caster.alive ? [caster] : [];
@@ -67,14 +77,20 @@ function allyTargets(caster, e) {
 }
 /** Hồi máu / hồi theo thời gian / lá chắn / tăng chỉ số / tự hiến máu. Lượng hồi và lá chắn nhân sức mạnh kỹ năng (sao × tộc/hệ). */
 function applyAllyEffects(caster, effects, ctx) {
-  const power = (STAR.skill[caster.star] || 1) * (caster.bonus ? caster.bonus.skill : 1);
+  const power = caster.apNow ? caster.apNow() / 100 : 1;   // AP: sao × tộc/hệ × trang bị
   for (const e of effects) {
     if (e.kind === 'selfDamage') { if (caster.alive) caster.hp = Math.max(1, caster.hp - caster.hp * e.pct); continue; }
     for (const u of allyTargets(caster, e)) {
       switch (e.kind) {
-        case 'heal': healUnit(caster, u, (caster.maxHp * (e.pct || 0) + caster.atkNow() * (e.atk || 0)) * power); break;
+        case 'heal': healUnit(caster, u, (caster.maxHp * (e.pct || 0) + caster.atkNow() * (e.atk || 0)) * power); if (ctx.leaf) skillVfx.leaves(u, ctx.color); break;
+        case 'cleanse': {
+          const gone = u.fx.cleanse(e.n || 1);
+          if (gone.length) { floatText(u.chest(_v2.clone()), 'Thanh tẩy: ' + gone.map(g => g.name).join(', '), '#e8fff4', 0.8); vfx.particles.burst(u.chest(_v2.clone()), COLORS.white, 16, 4, 0.5, 0.25, { up: 3, drag: 2 }); }
+          break;
+        }
         case 'hot': { const total = caster.maxHp * e.pct * power, tick = 0.5; u.fx.push({ stat: 'hot', hot: total * tick / e.dur, dur: e.dur, tick, src: caster, tag: ctx.id + ':hot' }); break; }
-        case 'shield': giveShield(u, caster.maxHp * e.pct * power, e.dur || 5); break;
+        case 'shield': giveShield(u, caster.maxHp * e.pct * power, e.dur || 5, caster); break;
+        case 'glow': skillVfx.armorGlow(u, ctx.color, e.dur || 3); break;
         case 'buff':
           if (!u.fx.has(ctx.id + ':buff')) floatText(u.chest(_v2.clone()), e.label || '+' + e.stat, '#ffe08a', 0.75);
           u.fx.push({ stat: e.stat, mul: e.mul, add: e.add, dur: e.dur, tag: ctx.id + ':buff' });
@@ -96,6 +112,35 @@ const skillVfx = {
     vfx.particles.burst(_v1.set(center.x, 0.6, center.z), color, Math.round(30 + r * 10), 7, 0.8, 0.45, { up: 3, drag: 2 });
     if (thunder) lightningBolt(new V3(center.x + rand(-2, 2), 16, center.z + rand(-2, 2)), new V3(center.x, 0.1, center.z), color, 0.25);
     combatCam.shake(0.2 + r * 0.03);
+  },
+  /** Lá xanh + ánh ngọc (hồi máu hệ Mộc). */
+  leaves(u, color) { for (let i = 0; i < 10; i++) { const a = Math.random() * TAU; vfx.particles.emit(u.pos.x + Math.cos(a) * 0.6, rand(0.4, 1.8), u.pos.z + Math.sin(a) * 0.6, -Math.sin(a) * 1.5, rand(0.6, 1.6), Math.cos(a) * 1.5, 0.9, 0.22, 0.06, i % 3 ? color : COLORS.shield, 0.85, 0.6); } },
+  /** Lớp giáp phát sáng (không tạo material – dùng uniform phát sáng của tướng). */
+  armorGlow(u, color, dur) { u.glowT = Math.max(u.glowT || 0, dur); u.glowColor = color; },
+  /** Báo trước vùng sắp nổ (pháp trận đỏ nhấp nháy). */
+  telegraph(c, r, color, dur) { vfx.magicCircle(c, r, color, COLORS.enemyA, { reveal: dur * 0.8, life: dur, spin: -3, alpha: 0.95 }); }
+};
+
+/* ---------- Vùng nguy hiểm: kỹ năng có thời gian chuẩn bị báo trước vị trí → AI phe kia có cơ hội chạy ra ---------- */
+const DangerZones = {
+  list: [],
+  add(team, c, r, until) { this.list.push({ team, x: c.x, z: c.z, r, until }); },
+  clear() { this.list.length = 0; },
+  /** Đang đứng trong vùng của phe địch còn hiệu lực → lùi ra ngoài (trả về true nếu đã di chuyển). */
+  flee(u, dt) {
+    const now = battle.time;
+    for (let i = this.list.length - 1; i >= 0; i--) if (this.list[i].until <= now) this.list.splice(i, 1);
+    for (const z of this.list) {
+      if (z.team === u.team) continue;
+      const dx = u.pos.x - z.x, dz = u.pos.z - z.z, d = Math.hypot(dx, dz);
+      if (d > z.r + 0.4) continue;
+      const l = d || 1, sp = u.speedNow();
+      u.pos.x += (d ? dx / l : 1) * sp * dt; u.pos.z += (d ? dz / l : 0) * sp * dt;
+      u.faceTo(_v1.set(u.pos.x + dx, 0, u.pos.z + dz), dt, 12); u.anim.locomotion(sp);
+      combatLog.dodgedZones = (combatLog.dodgedZones || 0) + dt;
+      return true;
+    }
+    return false;
   }
 };
 
@@ -104,7 +149,7 @@ function buildDataSkill(spec, caster, target, release) {
   const tl = new SkillTimeline(spec.name, caster);
   const T = Object.assign({ windup: 0.3, impact: 0.45, end: 0.9 }, spec.timing);
   const color = SKILL_COLORS[spec.color] || (caster.team === 'ally' ? COLORS.allyA : COLORS.enemyA);
-  const ctx = { id: spec.id, color, center: null };
+  const ctx = { id: spec.id, color, center: null, leaf: spec.color === 'wood', multScale: 1, pulse: -1 };
   const effects = spec.effects || [], ally = spec.ally || [];
   const animName = spec.anim || (caster.def.animSet && caster.def.animSet.cast) || 'SkillCast';
   const ultimate = animName === 'UltimateCast';
@@ -132,11 +177,12 @@ function buildDataSkill(spec, caster, target, release) {
       break;
     case 'multi':
       for (let i = 0; i < spec.hits; i++) {
-        const at = T.impact + i * (spec.gap || 0.15);
+        const at = T.impact + i * (spec.gap || 0.15), last = i === spec.hits - 1;
         tl.at(at, 'ApplyDamage', () => {
           const tg = live(); if (!tg) return;
-          caster.snapFace(tg.pos); skillVfx.slash(caster, color, i % 2 ? -0.5 : 0.5); skillVfx.impact(tg.pos, color);
-          hitEnemies(caster, [tg], effects, ctx); hitStop(0.02);
+          caster.snapFace(tg.pos); skillVfx.slash(caster, color, last ? Math.PI / 2 : i % 2 ? -0.5 : 0.5); skillVfx.impact(tg.pos, color, last ? 30 : 18);
+          ctx.multScale = last && spec.lastMult ? spec.lastMult : 1;   // đòn cuối tăng cường
+          hitEnemies(caster, [tg], effects, ctx); ctx.multScale = 1; hitStop(last ? 0.05 : 0.02);
         });
         end = Math.max(end, at + 0.2);
       }
@@ -150,8 +196,10 @@ function buildDataSkill(spec, caster, target, release) {
           if (spec.type === 'volley') { const foes = caster.enemies().sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp); tg = foes[i % Math.max(1, foes.length)]; }
           else tg = live();
           if (!tg) return;
-          Projectiles.spawn({ src: caster, target: tg, pos: caster.rig.getSocket('weaponTip').getWorldPosition(new V3()), speed: spec.speed || 16, homing: true, turn: 6,
+          Projectiles.spawn({ src: caster, target: tg, pos: caster.launchPoint(new V3()), speed: spec.speed || 16, homing: true, turn: 6,
             color, size: spec.size || 0.5, life: 3, radius: 0.9,
+            // mục tiêu chết khi đạn đang bay: đạn đổi sang kẻ địch gần nhất (Liên Châu Tiễn chọn lại mục tiêu)
+            update: p => { if (spec.retarget !== false && p.target && !p.target.alive) { const n = caster.enemies().sort((a, b) => a.pos.distanceTo(p.pos) - b.pos.distanceTo(p.pos))[0]; if (n) { p.target = n; combatLog.retargets = (combatLog.retargets || 0) + 1; } } },
             onHit: (p, u) => {
               const c = new V3(p.pos.x, 0, p.pos.z); ctx.center = c;
               hitEnemies(caster, spec.radius ? enemiesNear(caster, c, spec.radius) : [u], effects, ctx);
@@ -187,17 +235,16 @@ function buildDataSkill(spec, caster, target, release) {
         const c = tg.pos.clone(); c.y = 0; ctx.center = c;
         vfx.magicCircle(c, spec.radius, color, COLORS.white, { reveal: 0.2, life: spec.dur, spin: 1.5, alpha: 0.9 });
         skillVfx.area(c, spec.radius * 0.8, color, false);
-        let t = 0, acc = 0, alive = true;
-        // Vùng duy trì: tự dừng khi hết giờ hoặc trận kết thúc; vfx.clear() khi sang vòng sẽ gọi cleanup.
-        vfx.add({
+        let t = 0, acc = 0;
+        // Vùng duy trì chạy trong BƯỚC MÔ PHỎNG (SimTasks) – vẫn cháy tiếp nếu người thi triển ngã; dừng khi hết giờ / hết trận.
+        SimTasks.add({
           update: dt => {
-            if (!alive || battle.phase !== 'fight') return false;
+            if (battle.phase !== 'fight') return false;
             t += dt; acc += dt;
             if (Math.random() < 0.7) vfx.particles.emit(c.x + rand(-spec.radius, spec.radius) * 0.8, 0.2, c.z + rand(-spec.radius, spec.radius) * 0.8, 0, rand(1, 2.5), 0, 0.6, 0.35, 0.05, color, 0.8, 0.5);
-            while (acc >= (spec.tick || 0.5)) { acc -= spec.tick || 0.5; hitEnemies(caster, enemiesNear(caster, c, spec.radius), effects, ctx); combatLog.zoneTicks = (combatLog.zoneTicks || 0) + 1; }
-            return t < spec.dur;
-          },
-          cleanup: () => { alive = false; }
+            while (acc >= (spec.tick || 0.5) - 1e-9) { acc -= spec.tick || 0.5; hitEnemies(caster, enemiesNear(caster, c, spec.radius), effects, ctx); combatLog.zoneTicks = (combatLog.zoneTicks || 0) + 1; }
+            return t < spec.dur - 1e-9;
+          }
         });
       });
       break;
@@ -225,32 +272,40 @@ function buildDataSkill(spec, caster, target, release) {
       break;
     }
     case 'summon':
+      // Ngự Kiếm: phi kiếm bay quanh người thi triển; cứ `interval` giây một thanh rời vòng, TRUY ĐUỔI mục tiêu (bay có tốc độ, va chạm theo
+      // khoảng cách), trúng đúng 1 lần rồi quay về; mục tiêu chết giữa đường thì đổi sang kẻ địch gần nhất. Logic chạy trong SimTasks (60 Hz).
       tl.at(T.impact, 'SpawnVFX', () => {
         const n = (spec.count || 4) + (caster.star - 1), swarm = new SwordSwarm(n), swords = [];
-        for (let i = 0; i < n; i++) swords.push({ a: i / n * TAU, strike: null, pos: new V3(), dir: new V3(0, 1, 0) });
+        for (let i = 0; i < n; i++) swords.push({ a: i / n * TAU, fly: null, pos: caster.chest(new V3()), dir: new V3(0, 1, 0) });
         let t = 0, next = 0.3, rr = 0, done = false;
         const finish = () => { if (done) return; done = true; swarm.dispose(); };
         combatLog.summons = (combatLog.summons || 0) + 1;
-        vfx.add({
+        const nearest = from => caster.enemies().sort((x, y) => x.pos.distanceTo(from) - y.pos.distanceTo(from))[0] || null;
+        SimTasks.add({
           update: dt => {
             if (done) return false;
-            if (!caster.alive || battle.phase !== 'fight' || t > spec.dur) { finish(); return false; }
+            if (!caster.alive || battle.phase !== 'fight' || t > spec.dur) return false;
             t += dt; next -= dt;
-            if (next <= 0) {   // lần lượt từng thanh lao vào kẻ địch gần nhất
+            if (next <= 0) {   // lần lượt từng thanh lao vào mục tiêu
               next = spec.interval || 0.7;
               const tg = caster.findTarget(), s = swords[rr++ % n];
-              if (tg && !s.strike) s.strike = { t: 0, from: s.pos.clone(), tg };
+              if (tg && !s.fly) { s.fly = { tg, t: 0 }; combatLog.summonLaunch = (combatLog.summonLaunch || 0) + 1; }
             }
             swords.forEach((s, i) => {
-              if (s.strike) {
-                const st = s.strike; st.t += dt / 0.2;
-                const to = st.tg.alive ? st.tg.chest(_v3) : s.pos;
-                s.pos.lerpVectors(st.from, to, Math.min(1, st.t)); s.dir.subVectors(to, st.from).normalize();
-                if (st.t >= 1) { if (st.tg.alive) { ctx.center = s.pos; hitEnemies(caster, [st.tg], effects, ctx); skillVfx.impact(s.pos, color, 10); } s.strike = null; }
+              if (s.fly) {
+                const f = s.fly; f.t += dt;
+                if (!f.tg.alive) { f.tg = nearest(s.pos); if (!f.tg) { s.fly = null; return; } }
+                const to = f.tg.chest(_v3), d = _v2.subVectors(to, s.pos), len = d.length(), step = (spec.speed || 18) * dt;
+                s.dir.copy(d).multiplyScalar(1 / (len || 1));
+                if (len <= step + 0.5) {   // va chạm: gây sát thương đúng 1 lần cho lần lao này
+                  ctx.center = to; hitEnemies(caster, [f.tg], effects, ctx); skillVfx.impact(to, color, 10);
+                  combatLog.summonHits = (combatLog.summonHits || 0) + 1; s.fly = null;
+                } else if (f.t > 2) s.fly = null;   // bay quá lâu (mục tiêu chạy xa) → quay về
+                else s.pos.addScaledVector(s.dir, step);
               } else {
                 s.a += dt * 2.2;
-                const target = _v1.set(caster.pos.x + Math.sin(s.a) * 1.3, 2.1 + Math.sin(t * 3 + i) * 0.15, caster.pos.z + Math.cos(s.a) * 1.3);
-                s.pos.lerp(target, Math.min(1, dt * 10)); s.dir.set(Math.cos(s.a), 0.2, -Math.sin(s.a)).normalize();
+                const home = _v1.set(caster.pos.x + Math.sin(s.a) * 1.3, 2.1 + Math.sin(t * 3 + i) * 0.15, caster.pos.z + Math.cos(s.a) * 1.3);
+                s.pos.lerp(home, Math.min(1, dt * 10)); s.dir.set(Math.cos(s.a), 0.2, -Math.sin(s.a)).normalize();
               }
               swarm.write(i, s.pos, s.dir, 0.55, 1);
             });
@@ -261,6 +316,58 @@ function buildDataSkill(spec, caster, target, release) {
         });
       });
       break;
+    case 'chain': {
+      // Sét liên hoàn: nhảy tới kẻ địch CHƯA bị trúng gần nhất trong tầm nhảy; mỗi kẻ địch tối đa 1 lần / lần thi triển
+      // (không nhảy qua lại giữa hai mục tiêu); sát thương giảm dần theo falloff mỗi lần nhảy.
+      const hit = new Set(); let cur = null, from = null;
+      for (let j = 0; j <= (spec.jumps || 4); j++) {
+        tl.at(T.impact + j * (spec.gap || 0.12), 'ApplyDamage', () => {
+          let nx;
+          if (j === 0) nx = live();
+          else {
+            if (!cur) return;
+            const p = cur.pos; let bd = spec.jumpRange || 5;
+            nx = null; for (const e of caster.enemies()) { if (hit.has(e)) continue; const d = e.pos.distanceTo(p); if (d <= bd) { bd = d; nx = e; } }
+          }
+          if (!nx) { cur = null; return; }
+          const a = from || caster.launchPoint(new V3()), b = nx.chest(new V3());
+          lightningBolt(a.clone(), b, color, 0.22);
+          hit.add(nx); from = b; cur = nx;
+          ctx.center = nx.pos; ctx.multScale = Math.pow(spec.falloff || 1, j);
+          hitEnemies(caster, [nx], effects, ctx); ctx.multScale = 1;
+          skillVfx.impact(nx.pos, color, 14); hitStop(0.02);
+          combatLog.chainJumps = (combatLog.chainJumps || 0) + 1;
+        });
+        end = Math.max(end, T.impact + j * (spec.gap || 0.12) + 0.2);
+      }
+      break;
+    }
+    case 'rift': {
+      // Vùng hỗn độn: báo trước (telegraph) tại vùng địch đông nhất → phe kia có `telegraph` giây để chạy ra (DangerZones);
+      // hết giờ người thi triển lao tới tâm, nổ `pulses` đợt, đợt nào cũng suy yếu (giảm giáp / kháng phép), choáng ở đợt đầu.
+      const st = { c: null };
+      tl.at(0.05, 'SpawnVFX', () => {
+        const tg = live(); if (!tg) return;
+        st.c = tg.pos.clone(); st.c.y = 0;
+        skillVfx.telegraph(st.c, spec.radius, color, spec.telegraph);
+        DangerZones.add(caster.team, st.c, spec.radius, battle.time + spec.telegraph);
+      });
+      const land = 0.05 + spec.telegraph, from = new V3();
+      tl.at(land - 0.25, 'AnimationEvent', () => { from.copy(caster.pos); combatLog.dashes = (combatLog.dashes || 0) + 1; });
+      tl.track(land - 0.25, land, 'AnimationEvent', k => { if (!st.c) return; caster.pos.lerpVectors(from, st.c, easeOut(k)); });
+      for (let p = 0; p < (spec.pulses || 3); p++) {
+        const at = land + p * (spec.pulseGap || 0.4);
+        tl.at(at, 'ApplyDamage', () => {
+          if (!st.c) return;
+          ctx.center = st.c; ctx.pulse = p;
+          skillVfx.area(st.c, spec.radius, color, false); hitStop(p === 0 ? 0.08 : 0.03);
+          hitEnemies(caster, enemiesNear(caster, st.c, spec.radius), effects, ctx);
+          combatLog.riftPulses = (combatLog.riftPulses || 0) + 1;
+        });
+        end = Math.max(end, at + 0.3);
+      }
+      break;
+    }
     case 'support':
     default:
       break;

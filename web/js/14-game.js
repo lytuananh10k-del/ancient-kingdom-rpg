@@ -327,7 +327,7 @@ function newGame() { restoreGame(newGameState()); ui.toast('Ván mới – mua t
 function setupRound() {
   TraitEngine.battleEnd();
   timelines.forEach(t => t.cancel()); timelines.length = 0;
-  Projectiles.clear(); vfx.clear(); floaters.length = 0;
+  Projectiles.clear(); SimTasks.clear(); DangerZones.clear(); vfx.clear(); floaters.length = 0;
   for (let i = units.length - 1; i >= 0; i--) if (units[i].team === 'enemy') { units[i].dispose(); units.splice(i, 1); }
   const scale = 0.85 * Math.pow(1.07, battle.round - 1);   // máu và công cùng nhân → sức mạnh ≈ scale²
   enemyLineup(battle.round).forEach(([k, c, r, star]) => units.push(new Unit(k, 'enemy', c, r, star)));
@@ -367,6 +367,10 @@ function startBattle() {
   if (!battle.bench) autoFillBoard();
   if (!boardAllies().length) ui.toast('Không có tu sĩ trên bàn – vòng này sẽ thua');
   applyTraits(); boardAllies().forEach(u => u.reset(1));
+  // RNG có seed cho logic trận (tái hiện được): battle.seedOverride (kiểm thử) hoặc seed ngẫu nhiên, lưu ở battle.seed.
+  battle.seed = CombatRNG.seed(battle.seedOverride != null ? battle.seedOverride : (Math.random() * 4294967296) >>> 0);
+  battle.step = 0; CombatAudit.reset();
+  for (const u of units) u.atkCd = crand() * 0.4;   // lệch nhịp đánh đầu trận (sau khi đặt seed → giống nhau giữa các lần chạy cùng seed)
   battle.phase = 'fight';
   TraitEngine.battleStart(); battle.time = 0; battle.loot = { gold: 0, items: [] }; battle.otShown = false; select(null); ui.update();
   combatCam.tDist = combatCam.defaults.dist;
@@ -413,14 +417,17 @@ function settleRound(win) {
 function checkBattleEnd() {
   if (battle.phase !== 'fight' || battle.bench) return;
   const allies = units.some(u => u.team === 'ally' && u.alive), enemies = units.some(u => u.team === 'enemy' && u.alive);
-  if (allies && enemies && battle.time > OVERTIME_AT && !battle.otShown) { battle.otShown = true; combatLog.overtime = (combatLog.overtime || 0) + 1; showBanner('Linh khí hỗn loạn', 'enemy'); ui.toast('Trận kéo dài – sát thương tăng dần'); }
+  if (allies && enemies && battle.time > OVERTIME_AT && !battle.otShown) { battle.otShown = true; combatLog.overtime = (combatLog.overtime || 0) + 1; showBanner('Linh khí hỗn loạn', 'enemy'); ui.toast('Trận kéo dài – sát thương tăng dần, hồi máu giảm một nửa'); }
   if (allies && enemies && battle.time < FIGHT_LIMIT) return;
-  const win = allies && !enemies;
-  battle.phase = 'end'; battle.result = win ? 'win' : 'lose';
+  // Hết giờ mà hai bên còn người, hoặc hai bên ngã cùng một bước → HOÀ; người chơi bị tính như thua (BATTLE_RULES.drawCountsAsLoss).
+  const win = allies && !enemies, draw = !win && (allies === enemies);
+  battle.phase = 'end'; battle.result = win ? 'win' : draw ? 'draw' : 'lose';
+  Projectiles.clear(); SimTasks.clear(); DangerZones.clear();   // không còn đạn / vùng / phi kiếm của trận này
+  if (draw) combatLog.draws = (combatLog.draws || 0) + 1;
   TraitEngine.battleEnd();
   units.forEach(u => { if (u.alive && ((u.team === 'ally') === win)) u.fsm.set('victory'); else if (u.alive) u.fsm.set('idle'); });
   settleRound(win);
   if (game.over) { ui.result('Đạo tâm tan vỡ'); ui.toast('Hết máu – trụ được ' + battle.round + ' vòng'); }
-  else { ui.result(win ? 'Đại thắng' : 'Bại trận'); ui.toast(game.lastSummary); }
+  else { ui.result(win ? 'Đại thắng' : draw ? 'Hoà – hết giờ' : 'Bại trận'); ui.toast(game.lastSummary); }
   ui.update();
 }

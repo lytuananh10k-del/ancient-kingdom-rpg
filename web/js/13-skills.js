@@ -53,7 +53,7 @@ function thunderSkill(cfg) {
       tl.at(0.35, 'SpawnVFX', () => {
         const c = target.alive ? target.pos : caster.pos;
         const foes = caster.enemies().sort((a, b) => a.pos.distanceTo(c) - b.pos.distanceTo(c));
-        for (let i = 0; i < cfg.strikes; i++) { const f = foes[i % Math.max(1, foes.length)]; spots.push((f ? f.pos : c).clone().add(new V3(rand(-0.6, 0.6), 0, rand(-0.6, 0.6)))); }
+        for (let i = 0; i < cfg.strikes; i++) { const f = foes[i % Math.max(1, foes.length)]; spots.push((f ? f.pos : c).clone().add(new V3(crandR(-0.6, 0.6), 0, crandR(-0.6, 0.6)))); }   // vị trí sét ảnh hưởng trúng/trượt → RNG có seed
         spots.forEach(s => vfx.magicCircle(s, 1.3, COLORS.thunder, COLORS.white, { reveal: 0.2, spin: 3, life: 0.9, alpha: 0.8 }));
       });
       cfg.times.forEach((at, i) => {
@@ -81,7 +81,7 @@ function phoenixSkill(cfg) {
       tl.track(0, 0.5, 'SpawnVFX', () => { const p = caster.rig.getSocket('weaponTip').getWorldPosition(_v1); for (let i = 0; i < 3; i++) { const a = Math.random() * TAU, r = rand(0.8, 1.6); vfx.particles.emit(p.x + Math.sin(a) * r, p.y + rand(-0.5, 0.8), p.z + Math.cos(a) * r, -Math.sin(a) * r * 3, 0, -Math.cos(a) * r * 3, 0.32, 0.3, 0.05, Math.random() < 0.5 ? COLORS.fire : COLORS.fireHot, 0.9, 0.5); } });
       targets.forEach((tg, k) => tl.at(0.5 + k * 0.25, 'LaunchProjectile', () => {
         Sfx.fire();
-        Projectiles.spawn({ src: caster, target: tg.alive ? tg : target, pos: caster.rig.getSocket('weaponTip').getWorldPosition(new V3()), speed: 11, homing: true, turn: 4, color: COLORS.fire, size: 1.1, life: 3, radius: 1.1,
+        Projectiles.spawn({ src: caster, target: tg.alive ? tg : target, pos: caster.launchPoint(new V3()), speed: 11, homing: true, turn: 4, color: COLORS.fire, size: 1.1, life: 3, radius: 1.1,
           update: (p) => { for (let i = 0; i < 3; i++) vfx.particles.emit(p.pos.x + rand(-0.4, 0.4), p.pos.y + rand(-0.4, 0.4), p.pos.z + rand(-0.4, 0.4), rand(-1, 1), rand(0.5, 2), rand(-1, 1), 0.5, 0.5, 0.05, Math.random() < 0.4 ? COLORS.fireHot : COLORS.fire, 0.8, 1.5);
             const side = _v3.set(-p.vel.z, 0, p.vel.x).normalize(); // đôi cánh phượng
             for (const sgn of [-1, 1]) vfx.particles.emit(p.pos.x + side.x * sgn * 1.2, p.pos.y + 0.3, p.pos.z + side.z * sgn * 1.2, side.x * sgn * 2 - p.vel.x * 0.2, 0.8, side.z * sgn * 2 - p.vel.z * 0.2, 0.4, 0.45, 0.05, COLORS.fire, 0.7, 2); },
@@ -113,10 +113,9 @@ function shieldSkill(cfg) {
         Sfx.shield();
         const list = caster.allies().sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp).slice(0, cfg.count);
         if (!list.includes(caster)) list[list.length - 1] = caster;
+        const power = caster.apNow() / 100;   // lá chắn nhân sức mạnh phép thuật (sao × tộc/hệ × trang bị)
         list.forEach(u => {
-          u.shield = caster.maxHp * cfg.pct; u.shieldTime = 6;
-          if (!u.shieldFx) u.shieldFx = makeShield(u);
-          floatText(u.chest(new V3()), '+Khiên ' + Math.round(u.shield), '#9ff0d0', 0.9);
+          giveShield(u, caster.maxHp * cfg.pct * power, 6, caster);
           vfx.particles.burst(u.chest(new V3()), COLORS.shield, 20, 4, 0.6, 0.3, { up: 2, drag: 2 });
         });
       });
@@ -141,11 +140,12 @@ function slashWaveSkill(cfg) {
         const dir = new V3(Math.sin(caster.yaw), 0, Math.cos(caster.yaw)), side = new V3(-dir.z, 0, dir.x);
         Sfx.whoosh();
         vfx.slash(caster.pos, caster.yaw, col, 2.2, Math.PI / 2, 0.25, 1.1);
+        let pierced = 0;   // falloff: mỗi mục tiêu xuyên qua giảm sát thương (cfg.falloff, tối thiểu cfg.minFalloff); 1 = giữ nguyên
         Projectiles.spawn({ src: caster, target: null, pierce: true, hitSet: new Set(), pos: caster.pos.clone().setY(1.1).addScaledVector(dir, 0.8),
           vel: dir.clone().multiplyScalar(17), speed: 17, color: col, size: 0.45, life: 0.75, radius: 1.4,
           update: (p) => { for (let k = -3; k <= 3; k++) { const w = k / 3; // hình bán nguyệt
             vfx.particles.emit(p.pos.x + side.x * w * 1.3 - dir.x * Math.abs(w) * 0.55, p.pos.y + w * 0.12, p.pos.z + side.z * w * 1.3 - dir.z * Math.abs(w) * 0.55, 0, 0, 0, 0.12, 0.38 * (1 - Math.abs(w) * 0.5), 0.05, col, 0.9, 0); } },
-          onHit: (p, u) => { dealDamage(caster, u, cfg.mult, { skill: true, color: col, pen: cfg.pen }); hitStop(0.03); combatCam.shake(0.08); } });
+          onHit: (p, u) => { const k = Math.max(cfg.minFalloff || 0, Math.pow(cfg.falloff || 1, pierced++)); dealDamage(caster, u, cfg.mult * k, { skill: true, type: 'physical', color: col, pen: cfg.pen }); hitStop(0.03); combatCam.shake(0.08); } });
       });
       tl.at(0.75 + (cfg.waves - 1) * 0.22, 'Cleanup', () => release());
       tl.onCleanup(c => { if (c) release(); });
@@ -322,8 +322,8 @@ const SKILLS = {
   /* -------- KIẾM KHÍ TRẢM (Kiếm Đồng): lưỡi kiếm khí bán nguyệt bay thẳng, xuyên mục tiêu -------- */
   kiemKhi: slashWaveSkill({ name: 'Kiếm Khí Trảm', mult: 1.9, pen: 0, waves: 1,
     desc: 'Chém một đạo kiếm khí bán nguyệt bay thẳng, xuyên qua mọi kẻ địch trên đường, gây 190% công.' }),
-  voCucKiem: slashWaveSkill({ name: 'Vô Cực Kiếm Khí', mult: 2.4, pen: 0.5, waves: 2,
-    desc: 'Chém 2 đạo kiếm khí bán nguyệt liên tiếp theo hướng trúng nhiều địch nhất: mỗi đạo 240% công, xuyên mọi kẻ địch và bỏ qua 50% giáp.' }),
+  voCucKiem: slashWaveSkill({ name: 'Vô Cực Kiếm Khí', mult: 2.4, pen: 0.5, waves: 2, falloff: 0.85, minFalloff: 0.55,
+    desc: 'Chém 2 đạo kiếm khí bán nguyệt liên tiếp theo hướng trúng nhiều địch nhất: mỗi đạo 240% công (vật lý), xuyên mọi kẻ địch, bỏ qua 50% giáp; mỗi mục tiêu xuyên qua giảm 15% (tối thiểu 55%).' }),
 
   /* -------- THIÊN LÔI QUYẾT: 3 đạo sét thủ tục -------- */
   thienLoi: thunderSkill({ name: 'Thiên Lôi Quyết', strikes: 3, gap: 0.25, radius: 2.4, mult: 1.6, stun: 0.8,
@@ -332,16 +332,16 @@ const SKILLS = {
     desc: 'Gọi 6 tia sét giáng xuống các kẻ địch quanh vùng đông nhất: mỗi tia gây 180% công trong bán kính 2,6 m và choáng 1 giây.' }),
 
   /* -------- HỎA PHƯỢNG PHẦN THIÊN: cầu lửa lớn → nổ + thiêu đốt -------- */
-  hoaCau: phoenixSkill({ name: 'Hỏa Cầu Thuật', count: 1, mult: 1.5, burn: 0.12,
-    desc: 'Phóng hỏa cầu truy đuổi mục tiêu, nổ gây 150% công trong bán kính 3 m và thiêu đốt.' }),
+  hoaCau: phoenixSkill({ name: 'Hỏa Cầu Thuật', count: 1, mult: 1.8, burn: 0.12,
+    desc: 'Phóng hỏa cầu truy đuổi mục tiêu, nổ gây 180% công (phép) trong bán kính 3 m và thiêu đốt 3 giây (12% công mỗi 0,5 giây).' }),
   hoaPhuong: phoenixSkill({ name: 'Hỏa Phượng Phần Thiên', count: 1, mult: 2.0, burn: 0.18,
     desc: 'Phóng hỏa phượng truy đuổi mục tiêu, nổ gây 200% công trong bán kính 3 m và thiêu đốt theo thời gian.' }),
   songPhuong: phoenixSkill({ name: 'Song Phượng Diệt Thế', count: 2, mult: 2.6, burn: 0.25,
     desc: 'Phóng 2 hỏa phượng vào 2 cụm địch khác nhau, mỗi con nổ gây 260% công trong bán kính 3 m và thiêu đốt mạnh.' }),
 
   /* -------- HỘ THỂ CHÂN KHÍ: khiên Fresnel cho đồng đội yếu nhất -------- */
-  hoThe: shieldSkill({ name: 'Hộ Thể Chân Khí', count: 3, pct: 0.3,
-    desc: 'Tạo khiên bằng 30% máu tối đa của bản thân cho 3 đồng minh đang yếu nhất (luôn gồm bản thân), giữ 6 giây.' }),
+  hoThe: shieldSkill({ name: 'Hộ Thể Chân Khí', count: 3, pct: 0.2,
+    desc: 'Tạo khiên bằng 20% máu tối đa của bản thân (× sức mạnh phép thuật) cho 3 đồng minh đang yếu nhất (luôn gồm bản thân), giữ 6 giây.' }),
   kimCuong: shieldSkill({ name: 'Kim Cương Bất Hoại', count: 5, pct: 0.4,
     desc: 'Tạo khiên bằng 40% máu tối đa của bản thân cho 5 đồng minh đang yếu nhất (luôn gồm bản thân), giữ 6 giây.' }),
 
@@ -378,7 +378,7 @@ const SKILLS = {
       tl.at(0, 'SpawnVFX', () => vfx.magicCircle(caster.pos, 1.8, CV, CR, { reveal: 0.3, life: 1.2, spin: -1.5 }));
       [0.45, 0.6, 0.75].forEach((at, i) => tl.at(at, 'LaunchProjectile', () => {
         const foes = caster.enemies().sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp); const t = foes[i % Math.max(1, foes.length)] || target;   // 3 kẻ yếu nhất
-        Projectiles.spawn({ src: caster, target: t, pos: caster.chest(new V3()).add(new V3(rand(-1, 1), 1, rand(-1, 1))), speed: 9, homing: true, turn: 3, arc: 6, color: CV, size: 0.55, life: 3,
+        Projectiles.spawn({ src: caster, target: t, pos: caster.chest(new V3()).add(new V3([-0.8, 0, 0.8][i], 1, [0.3, -0.5, 0.3][i])), speed: 9, homing: true, turn: 3, arc: 6, color: CV, size: 0.55, life: 3,
           onHit: (p, u) => { dealDamage(caster, u, 1.2, { color: CV, skill: true }); vfx.particles.burst(p.pos, CV, 18, 6, 0.5, 0.3, { drag: 3 }); } });
       }));
       tl.at(1.0, 'Cleanup', () => release());

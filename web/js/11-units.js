@@ -13,7 +13,8 @@ const RIG_FACTORIES = {};
  * 15. Đơn vị chiến đấu (Unit) – logic + AnimationController
  * ===================================================================*/
 const units = [];
-let battle = { phase: 'prep', round: 1, time: 0, result: null, selected: null, speed: 1, paused: false, bench: false };
+let battle = { phase: 'prep', round: 1, time: 0, step: 0, result: null, selected: null, speed: 1, paused: false, bench: false, seed: 0, seedOverride: null };
+const NAV_DIR = new V3();
 const ATTACK_TIMING = {
   melee: { Attack01: { dur: 0.62, windup: 0.22, active: 0.3 }, Attack02: { dur: 0.6, windup: 0.18, active: 0.27 }, Attack03: { dur: 0.72, windup: 0.3, active: 0.38 }, HeavyAttack: { dur: 0.95, windup: 0.32, active: 0.6 } },
   ranged: { Attack01: { dur: 0.7, windup: 0.32, active: 0.4 }, Attack02: { dur: 0.7, windup: 0.3, active: 0.38 }, Attack03: { dur: 0.75, windup: 0.34, active: 0.42 }, HeavyAttack: { dur: 0.9, windup: 0.45, active: 0.55 } }
@@ -56,21 +57,39 @@ class Unit {
   }
   get alive() { return this.hp > 0; }
   modelScale() { return STAR.scale[this.star] * ((this.def.model && this.def.model.scale) || 1); }
-  /* Chỉ số hiện hành = chỉ số trận (gốc × sao × tộc/hệ → trang bị, tính 1 lần ở reset) × hiệu ứng tạm thời (EffectSet) × nội tại. */
+  /* Chỉ số hiện hành = chỉ số trận (gốc × sao × tộc/hệ → trang bị, tính 1 lần ở reset) × trạng thái tạm thời (StatusEffectManager) × nội tại.
+   * Giáp / kháng phép có thể âm khi bị giảm quá 0 – DamageCalculator xử lý riêng (defenseFactor), không chia cho 0. */
   atkNow() { const p = this.def.passive; return this.atk * this.fx.mul('atk') * (p && p.lowHpAtk ? 1 + p.lowHpAtk * (1 - this.hp / this.maxHp) : 1); }
-  defNow() { return Math.max(0, this.def_ * this.fx.mul('def') + this.fx.sum('def')); }
+  defNow() { return this.def_ * this.fx.mul('def') + this.fx.sum('def'); }
+  mrNow() { return this.mr_ * this.fx.mul('mr') + this.fx.sum('mr'); }
+  apNow() { return this.ap_ * this.fx.mul('ap'); }
   aspdNow() { return this.def.aspd * this.bonus.aspd * this.fx.mul('aspd'); }
   speedNow() { return this.def.speed * this.fx.mul('speed'); }
+  get shield() { return this.fx ? this.fx.shieldAmount() : 0; }
+  set shield(v) { if (this.fx) this.fx.setShield(v); }
+  /** Kháng khống chế (0–1): thời gian choáng / đóng băng nhân (1 − tenacity). */
+  tenacity() { return 1 - (ROLES[this.def.role] ? ROLES[this.def.role].tenacity : 1); }
+  /** Bảng chỉ số chuẩn hoá (giao diện, bài kiểm thử, bảng cân bằng). */
+  statsNow() {
+    return { hp: this.hp, maxHp: this.maxHp, atk: this.atkNow(), ap: this.apNow(), armor: this.defNow(), mr: this.mrNow(), aspd: this.aspdNow(), range: this.def.range,
+      speed: this.speedNow(), mana: this.mana, maxMana: this.maxMana, crit: this.def.crit, critDmg: this.def.critDmg,
+      lifesteal: (this.bonus.ls || 0) + this.fx.sum('ls'), omnivamp: this.bonus.omni || 0, tenacity: this.tenacity(), shield: this.shield };
+  }
+  /** Điểm phóng đạn: tính từ vị trí logic + hướng mặt (KHÔNG đọc tư thế animation) → cùng kết quả ở mọi FPS / tốc độ. */
+  launchPoint(out = new V3()) { const f = 0.6; return out.set(this.pos.x + Math.sin(this.yaw) * f, 1.45, this.pos.z + Math.cos(this.yaw) * f); }
   reset(scale) {
     const d = this.def, b = this.bonus, s = this.star;
     // Gốc → × sao → × (1 + Σ% tộc/hệ) → trang bị (phẳng). Làm tròn: máu & giáp số nguyên, công 1 chữ số thập phân. Không sửa UNIT_DEFS.
     this.maxHp = Math.round(d.hp * scale * STAR.hp[s] * b.hp + (b.hpAdd || 0)); this.hp = this.maxHp;
     this.atk = Math.round(d.atk * scale * STAR.atk[s] * b.atk * 10) / 10;
     this.def_ = Math.round(d.def * Math.sqrt(scale) * (b.defMul || 1) + b.def);
-    this.mana = Math.min(d.mana, d.mana0 + b.mana0); this.maxMana = d.mana; this.shield = 0; this.shieldTime = 0;
-    this.status = { stun: 0, frozen: 0, burn: 0, burnTick: 0, burnDmg: 0 };
+    this.mr_ = Math.round((d.mr || 0) * Math.sqrt(scale));
+    this.ap_ = Math.round((d.ap || 100) * (STAR.skill[s] || 1) * b.skill * 10) / 10;   // AP = 100 × sao × (tộc/hệ + trang bị)
+    this.mana = Math.min(d.mana, d.mana0 + b.mana0); this.maxMana = d.mana; this.shield = 0;
+    this.status = { stun: 0, frozen: 0, burn: 0 };
     this.fx.clear();
-    this.target = null; this.retarget = 0; this.atkCd = rand(0, 0.4); this.attackIdx = 0; this.dashCd = 0;
+    this.target = null; this.retarget = 0; this.atkCd = crand() * 0.4; this.attackIdx = 0; this.attackSeq = 0; this.dashCd = 0; this.nav = null; this.searchT = 0;
+    this.cs = { dealt: 0, physical: 0, magic: 0, true: 0, taken: 0, healed: 0, shielded: 0, casts: 0, kills: 0, attacks: 0 };   // thống kê trận (CombatTestRunner)
     this.ccImmune = 0; this.avoid = null; this.stuckT = 0; this.progT = 0; this.progD = Infinity; this.fullManaT = 0;
     this.knock = new V3(); this.deathT = 0; this.casting = null; this.flash = 0; this.manaLock = false;
     tileCenter(this.homeTile.c, this.homeTile.r, this.pos); this.yaw = this.team === 'ally' ? 0 : Math.PI;
@@ -89,8 +108,9 @@ class Unit {
         update(dt) {
           if (battle.phase !== 'fight') { self.fsm.set('idle'); return; }
           if (self.castReady(dt)) { self.fsm.set('cast'); return; }
+          if (DangerZones.list.length && DangerZones.flee(self, dt)) return;   // vùng địch báo trước sắp nổ → chạy ra trước
           const t = self.findTarget();
-          if (!t) { self.anim.locomotion(0); return; }
+          if (!t) { self.fsm.set('search'); return; }
           const dist = Math.hypot(t.pos.x - self.pos.x, t.pos.z - self.pos.z);
           if (self.def.ranged && self.kite(dt)) return;            // đánh xa: lùi khi cận chiến địch áp sát
           self.faceTo(t.pos, dt, 10);
@@ -104,6 +124,23 @@ class Unit {
             self.checkStuck(t, dist, dt);
           }
         }
+      })
+      // SEARCH: không còn mục tiêu hợp lệ → đứng tìm lại mỗi 0,25 s (trận tự kết thúc khi một bên hết người).
+      .add('search', {
+        enter() { self.anim.locomotion(0); self.retarget = 0; self.searchT = 0; if (self.nav) self.nav.goal = -1; },
+        update(dt) {
+          if (battle.phase !== 'fight') { self.fsm.set('idle'); return; }
+          self.anim.locomotion(0); self.searchT -= dt;
+          if (self.searchT > 0) return;
+          self.searchT = 0.25; self.retarget = 0;
+          if (self.castReady(0) || self.findTarget()) self.fsm.set('move');
+        }
+      })
+      // RECOVER: hồi chiêu sau đòn đánh / thi triển – không hành động, vẫn có thể bị khống chế.
+      .add('recover', {
+        maxTime: 1, fallback: 'move',
+        enter(prev, dur = 0.15) { self.recoverT = dur; self.anim.locomotion(0); },
+        update(dt) { self.recoverT -= dt; if (self.recoverT <= 0) self.fsm.set('move'); }
       })
       .add('attack', {
         maxTime: 2.5, fallback: 'move',
@@ -131,7 +168,7 @@ class Unit {
       .add('cast', {
         enter() { self.startCast(); },
         locked() { return true; },
-        update() { self.anim.locomotion(0); if (!self.casting || self.casting.released) self.fsm.set('move'); },
+        update() { self.anim.locomotion(0); if (!self.casting || self.casting.released) self.fsm.set('recover', 0.15); },
         exit() { self.anim.hold('UltimateCast', false); }
       })
       .add('stun', {
@@ -188,8 +225,8 @@ class Unit {
   /** Đủ linh lực và kỹ năng có mục tiêu hợp lệ; kỹ năng có điều kiện (ready) được chờ tối đa 4 s cho đúng thời điểm. */
   castReady(dt) {
     const sk = SKILLS[this.def.skill];
-    if (!sk || this.manaLock || this.mana < this.maxMana) { this.fullManaT = 0; return false; }
-    this.fullManaT += dt;
+    if (!sk || this.manaLock || this.mana < this.maxMana) return false;
+    // fullManaT đếm trong simStep (mọi trạng thái) – trước tuần 3 chỉ đếm lúc "move" nên tướng đánh liên tục gần như không bao giờ hết 4 s chờ
     if (sk.ready && !sk.ready(this) && this.fullManaT < 4) return false;
     return !!(sk.pick ? sk.pick(this) : this.findTarget());
   }
@@ -214,6 +251,13 @@ class Unit {
   steerTo(t, dt) {
     let ax = this.pos.x - t.pos.x, az = this.pos.z - t.pos.z; const al = Math.hypot(ax, az) || 1; ax /= al; az /= al;
     const ranged = !!this.def.ranged, reachD = ranged ? this.def.range - 0.4 : Math.max(0.9, this.def.range * 0.8);
+    // Ưu tiên đường A* trên lưới dẫn đường (vòng qua tướng cản đường, tới ô đứng đánh còn trống); không có đường thì lái trực tiếp như cũ.
+    const nd = navSteer(this, t, ranged ? this.def.range - 0.3 : this.def.range + 0.2, dt, NAV_DIR);
+    if (nd) {
+      const sp = this.speedNow();
+      this.vel.set(nd.x * sp, 0, nd.z * sp); this.pos.addScaledVector(this.vel, dt); this.anim.locomotion(sp);
+      return;
+    }
     if (!ranged) {
       let k = 0;
       for (const u of units) if (u !== this && u.team === this.team && u.alive && !u.def.ranged && u.target === t && u.id < this.id) k++;
@@ -253,6 +297,7 @@ class Unit {
   startAttack() {
     const t = this.findTarget(); if (!t) { this.fsm.set('move'); return; }
     TraitEvents.emit('onAttack', this, t);
+    this.cs.attacks++; if (!t.alive) CombatAudit.deadTargetAttacks++;
     this.snapFace(t.pos);
     const ranged = !!this.def.ranged;
     const seq = (this.def.animSet && this.def.animSet.attack) || ['Attack01', 'Attack02', 'Attack03', 'HeavyAttack'];
@@ -272,17 +317,19 @@ class Unit {
       if (heavy && this.rig.weaponType !== 'spear' && this.rig.weaponType !== 'claws') { vfx.slash(this.pos, this.yaw, col, 2.6, 0, 0.35, 0.9); vfx.slash(this.pos, this.yaw + Math.PI, col, 2.6, 0, 0.35, 0.9); }
       else vfx.slash(this.pos, this.yaw, col, this.def.range * 0.95, tilt, 0.24, 1.1, name === 'Attack02');
     });
+    const aseq = ++this.attackSeq;   // mã đòn: mỗi đòn đánh thường gây sát thương tối đa 1 lần (kiểm thử đếm theo mã này)
     tl.at(tim.active, ranged ? 'LaunchProjectile' : 'ApplyDamage', () => {
       if (act && this.rig.action === act) { combatLog.syncChecks++; combatLog.syncMaxErr = Math.max(combatLog.syncMaxErr, Math.abs(act.t - act.ae)); }
-      if (!t.alive) return;
-      if (ranged) Projectiles.basic(this, t, heavy);
+      if (!t.alive) { combatLog.deadTargetSkips = (combatLog.deadTargetSkips || 0) + 1; return; }   // mục tiêu đã chết: không đánh xác
+      if (ranged) Projectiles.basic(this, t, heavy, aseq);
       else if (t.pos.distanceTo(this.pos) <= this.def.range + 0.9) {
-        dealDamage(this, t, heavy ? 1.6 : 1, { heavy, knock: heavy ? 3 : 0 });
+        dealDamage(this, t, heavy ? DAMAGE.heavyMult : 1, { heavy, knock: heavy && this.def.role === 'tank' ? DAMAGE.heavyKnock : 0, attack: aseq });   // chỉ đỡ đòn hất lùi bằng đòn nặng
         hitStop(heavy ? 0.07 : 0.035); combatCam.shake(heavy ? 0.22 : 0.08);
       }
     });
     tl.at(tim.active + 0.12, 'AnimationEvent', () => this.anim.trail(false));
-    tl.at(tim.dur, 'Cleanup', () => { if (this.fsm.name === 'attack') this.fsm.set('move'); });
+    // Sau va chạm: phần còn lại của động tác là RECOVER (không đánh / đi được, vẫn bị khống chế).
+    tl.at(tim.active + 0.12, 'Cleanup', () => { if (this.fsm.name === 'attack') this.fsm.set('recover', Math.max(0.02, tim.dur - tim.active - 0.12)); });
     this.attackTl = runTimeline(tl);
   }
   startCast() {
@@ -290,6 +337,8 @@ class Unit {
     if (!skill || !t) { this.fsm.set('move'); return; }
     combatLog.casts[this.def.skill] = (combatLog.casts[this.def.skill] || 0) + 1;
     if (skill.ready && !skill.ready(this)) combatLog.forcedCasts = (combatLog.forcedCasts || 0) + 1;
+    if (this.mana < this.maxMana - 1e-6) { combatLog.badCasts++; CombatAudit.badCasts++; }
+    this.cs.casts++;   // không bao giờ được tung khi thiếu năng lượng (bài kiểm thử đếm)
     this.mana = 0;
     this.casting = { released: false, tl: null };
     if (this.tstate) this.tstate.castSeq++;   // Pháp Tu (6): mỗi lần thi triển mới được nổ thêm 1 lần trên mỗi mục tiêu
@@ -299,19 +348,16 @@ class Unit {
   }
   simStep(dt) {
     this.retarget -= dt; this.atkCd -= dt; this.dashCd -= dt;
+    this.fullManaT = this.mana >= this.maxMana && !this.manaLock ? this.fullManaT + dt : 0;
     if (this.ccImmune > 0) this.ccImmune -= dt;
     if (this.avoid) { this.avoid.t -= dt; if (this.avoid.t <= 0) this.avoid = null; }
-    if (this.alive) {
-      if (this.status.stun > 0) { this.status.stun -= dt; if (this.fsm.name !== 'stun' && this.fsm.name !== 'cast' && this.fsm.name !== 'knockback') this.fsm.set('stun'); if (Math.random() < 0.25) vfx.particles.emit(this.pos.x + Math.sin(performance.now() * 0.01) * 0.4, 2.15, this.pos.z + Math.cos(performance.now() * 0.01) * 0.4, 0, 0.2, 0, 0.3, 0.16, 0.05, COLORS.allyB, 0.9, 0); }
-      if (this.status.burn > 0) { this.status.burn -= dt; this.status.burnTick -= dt; if (this.status.burnTick <= 0) { this.status.burnTick = 0.5; dealDamage(this.status.burnSrc, this, this.status.burnDmg, { dot: true }); }
-        if (Math.random() < 0.5) vfx.particles.emit(this.pos.x + rand(-0.3, 0.3), rand(0.3, 1.6), this.pos.z + rand(-0.3, 0.3), 0, rand(1, 2), 0, 0.5, 0.25, 0.05, COLORS.fire, 0.8, 1); }
-      if (this.shieldTime > 0) { this.shieldTime -= dt; if (this.shieldTime <= 0) this.shield = 0; }
-      if (this.status.frozen > 0) this.status.frozen -= dt;
-      if (battle.phase === 'fight') {
-        this.fx.update(dt);   // buff / debuff / chậm / sát thương & hồi máu theo thời gian
-        const p = this.def.passive;
-        if (p && p.regen && this.alive) this.hp = Math.min(this.maxHp, this.hp + this.maxHp * p.regen * dt);   // nội tại tự hồi phục
-      }
+    if (this.alive && battle.phase === 'fight') {
+      this.fx.update(dt);   // StatusEffectManager: nhịp DoT / HoT, hết hạn theo đồng hồ mô phỏng, đồng bộ status.stun / frozen / burn
+      // Khống chế: ngắt đòn đánh thường đang vung (chưa tới khung va chạm thì không gây sát thương); KHÔNG ngắt thi triển
+      // (giáp chiêu) – thời gian khống chế vẫn trôi, còn dư thì bị choáng ngay sau khi thi triển xong; đang bị hất lùi thì choáng sau khi tiếp đất.
+      if (this.alive && this.status.stun > 0 && this.fsm.name !== 'stun' && this.fsm.name !== 'cast' && this.fsm.name !== 'knockback' && this.fsm.name !== 'dead') this.fsm.set('stun');
+      const p = this.def.passive;
+      if (p && p.regen && this.alive) this.hp = Math.min(this.maxHp, this.hp + this.maxHp * p.regen * dt * overtimeHealMul());   // nội tại tự hồi phục
     }
     this.fsm.update(dt);
     // Tách đơn vị chồng lấn + giữ trong đài.
@@ -328,8 +374,12 @@ class Unit {
   }
   renderUpdate(dt) {
     const f = this.flash, ice = this.status.frozen > 0 && this.alive;
+    if (this.alive && dt > 0) StatusVFX.emit(this, dt);   // hạt theo trạng thái (chỉ hình ảnh, Math.random – không ảnh hưởng logic)
     if (ice) this.U.uFlash.value.setRGB(0.12 + f * 0.3, 0.3 + f * 0.3, 0.5 + f * 0.3);   // đóng băng: phủ màu băng
-    else this.U.uFlash.value.setRGB(f * 0.42, f * 0.42, f * 0.45);
+    else if (this.glowT > 0 && this.alive) {   // lớp giáp phát sáng (Thiết Bích…): nhấp nháy nhẹ màu kỹ năng
+      this.glowT -= dt; const g = 0.22 + 0.1 * Math.sin(performance.now() * 0.012), c = this.glowColor || COLORS.allyB;
+      this.U.uFlash.value.setRGB(f * 0.42 + c.r * g, f * 0.42 + c.g * g, f * 0.45 + c.b * g);
+    } else this.U.uFlash.value.setRGB(f * 0.42, f * 0.42, f * 0.45);
     this.rig.update(ice ? 0 : dt, this.pos, this.yaw);   // đóng băng: đứng im đúng tư thế bị đóng băng
     if (this.shieldFx) this.shieldFx.follow(this);
   }
