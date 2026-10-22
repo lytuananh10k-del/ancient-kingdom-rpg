@@ -166,7 +166,8 @@ function select(sel) {
   game.sel = sel; battle.selected = sel && sel.type === 'board' ? sel.unit : null;
   if (sel) showHighlight(sel.type === 'board' ? { type: 'tile', c: sel.unit.homeTile.c, r: sel.unit.homeTile.r } : { type: 'bench', i: sel.i }, true);
   else world.highlight.visible = false;
-  ui.update();
+  ui.update();   // trước khi đặt bảng thông tin: cửa hàng có thể cao thêm (nút Bán / Về hàng chờ)
+  if (sel) showUnitInfo(sel.type === 'board' ? sel.unit : benchUnits[sel.i]); else closeUnitInfo();
 }
 function showHighlight(t, ok) {
   const hl = world.highlight;
@@ -228,7 +229,15 @@ function restoreGame(st) {
   Object.assign(game, { hp: st.hp, gold: st.gold, level: st.level, xp: st.xp, streak: st.streak, over: !!st.over, sel: null, lastSummary: '' });
   game.bench = (st.bench || []).slice(0, BENCH_SIZE).map(e => (e && UNIT_DEFS[e.key] ? { key: e.key, star: e.star } : null));
   while (game.bench.length < BENCH_SIZE) game.bench.push(null);
-  (st.board || []).forEach(b => { if (UNIT_DEFS[b.key]) placeUnit(b.key, b.star, b.c, b.r); });
+  // Bản lưu hỏng / cũ: bỏ ô trùng hoặc ngoài nửa bàn phe ta, quân vượt giới hạn cấp → về hàng chờ (đầy thì hoàn linh thạch).
+  const used = new Set();
+  (st.board || []).forEach(b => {
+    if (!UNIT_DEFS[b.key] || !(b.star >= 1 && b.star <= 3)) return;
+    const k = b.c + ',' + b.r, okTile = b.c >= 0 && b.c < 8 && b.r >= 0 && b.r < 4 && !used.has(k);
+    if (okTile && boardAllies().length < game.level) { used.add(k); placeUnit(b.key, b.star, b.c, b.r); return; }
+    const slot = game.bench.indexOf(null);
+    if (slot >= 0) game.bench[slot] = { key: b.key, star: b.star }; else game.gold += sellPrice(b.key, b.star);
+  });
   battle.round = st.round || 1;
   if (st.shop && st.shop.length === SHOP_SIZE) game.shop = st.shop.map(k => (k && UNIT_DEFS[k] ? k : null)); else rollShop();
   setupRound();
@@ -251,9 +260,23 @@ function setupRound() {
   applyPrepCamera();
   saveGame();
 }
+/** Giống TFT: vào trận mà bàn còn chỗ theo cấp thì tự đưa tướng mạnh nhất từ hàng chờ lên ô trống. */
+function autoFillBoard() {
+  const placed = [];
+  while (boardAllies().length < boardCap()) {
+    let best = -1;
+    game.bench.forEach((e, i) => { if (e && (best < 0 || e.star * 10 + UNIT_DEFS[e.key].cost > game.bench[best].star * 10 + UNIT_DEFS[game.bench[best].key].cost)) best = i; });
+    const tile = freeAllyTile(); if (best < 0 || !tile) break;
+    placed.push(UNIT_DEFS[game.bench[best].key].short || UNIT_DEFS[game.bench[best].key].name);
+    benchToBoard(best, tile.c, tile.r);
+  }
+  if (placed.length) { ui.toast('Tự đưa lên bàn: ' + placed.join(', ')); afterRosterChange(); }
+  return placed.length;
+}
 function startBattle() {
   if (battle.phase !== 'prep' || game.over) return;
   if (drag.src) cancelDrag();
+  if (!battle.bench) autoFillBoard();
   if (!boardAllies().length) ui.toast('Không có tu sĩ trên bàn – vòng này sẽ thua');
   applyTraits(); boardAllies().forEach(u => u.reset(1));
   battle.phase = 'fight'; battle.time = 0; select(null); ui.update();

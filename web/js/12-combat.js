@@ -6,7 +6,7 @@
  * 16. Sát thương, khiên, trạng thái, hit stop
  * ===================================================================*/
 let hitStopTimer = 0;
-const options = { hitstop: store.get('hitstop', true), swordCount: store.get('swords', 0), footIK: store.get('footIK', true) };
+const options = { hitstop: store.get('hitstop', true), swordCount: store.get('swords', 0), footIK: store.get('footIK', true), haptics: store.get('haptics', true) };
 /** 0 = theo mức đồ hoạ; > 0 = số người chơi chọn. */
 const swordCount = () => (options.swordCount > 0 ? options.swordCount : Q().swords);
 function hitStop(d) { if (options.hitstop) hitStopTimer = Math.max(hitStopTimer, d); }

@@ -35,8 +35,77 @@ const ui = {
   tick(dt) {
     if (this.toastTimer > 0) { this.toastTimer -= dt; if (this.toastTimer <= 0) $('toast').hidden = true; }
     if (this.bannerTimer > 0) { this.bannerTimer -= dt; if (this.bannerTimer <= 0) $('skill-banner').classList.remove('show'); }
+    if (info.key && info.unit) { info.refresh -= dt; if (info.refresh <= 0) { info.refresh = 0.2; renderUnitInfo(); } }   // máu / linh lực trực tiếp
   }
 };
+
+/* ---------- Thông tin tướng: chạm vào nhân vật (ta, hàng chờ, địch) hoặc nhấn giữ thẻ cửa hàng ---------- */
+const info = { unit: null, key: null, star: 1, refresh: 0 };
+function showUnitInfo(u) { if (!u) return; Object.assign(info, { unit: u, key: u.key, star: u.star, refresh: 0.2 }); renderUnitInfo(); placeUnitInfo(u); }
+function showDefInfo(key, star = 1) { Object.assign(info, { unit: null, key, star }); renderUnitInfo(); placeUnitInfo(null); }
+/** Đặt bảng thông tin (đo kích thước thật): không đè lên tướng vừa chạm, và không bao giờ đè lên cửa hàng /
+ *  cụm nút dưới (để vẫn mua, bán, bắt đầu được khi bảng đang mở). Xem trước từ cửa hàng (u = null) thì đặt phía trên. */
+function placeUnitInfo(u) {
+  const el = $('unit-info'), W = window.innerWidth, H = window.innerHeight, st = el.style;
+  st.left = st.right = st.top = st.bottom = ''; st.maxHeight = ''; el.hidden = false;
+  const pw = el.offsetWidth;
+  // Màn dọc / màn thấp: được phủ tạm lên vùng thông tin trên cùng (bảng có nút ✕); màn lớn thì nằm dưới hàng nút.
+  const top = W < H || H < 520 ? 8 : document.querySelector('.top-actions').getBoundingClientRect().bottom + 6;
+  let sx = -1, sy = -1;
+  if (u) { const v = _v1.set(u.pos.x, 1, u.pos.z).project(camera); sx = (v.x * 0.5 + 0.5) * W; sy = (-v.y * 0.5 + 0.5) * H; }
+  const obstacles = [$('prep-panel'), document.querySelector('.main-actions')]
+    .filter(e => e && !e.hidden && e.offsetParent !== null).map(e => e.getBoundingClientRect());
+  /** Mép dưới dùng được nếu bảng chiếm dải ngang [x0, x1]. */
+  const floor = (x0, x1) => obstacles.reduce((lim, r) => (r.right > x0 && r.left < x1 ? Math.min(lim, r.top - 8) : lim), H - 10);
+  const covers = (x0, x1, y0, y1) => !!u && sx > x0 - 24 && sx < x1 + 24 && sy + 30 > y0 && sy - 70 < y1;   // tướng cao ~ 70 px trên điểm ngực
+  if (W > H) {
+    const sides = [{ k: 'left', x0: 12, x1: 12 + pw }, { k: 'right', x0: W - 12 - pw, x1: W - 12 }].map(sd => ({ ...sd, room: floor(sd.x0, sd.x1) - top }));
+    const fit = sd => !covers(sd.x0, sd.x1, top, top + Math.min(el.scrollHeight, sd.room));
+    sides.sort((a, b) => (fit(b) - fit(a)) || (Math.min(b.room, el.scrollHeight) - Math.min(a.room, el.scrollHeight)) || (u ? 0 : a.k === 'right' ? -1 : 1));
+    const sd = sides[0];
+    st[sd.k] = '12px'; st.top = top + 'px'; st.maxHeight = Math.max(100, sd.room) + 'px';
+  } else {
+    const x0 = W - 12 - pw, lim = floor(x0, W - 12), maxH = Math.min((lim - top) * 0.55, 340), ph = Math.min(el.scrollHeight, maxH);
+    st.right = '12px'; st.maxHeight = maxH + 'px';
+    if (covers(x0, W - 12, top, top + ph) && !covers(x0, W - 12, lim - ph, lim)) st.bottom = (H - lim) + 'px'; else st.top = top + 'px';
+  }
+}
+function closeUnitInfo() { info.unit = null; info.key = null; $('unit-info').hidden = true; }
+function renderUnitInfo() {
+  const u = info.unit;
+  if (u && !units.includes(u) && !benchUnits.includes(u)) { closeUnitInfo(); return; }   // quân đã bán / gộp / huỷ
+  const d = UNIT_DEFS[info.key], star = info.star, enemy = !!u && u.team === 'enemy', onBench = !!u && benchUnits.includes(u);
+  let hp, maxHp, atk, def, aspd, mana, maxMana, shield = 0;
+  if (u) { hp = Math.max(0, u.hp); maxHp = u.maxHp; atk = u.atk; def = u.def_; aspd = d.aspd * u.bonus.aspd; mana = u.mana; maxMana = u.maxMana; shield = u.shield; }
+  else { maxHp = Math.round(d.hp * STAR_MUL[star]); hp = maxHp; atk = d.atk * STAR_MUL[star]; def = d.def; aspd = d.aspd; mana = d.mana0; maxMana = d.mana; }
+  const box = $('unit-info'); box.classList.toggle('enemy', enemy);
+  $('ui-name').textContent = d.name; $('ui-stars').textContent = '★'.repeat(star);
+  const counts = traitCounts(), tags = [];
+  if (enemy) tags.push('<span class="ui-tag foe">Phe địch</span>');
+  if (d.cost) tags.push(`<span class="ui-tag cost">◆ ${d.cost}</span>`);
+  (d.traits || []).forEach(t => {
+    const T = TRAITS[t], n = enemy ? 0 : counts[t] || 0, lv = !enemy && !onBench && u ? traitLevel(t, n) : 0;
+    tags.push(`<span class="ui-tag${lv ? ' on' : ''}" style="--c:${T.color}">${T.name}${!enemy ? ` ${n}/${T.tiers.find(m => m > n) || T.tiers[T.tiers.length - 1]}` : ''}</span>`);
+  });
+  $('ui-tags').innerHTML = tags.join('');
+  $('ui-bars').innerHTML = `<div class="ui-bar hp"><i style="width:${(hp / maxHp * 100).toFixed(1)}%"></i><span>Máu ${Math.round(hp)}/${maxHp}${shield > 0 ? ' · khiên ' + Math.round(shield) : ''}</span></div>` +
+    `<div class="ui-bar mana"><i style="width:${(mana / maxMana * 100).toFixed(1)}%"></i><span>Linh lực ${Math.round(mana)}/${maxMana}</span></div>`;
+  const range = d.range > 3 ? 'Xa ' + Math.round(d.range / BOARD.tile) + ' ô' : 'Cận';
+  $('ui-stats').innerHTML = `<dt>Công</dt><dd>${Math.round(atk)}</dd><dt>Giáp</dt><dd>${Math.round(def)}</dd>` +
+    `<dt>Tốc đánh</dt><dd>${aspd.toFixed(2)}/s</dd><dt>Tầm</dt><dd>${range}</dd>` +
+    `<dt>Chí mạng</dt><dd>${Math.round(d.crit * 100)}% ×${d.critDmg}</dd><dt>Linh lực</dt><dd>${d.mana0}/${d.mana}</dd>`;
+  const sk = SKILLS[d.skill];
+  $('ui-skill-name').textContent = (!enemy && sk.allyName) || sk.name;
+  $('ui-skill-mana').textContent = 'Cần ' + d.mana + ' linh lực';
+  $('ui-skill-desc').textContent = sk.desc || '';
+  let foot = '';
+  if (!u && d.cost) foot = `Giá ${d.cost} linh thạch · đang có ${countCopies(info.key, 1)}/3 bản ★1`;
+  else if (onBench) foot = `Đang ở hàng chờ – tộc/hệ chưa tính. Kéo lên ô xanh để ra trận · bán +${sellPrice(u.key, u.star)}`;
+  else if (u && !enemy) foot = battle.phase === 'prep' ? `Bán +${sellPrice(u.key, u.star)} linh thạch · kéo để đổi vị trí` : '';
+  else if (enemy) foot = `Chỉ số đã nhân theo vòng ${battle.round}`;
+  $('ui-foot').textContent = foot;
+}
+$('btn-info-close').addEventListener('click', () => { closeUnitInfo(); if (game.sel) select(null); });
 const TIER_LABEL = ['', 'Phàm', 'Linh', 'Tiên'];
 function renderShop() {
   const el = $('shop'); el.textContent = '';
@@ -48,7 +117,13 @@ function renderShop() {
     b.innerHTML = `<span class="nm">${d.name}</span><span class="tr">${d.traits.map(t => TRAITS[t].name).join(' · ')}</span>` +
       `<span class="ft"><span class="cost">${d.cost}</span>${owned ? `<span class="own">${owned}/3</span>` : ''}</span>`;
     b.setAttribute('aria-label', `Mua ${d.name}, giá ${d.cost} linh thạch${owned ? ', đang có ' + owned : ''}`);
-    b.addEventListener('click', () => buyShop(i));
+    // Nhấn giữ (hoặc chuột phải) để xem thông tin trước khi mua; nhả sau khi giữ thì không mua.
+    let lpTimer = 0, longPressed = false;
+    const cancelLp = () => { clearTimeout(lpTimer); lpTimer = 0; };
+    b.addEventListener('pointerdown', () => { longPressed = false; cancelLp(); lpTimer = setTimeout(() => { longPressed = true; showDefInfo(key); haptic(8); }, 500); });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => b.addEventListener(t, cancelLp));
+    b.addEventListener('contextmenu', e => { e.preventDefault(); longPressed = true; showDefInfo(key); });
+    b.addEventListener('click', () => { if (longPressed) { longPressed = false; return; } buyShop(i); });
     el.appendChild(b);
   });
   $('btn-reroll').disabled = game.gold < REROLL_COST;
@@ -112,6 +187,7 @@ $('btn-hud-toggle').addEventListener('click', () => setHudCollapsed(!$('left-col
 setHudCollapsed(store.get('hudCollapsed', false));
 $('btn-close-settings').addEventListener('click', () => { closeSettings(); $('btn-settings').focus(); });
 window.addEventListener('keydown', e => { if (e.key === 'Escape') closeSettings(); });
+$('opt-haptics').checked = options.haptics; $('opt-haptics').addEventListener('change', e => { options.haptics = e.target.checked; store.set('haptics', e.target.checked); if (e.target.checked) haptic(15); });
 $('opt-sound').checked = !Sfx.muted; $('opt-sound').addEventListener('change', e => { Sfx.muted = !e.target.checked; store.set('mute', Sfx.muted); });
 $('btn-enter').addEventListener('click', () => { Sfx.init(); $('intro').hidden = true; canvas.focus(); });
 $('btn-newgame').addEventListener('click', () => { Sfx.init(); newGame(); $('intro').hidden = true; canvas.focus(); });

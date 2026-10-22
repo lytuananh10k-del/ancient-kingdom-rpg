@@ -9,6 +9,7 @@ const SKILLS = {
   /* -------- VẠN KIẾM QUY TÔNG (kỹ năng mẫu đầy đủ 5 giai đoạn) -------- */
   vanKiem: {
     name: 'Vạn Kiếm Quy Tông',
+    desc: 'Triệu hồi phi kiếm vây quanh vùng địch đông nhất: 10 nhát chém liên tiếp (32% công mỗi nhát, bán kính 3,4 m), rồi cự kiếm giáng xuống gây 300% công trong bán kính 5 m, hất lùi và choáng 1,2 giây.',
     build(caster, target, release) {
       const tl = new SkillTimeline('Vạn Kiếm Quy Tông', caster);
       const N = swordCount(), A = COLORS.allyA, B = COLORS.allyB;
@@ -171,6 +172,7 @@ const SKILLS = {
   /* -------- KIẾM KHÍ TRẢM (Kiếm Đồng): lưỡi kiếm khí bán nguyệt bay thẳng, xuyên mục tiêu -------- */
   kiemKhi: {
     name: 'Kiếm Khí Trảm',
+    desc: 'Chém một đạo kiếm khí bán nguyệt bay thẳng, xuyên qua mọi kẻ địch trên đường, gây 190% công.',
     build(caster, target, release) {
       const tl = new SkillTimeline('Kiếm Khí Trảm', caster);
       const col = caster.team === 'ally' ? COLORS.allyA : COLORS.enemyA;
@@ -195,6 +197,7 @@ const SKILLS = {
   /* -------- THIÊN LÔI QUYẾT: 3 đạo sét thủ tục -------- */
   thienLoi: {
     name: 'Thiên Lôi Quyết',
+    desc: 'Gọi 3 tia sét giáng quanh mục tiêu: mỗi tia gây 160% công trong bán kính 2,4 m và choáng 0,8 giây.',
     build(caster, target, release) {
       const tl = new SkillTimeline('Thiên Lôi Quyết', caster);
       const spots = [];
@@ -220,6 +223,7 @@ const SKILLS = {
   /* -------- HỎA PHƯỢNG PHẦN THIÊN: cầu lửa lớn → nổ + thiêu đốt -------- */
   hoaPhuong: {
     name: 'Hỏa Phượng Phần Thiên',
+    desc: 'Phóng hỏa phượng truy đuổi mục tiêu, nổ gây 200% công trong bán kính 3 m và thiêu đốt theo thời gian.',
     build(caster, target, release) {
       const tl = new SkillTimeline('Hỏa Phượng', caster);
       tl.at(0, 'AnimationEvent', () => caster.anim.play('SkillCast', { dur: 1.1, windup: 0.45, active: 0.55, hold: 0.3 }));
@@ -248,6 +252,7 @@ const SKILLS = {
   /* -------- HỘ THỂ CHÂN KHÍ: khiên Fresnel cho đồng đội yếu nhất -------- */
   hoThe: {
     name: 'Hộ Thể Chân Khí',
+    desc: 'Tạo khiên bằng 30% máu tối đa của bản thân cho 3 đồng minh đang yếu nhất (luôn gồm bản thân), giữ 6 giây.',
     build(caster, target, release) {
       const tl = new SkillTimeline('Hộ Thể Chân Khí', caster);
       tl.at(0, 'AnimationEvent', () => caster.anim.play('SkillCast', { dur: 1.0, windup: 0.35, active: 0.45, hold: 0.3 }));
@@ -272,6 +277,7 @@ const SKILLS = {
   /* -------- HUYẾT ẢNH TRẢM (địch): lướt xuyên mục tiêu, vết chém đỏ góc cạnh -------- */
   huyetAnh: {
     name: 'Huyết Ảnh Trảm',
+    desc: 'Lướt xuyên qua mục tiêu, chém 210% công trong bán kính 1,8 m quanh mục tiêu.',
     build(caster, target, release) {
       const tl = new SkillTimeline('Huyết Ảnh Trảm', caster);
       const C1 = caster.team === 'ally' ? COLORS.allyA : COLORS.enemyA, C2 = caster.team === 'ally' ? COLORS.allyViolet : COLORS.blood;
@@ -291,6 +297,7 @@ const SKILLS = {
   /* -------- U MINH CHÚ (địch): 3 u hồn tím truy đuổi -------- */
   uMinh: {
     name: 'U Minh Chú',
+    desc: 'Phóng 3 u hồn truy đuổi 3 kẻ địch, mỗi u hồn gây 120% công.',
     build(caster, target, release) {
       const tl = new SkillTimeline('U Minh Chú', caster);
       const CV = caster.team === 'ally' ? COLORS.allyViolet : COLORS.enemyB, CR = caster.team === 'ally' ? COLORS.allyA : COLORS.enemyA;
@@ -310,6 +317,7 @@ const SKILLS = {
   /* -------- PHÁ ĐỊA HỐNG (địch): nhảy lên đập đất, xung kích đỏ hất lùi -------- */
   phaDia: {
     name: 'Phá Địa Hống', allyName: 'Trấn Sơn Kích',
+    desc: 'Dậm đất gây 160% công trong bán kính 3,6 m quanh bản thân và hất lùi kẻ địch.',
     build(caster, target, release) {
       const tl = new SkillTimeline('Phá Địa Hống', caster);
       const C1 = caster.team === 'ally' ? COLORS.allyB : COLORS.enemyA, C2 = caster.team === 'ally' ? COLORS.allyA : COLORS.blood;

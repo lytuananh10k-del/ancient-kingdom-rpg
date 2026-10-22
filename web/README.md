@@ -35,13 +35,15 @@ và phải nạp đúng thứ tự số. Thêm file mới: đặt số thứ t�
 ```bash
 cd web && npm install && npm test          # chơi 12 vòng liên tục, màn ngang 844×390
 ROUNDS=20 VIEW=400x820 node tests/playtest.js
+TOUCH=1 VIEW=400x820 node tests/playtest.js  # thao tác bằng sự kiện chạm thật (CDP) như trên Android
 ```
 `tests/playtest.js` mở game trong Chromium (Playwright) và tự chơi. Sau mỗi thao tác nó kiểm tra:
 linh thạch khi mua / bán / làm mới / mua kinh nghiệm; nâng sao bảo toàn số bản ★1 quy đổi và không còn nhóm 3 bản chưa gộp;
 kéo thả bằng chuột thật (hàng chờ → bàn, đổi chỗ, bàn → hàng chờ, kéo vào cửa hàng để bán, bị chặn khi đủ quân);
 hàng chờ 3D khớp dữ liệu; tộc/hệ; AI (không NaN, không ra ngoài đài, có sát thương, trận ≤ 90 s);
 thu nhập, mất máu, chuỗi thắng/thua theo công thức; bản lưu khớp trạng thái; tải lại trang giữa chừng (vòng 3, 6, 9…);
-rò rỉ object trong scene; lỗi console. Trận được tua nhanh bằng `__vkkt.simulate(giây)` (bỏ qua render) để chạy được cả khi không có GPU.
+rò rỉ object trong scene; lỗi console; mọi tướng đứng đúng tâm ô lúc chuẩn bị; tự đưa tướng lên khi vào trận;
+bảng thông tin (tướng ta, địch, nhấn giữ thẻ cửa hàng) hiện đúng và không che cửa hàng. Trận được tua nhanh bằng `__vkkt.simulate(giây)` (bỏ qua render) để chạy được cả khi không có GPU.
 `SHOTS=thư-mục` để lưu ảnh chụp mỗi vòng.
 
 ## Cấu trúc mã (các module)
@@ -70,7 +72,9 @@ Mô phỏng chạy bước cố định 60 Hz; sát thương nằm trên timelin
 |---|---|
 | Cửa hàng | 5 tướng mỗi vòng. Làm mới: 2 linh thạch (phím D). Tỉ lệ bậc 1/2/3 theo cấp: cấp 1–2 100/0/0 → cấp 8 20/40/40 |
 | Tướng | Bậc 1 (1 linh thạch): Kiếm Đồng, Hộ Pháp, Thiết Vệ · Bậc 2: Lôi Pháp Sư, Hỏa Linh, Ảnh Kiếm · Bậc 3: Kiếm Tiên, U Hồn Sư |
-| Cấp | Cấp = số tu sĩ tối đa trên bàn (khởi đầu cấp 3). Mua kinh nghiệm: 4 linh thạch → 4 KN (phím F); +2 KN mỗi vòng. Tối đa cấp 8 |
+| Cấp | Cấp = số tu sĩ tối đa trên bàn (khởi đầu cấp 3); kéo thêm khi đã đủ sẽ bị chặn (ô đích đỏ). Vào trận mà bàn còn chỗ thì tự đưa tướng mạnh nhất từ hàng chờ lên (giống TFT). Mua kinh nghiệm: 4 linh thạch → 4 KN (phím F); +2 KN mỗi vòng. Tối đa cấp 8 |
+| Bàn cờ | 8×8: 4 hàng ô xanh phía dưới là phe ta (đặt được), 4 hàng ô đỏ là địch; vạch vàng ở giữa |
+| Thông tin tướng | Chạm vào bất kỳ tướng nào (phe ta, hàng chờ, địch; cả lúc đang đánh – máu/linh lực cập nhật trực tiếp) để xem chỉ số, tộc/hệ, kỹ năng. Nhấn giữ (chuột phải) thẻ cửa hàng để xem trước khi mua. Bảng tự đặt ở phía không che tướng vừa chạm và không che cửa hàng |
 | Hàng chờ | Kiểu TFT: 9 ô 3D ngay sau hàng cuối phe ta, tướng đứng trên ô. **Kéo thả** tướng giữa bàn cờ và hàng chờ (thả lên quân khác = đổi chỗ), kéo vào cửa hàng để bán. Vẫn dùng được chạm-chọn rồi chạm-đích |
 | Nâng sao | 3 bản giống nhau cùng sao tự gộp: ★2 (chỉ số ×1.8), ★3 (×3.24). Được mua khi hàng chờ đầy nếu lần mua đó tạo ra gộp |
 | Bán | Hoàn giá × 3^(sao−1), trừ 1 với tướng ★2 trở lên |
@@ -87,6 +91,10 @@ Mô phỏng chạy bước cố định 60 Hz; sát thương nằm trên timelin
 
 Tộc/hệ đếm số **tướng khác nhau** trên bàn (2 bản cùng tướng chỉ tính 1). Địch: 2 quân ở vòng 1, cứ 2 vòng thêm 1 (tối đa 8); máu và công ×1.07 mỗi vòng; ★2 từ vòng 5 (thêm quân ★2 ở vòng 8, 11), ★3 từ vòng 15.
 Benchmark chụp lại ván đang chơi, chạy đội hình cố định rồi khôi phục nguyên trạng.
+
+**Cảm ứng (Android)**: vùng chạm tướng rộng 46 px (chuột 34 px); kéo khi di quá 12 px (chuột 8 px) để rung tay không thành kéo;
+khi kéo bằng ngón tay, tướng nổi phía trên ngón tay 56 px và mọi đích thả (ô, hàng chờ, cửa hàng để bán) tính theo vị trí tướng nổi;
+rung nhẹ khi nhấc / thả (tắt được trong Cài đặt); không kéo-để-tải-lại, không menu nhấn giữ, không trễ chạm đúp; nút ≥ 36–40 px.
 
 **Camera lúc chuẩn bị** tự căn khung theo kích thước màn hình (`fitPrepCamera`): tìm khoảng cách nhỏ nhất để hàng chờ + nửa bàn phe ta
 (thêm các hàng địch nếu hình không nhỏ đi quá 20%) nằm gọn trong vùng trống giữa HUD và cửa hàng, rồi dùng lens shift
