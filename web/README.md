@@ -32,7 +32,7 @@ Mô phỏng chạy bước cố định 60 Hz; sát thương nằm trên timelin
 | Cửa hàng | 5 tướng mỗi vòng. Làm mới: 2 linh thạch (phím D). Tỉ lệ bậc 1/2/3 theo cấp: cấp 1–2 100/0/0 → cấp 8 20/40/40 |
 | Tướng | Bậc 1 (1 linh thạch): Kiếm Đồng, Hộ Pháp, Thiết Vệ · Bậc 2: Lôi Pháp Sư, Hỏa Linh, Ảnh Kiếm · Bậc 3: Kiếm Tiên, U Hồn Sư |
 | Cấp | Cấp = số tu sĩ tối đa trên bàn (khởi đầu cấp 3). Mua kinh nghiệm: 4 linh thạch → 4 KN (phím F); +2 KN mỗi vòng. Tối đa cấp 8 |
-| Hàng chờ | 8 ô. Chạm hàng chờ → chạm ô xanh để đặt; chạm quân trên bàn → chạm hàng chờ để rút về / đổi chỗ |
+| Hàng chờ | Kiểu TFT: 9 ô 3D ngay sau hàng cuối phe ta, tướng đứng trên ô. **Kéo thả** tướng giữa bàn cờ và hàng chờ (thả lên quân khác = đổi chỗ), kéo vào cửa hàng để bán. Vẫn dùng được chạm-chọn rồi chạm-đích |
 | Nâng sao | 3 bản giống nhau cùng sao tự gộp: ★2 (chỉ số ×1.8), ★3 (×3.24). Được mua khi hàng chờ đầy nếu lần mua đó tạo ra gộp |
 | Bán | Hoàn giá × 3^(sao−1), trừ 1 với tướng ★2 trở lên |
 | Thu nhập | 5 + lãi (1 mỗi 10 linh thạch, tối đa 5) + chuỗi thắng/thua (2: +1, 4: +2, 5+: +3) + 1 khi thắng |
@@ -49,6 +49,10 @@ Mô phỏng chạy bước cố định 60 Hz; sát thương nằm trên timelin
 Tộc/hệ đếm số **tướng khác nhau** trên bàn (2 bản cùng tướng chỉ tính 1). Địch: số lượng tăng theo vòng (tối đa 8), chỉ số ×1.13 mỗi vòng, có ★2 từ vòng 4 và ★3 từ vòng 12.
 Benchmark chụp lại ván đang chơi, chạy đội hình cố định rồi khôi phục nguyên trạng.
 
+**Camera lúc chuẩn bị** tự căn khung theo kích thước màn hình (`fitPrepCamera`): tìm khoảng cách nhỏ nhất để hàng chờ + nửa bàn phe ta
+(thêm các hàng địch nếu hình không nhỏ đi quá 20%) nằm gọn trong vùng trống giữa HUD và cửa hàng, rồi dùng lens shift
+(dời tâm chiếu trong ma trận chiếu, không đổi phối cảnh) để đặt nội dung vào giữa vùng đó. Vào giao chiến camera trở về góc mặc định.
+
 ## GLB / GLTF
 Cài đặt → "Chọn file .glb". Mô hình thay cho mọi Kiếm Tiên phe ta (kể cả bản mua sau đó), giữ tỉ lệ theo sao. Tên clip được nhận theo mẫu: Idle, Walk, Run, Dash, Attack01–03, HeavyAttack,
 SkillCast, UltimateCast, Hit, Stun, Knockback, Death, Victory. Kiếm gắn vào xương có tên chứa RightHand / hand_r.
@@ -64,4 +68,6 @@ Nhân vật và animation là placeholder thủ tục, không phải animation d
 
 ## Cài đặt liên quan
 - **Số phi kiếm** (Vạn Kiếm Quy Tông): theo mức đồ hoạ (14 / 24 / 36 / 56) hoặc tự chọn 8–96.
+- **Âm thanh**: bật/tắt (lưu trên máy).
+- Bảng Cài đặt đóng bằng nút ✕, phím Esc hoặc chạm ra bàn cờ.
 - **IK chân**: bật/tắt để so sánh. Hàm `groundHeight(x, z)` là điểm nối khi có địa hình gồ ghề.

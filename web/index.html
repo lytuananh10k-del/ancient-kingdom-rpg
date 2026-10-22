@@ -69,16 +69,11 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .trait .fx { display: block; font-size: 0.7rem; color: var(--muted); }
 
 /* ---------- Hàng chờ & cửa hàng ---------- */
-#prep-panel { pointer-events: auto; width: min(560px, 100%); display: flex; flex-direction: column; gap: 6px; background: var(--panel); border: 1px solid var(--panel-line); border-radius: 12px; padding: 8px; }
+#prep-panel { position: relative; pointer-events: auto; width: min(560px, 100%); display: flex; flex-direction: column; gap: 6px; background: var(--panel); border: 1px solid var(--panel-line); border-radius: 12px; padding: 8px; }
 #prep-panel[hidden] { display: none; }
-.bench-row { display: flex; align-items: center; gap: 6px; }
-.bench-row .lbl { font-size: 0.7rem; color: var(--muted); writing-mode: vertical-rl; transform: rotate(180deg); }
-#bench { flex: 1; display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
-.slot { aspect-ratio: 1; min-height: 40px; border-radius: 8px; border: 1px dashed rgba(196,220,214,0.22); background: rgba(255,255,255,0.03); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 2px; overflow: hidden; }
-.slot.filled { border-style: solid; background: var(--tb, #33413f); border-color: var(--tl, #7f9a95); }
-.slot.sel, .slot.filled.sel { outline: 2px solid var(--gold); outline-offset: 1px; }
-.slot .st { font-size: 0.62rem; color: #ffd166; line-height: 1; }
-.slot .sn { font-size: 0.64rem; font-weight: 600; line-height: 1.1; text-align: center; overflow-wrap: anywhere; }
+#prep-panel.selling::after { content: attr(data-sell); position: absolute; inset: 0; border-radius: 12px; display: grid; place-items: center; padding: 8px; text-align: center;
+  background: rgba(60, 14, 10, 0.82); border: 2px dashed rgba(226, 85, 63, 0.7); color: #ffd1c8; font-weight: 700; font-size: 0.95rem; }
+#prep-panel.selling.hot::after { background: rgba(120, 26, 16, 0.92); border-color: #ff8a7a; color: #fff; }
 #shop { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
 .card { min-height: 64px; border-radius: 9px; border: 1px solid var(--tl, #7f9a95); background: linear-gradient(180deg, var(--tb, #33413f), rgba(10,18,24,0.9)); padding: 5px 5px 4px; display: flex; flex-direction: column; align-items: flex-start; text-align: left; gap: 2px; min-width: 0; }
 .card .nm { font-weight: 700; font-size: 0.76rem; line-height: 1.15; }
@@ -99,8 +94,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 @media (max-height: 520px) and (orientation: landscape) {
   .hud-bottom { justify-content: space-between; align-items: flex-end; flex-wrap: nowrap; }
   #prep-panel { width: min(520px, 62vw); padding: 6px; gap: 4px; }
-  .card { min-height: 52px; } .slot { aspect-ratio: auto; min-height: 0; height: 36px; }
-  .main-actions { flex-direction: column; gap: 6px; } .main-actions .cta { padding: 9px 14px; font-size: 0.88rem; }
+  .card { min-height: 52px; }
+  .main-actions { flex-direction: column; gap: 6px; margin-left: auto; } .main-actions .cta { padding: 9px 14px; font-size: 0.88rem; }
   .hint { display: none; }
   .xp-label, #traits .fx { display: none; }
 }
@@ -126,10 +121,13 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 /* ---------- Bảng cài đặt ---------- */
 .sheet {
   position: fixed; z-index: 20; right: max(10px, env(safe-area-inset-right, 0px)); top: calc(env(safe-area-inset-top, 0px) + 58px);
-  width: min(380px, calc(100vw - 20px)); max-height: calc(100% - 80px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box; width: min(380px, calc(100vw - 20px)); max-height: calc(100% - 80px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
   overflow-y: auto; background: rgba(9, 15, 20, 0.95); border: 1px solid var(--panel-line); border-radius: 14px; padding: 14px 16px 16px;
   font-size: 0.88rem; user-select: text; -webkit-user-select: text; touch-action: pan-y;
 }
+.sheet-head { position: sticky; top: -14px; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: -14px -16px 6px; padding: 12px 10px 6px 16px; background: rgba(9, 15, 20, 0.97); border-radius: 14px 14px 0 0; }
+.sheet-head h2 { margin: 0 !important; }
+.sheet .close { width: 40px; height: 40px; border-radius: 10px; font-size: 1.1rem; line-height: 1; background: rgba(255,255,255,0.06); border: 1px solid var(--panel-line); }
 .sheet h2 { margin: 0 0 10px; font-family: var(--font-display); font-size: 1.5rem; color: var(--gold); }
 .sheet h3 { margin: 16px 0 6px; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); }
 .seg { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
@@ -195,7 +193,6 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 
 <div class="hud-bottom">
   <div id="prep-panel">
-    <div class="bench-row"><span class="lbl">Hàng chờ</span><div id="bench"></div></div>
     <div id="shop" aria-label="Cửa hàng tu sĩ"></div>
     <div class="shop-actions">
       <button class="sbtn" id="btn-reroll">Làm mới <span class="cost">2</span></button>
@@ -213,7 +210,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 </div>
 
 <section class="sheet" id="settings" hidden aria-label="Cài đặt">
-  <h2>Cài đặt</h2>
+  <div class="sheet-head"><h2>Cài đặt</h2><button class="close" id="btn-close-settings" aria-label="Đóng cài đặt">✕</button></div>
   <h3>Chất lượng đồ hoạ</h3>
   <div class="seg" id="quality-seg">
     <button data-q="LOW">Thấp</button><button data-q="MEDIUM">Vừa</button><button data-q="HIGH">Cao</button><button data-q="ULTRA">Tối đa</button>
@@ -224,6 +221,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
   <div class="row"><label for="opt-shake">Rung màn hình</label><input type="checkbox" id="opt-shake" checked></div>
   <div class="row"><label for="opt-reduce">Giảm rung (nhẹ hơn 60%)</label><input type="checkbox" id="opt-reduce"></div>
   <div class="row"><label for="opt-hitstop">Khựng hình khi đánh trúng</label><input type="checkbox" id="opt-hitstop" checked></div>
+  <h3>Âm thanh</h3>
+  <div class="row"><label for="opt-sound">Âm thanh</label><input type="checkbox" id="opt-sound" checked></div>
   <h3>Vạn Kiếm Quy Tông</h3>
   <div class="row"><label for="opt-sword-auto">Số phi kiếm theo mức đồ hoạ</label><input type="checkbox" id="opt-sword-auto" checked></div>
   <div class="row"><label for="opt-swords">Số phi kiếm: <b id="sword-val">24</b></label><input type="range" id="opt-swords" min="8" max="96" step="4" value="24"></div>
@@ -1597,7 +1596,7 @@ function runTimeline(tl) { timelines.push(tl); return tl; }
  * 11. Âm thanh tổng hợp (WebAudio) – chỉ bật sau khi người chơi chạm
  * ===================================================================*/
 const Sfx = {
-  ctx: null, master: null, noise: null, last: {},
+  ctx: null, master: null, noise: null, last: {}, muted: store.get('mute', false),
   init() {
     if (this.ctx) return;
     try {
@@ -1607,7 +1606,7 @@ const Sfx = {
       for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1; this.noise = b;
     } catch (e) { this.ctx = null; }
   },
-  ok(key, gap = 0.03) { if (!this.ctx) return false; const t = this.ctx.currentTime; if (this.last[key] && t - this.last[key] < gap) return false; this.last[key] = t; return true; },
+  ok(key, gap = 0.03) { if (!this.ctx || this.muted) return false; const t = this.ctx.currentTime; if (this.last[key] && t - this.last[key] < gap) return false; this.last[key] = t; return true; },
   env(node, t, a, d, peak) { node.gain.setValueAtTime(0.0001, t); node.gain.exponentialRampToValueAtTime(peak, t + a); node.gain.exponentialRampToValueAtTime(0.0001, t + a + d); },
   noiseHit(freq, q, dur, peak, type = 'bandpass') {
     const c = this.ctx, t = c.currentTime, s = c.createBufferSource(); s.buffer = this.noise;
@@ -1642,9 +1641,9 @@ class CombatCamera {
     this.cine = null; this.cineW = 0; this.cineFocus = new V3();
     this.enableCinematic = store.get('cine', true); this.enableShake = store.get('shake', true); this.reduceShake = store.get('reduce', false);
   }
-  reset() { this.tYaw = this.defaults.yaw; this.tPitch = this.defaults.pitch; this.tDist = this.defaults.dist; }
+  reset() { this.tYaw = this.defaults.yaw; this.tPitch = this.defaults.pitch; this.tDist = battle.phase === 'prep' && prepFit.dist ? prepFit.dist : this.defaults.dist; }
   rotate(dx, dy) { this.tYaw = clamp(this.tYaw - dx * 0.005, -1.1, 1.1); this.tPitch = clamp(this.tPitch + dy * 0.004, 26 * DEG, 80 * DEG); }
-  zoom(f) { this.tDist = clamp(this.tDist * f, 13, 40); }
+  zoom(f) { this.tDist = clamp(this.tDist * f, 13, 70); }
   shake(amount) { if (!this.enableShake) return; this.trauma = Math.min(1, this.trauma + amount * (this.reduceShake ? 0.4 : 1)); }
   /** Camera impulse: hất camera theo một hướng rồi lò xo trả về. */
   kick(dir, strength) { if (!this.enableShake) return; this.impulseVel.addScaledVector(dir, strength * (this.reduceShake ? 0.4 : 1)); }
@@ -1683,6 +1682,63 @@ class CombatCamera {
   }
 }
 const combatCam = new CombatCamera(camera);
+/** Khung camera lúc chuẩn bị (giống TFT): tìm khoảng cách + điểm nhìn để nửa bàn phe ta và hàng chờ
+ *  nằm gọn trong vùng trống giữa thanh nút trên cùng và cửa hàng – tự tính theo kích thước màn hình. */
+const prepFit = { dist: 0, tz: -2.2, shiftX: 0, shiftY: 0 };
+function fitPrepCamera() {
+  const W = window.innerWidth, H = window.innerHeight;
+  const rectTop = el => (el && !el.hidden && el.offsetParent !== null ? el.getBoundingClientRect().top : H);
+  const ta = (document.querySelector('.top-actions').getBoundingClientRect().bottom || 0) + 6;
+  const lc = document.querySelector('.left-col').getBoundingClientRect();
+  const bottom = Math.min(rectTop(document.getElementById('prep-panel')), rectTop(document.querySelector('.main-actions'))) - 6;
+  const cam = new THREE.PerspectiveCamera(camera.fov, W / H, 0.1, 400), p = combatCam.defaults.pitch, v = new V3();
+  // Khung tối thiểu: hàng chờ + nửa bàn phe ta. Thêm các hàng địch đứng nếu hình không nhỏ đi quá 20%.
+  const PTS_ALLY = [[9.3, 0, -11.9], [-9.3, 0, -11.9], [9.3, 0, 0.6], [-9.3, 0, 0.6], [8, 2.2, -1.2], [-8, 2.2, -1.2]];
+  const PTS_FULL = [[9.3, 0, -11.9], [-9.3, 0, -11.9], [9.3, 0, 6.9], [-9.3, 0, 6.9], [4, 2.4, 5.8], [-4, 2.4, 5.8]];
+  let cx = 0, cy = 0, pts = PTS_ALLY;
+  // Vùng trống: hoặc nằm dưới cột thông tin bên trái (màn dọc), hoặc bên phải nó (màn ngang) – thử cả hai, lấy hình to hơn.
+  const rects = [{ l: 6, r: W - 6, t: Math.max(ta, lc.bottom + 6), b: bottom }, { l: lc.right + 8, r: W - 6, t: ta, b: bottom }];
+  const search = () => {
+  let best = null;
+  for (const R of rects) {
+    if (R.b - R.t < 80 || R.r - R.l < 120) continue;
+    // Điều kiện: kích thước vừa vùng trống, nội dung nằm quanh trục quang (lens shift sẽ dời vào giữa vùng trống).
+    const fits = (tz, d) => {
+      cam.position.set(0, 0.5 + Math.sin(p) * d, tz - Math.cos(p) * d); cam.lookAt(0, 0.5, tz); cam.updateMatrixWorld(true);
+      let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity, ok = true;
+      for (const q of pts) { v.set(q[0], q[1], q[2]).project(cam); if (v.z >= 1) ok = false; const x = (v.x * 0.5 + 0.5) * W, y = (-v.y * 0.5 + 0.5) * H; x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+      cx = (x0 + x1) / 2; cy = (y0 + y1) / 2;
+      return ok && x1 - x0 <= R.r - R.l && y1 - y0 <= R.b - R.t && Math.abs(cy - H / 2) < H * 0.06;
+    };
+    for (let tz = -24; tz <= 2; tz += 0.25) {
+      if (!fits(tz, 70)) continue;
+      let lo = 12, hi = 70;
+      for (let k = 0; k < 14; k++) { const m = (lo + hi) / 2; if (fits(tz, m)) hi = m; else lo = m; }
+      if (!best || hi < best.d) { const d = hi * 1.03; fits(tz, d); best = { tz, d, sx: (R.l + R.r) / 2 - cx, sy: (R.t + R.b) / 2 - cy }; }
+    }
+  }
+  return best;
+  };
+  let best = search();
+  if (!best) return;
+  pts = PTS_FULL; const full = search();
+  if (full && full.d <= best.d * 1.2) best = full;
+  Object.assign(prepFit, { dist: best.d, tz: best.tz, shiftX: best.sx, shiftY: best.sy });
+}
+/** Lens shift: dời tâm chiếu (pixel) mà không đổi phối cảnh, giống ống kính tilt-shift. */
+const lens = { x: 0, y: 0 };
+function applyLensShift() {
+  camera.updateProjectionMatrix();
+  if (lens.x || lens.y) {
+    const e = camera.projectionMatrix.elements;
+    e[8] -= 2 * lens.x / window.innerWidth; e[9] += 2 * lens.y / window.innerHeight;
+    camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
+  }
+}
+function applyPrepCamera() {
+  fitPrepCamera();
+  if (prepFit.dist) { combatCam.tDist = prepFit.dist; combatCam.tYaw = combatCam.defaults.yaw; combatCam.tPitch = combatCam.defaults.pitch; }
+}
 
 /* =====================================================================
  * 13. Thế giới: Vân Đài lơ lửng trên biển mây, bàn cờ 8×8
@@ -1692,6 +1748,10 @@ const BOARD = { cols: 8, rows: 8, tile: 2.3 };
 const groundHeight = (x, z) => 0;
 const tileCenter = (c, r, out = new V3()) => out.set((c - 3.5) * BOARD.tile, 0, (r - 3.5) * BOARD.tile);
 const worldToTile = (x, z) => ({ c: Math.floor(x / BOARD.tile + 4), r: Math.floor(z / BOARD.tile + 4) });
+/** Hàng chờ kiểu TFT: một dãy ô ngay sau hàng cuối của phe ta, tướng đứng trên ô. */
+const BENCH = { slots: 9, gap: 1.85, z: -10.9 };
+// Camera nhìn về +z nên trục x trên màn hình bị lật: ô 0 nằm bên trái màn hình khi x dương.
+const benchSlotPos = (i, out = new V3()) => out.set(((BENCH.slots - 1) / 2 - i) * BENCH.gap, 0, BENCH.z);
 
 const vfx = new VFXManager();
 const world = { tiles: [], tileMat: null, highlight: null, env: [] };
@@ -1719,6 +1779,11 @@ const world = { tiles: [], tileMat: null, highlight: null, env: [] };
   tiles.instanceColor.needsUpdate = true; scene.add(tiles); world.tilesMesh = tiles;
   // Đường giữa sông Hán
   const mid = new THREE.Mesh(new THREE.BoxGeometry(BOARD.tile * 8, 0.13, 0.12), gold); mid.position.y = 0.01; scene.add(mid);
+  // Ô hàng chờ
+  const bm = new THREE.InstancedMesh(new THREE.BoxGeometry(1.62, 0.1, 1.5), new THREE.MeshLambertMaterial({ color: 0xffffff }), BENCH.slots); bm.receiveShadow = true;
+  for (let k = 0; k < BENCH.slots; k++) { benchSlotPos(k, _v1); _m1.makeTranslation(_v1.x, 0, _v1.z); bm.setMatrixAt(k, _m1); bm.setColorAt(k, _c1.set(k % 2 ? 0x3c5f58 : 0x355550)); }
+  bm.instanceColor.needsUpdate = true; scene.add(bm);
+  const benchRail = new THREE.Mesh(new THREE.BoxGeometry(BENCH.slots * BENCH.gap + 0.3, 0.13, 0.1), gold); benchRail.position.set(0, 0.01, BENCH.z + 0.95); scene.add(benchRail);
   // Ô đánh dấu khi chọn
   const hl = new THREE.Mesh(new THREE.PlaneGeometry(BOARD.tile * 0.92, BOARD.tile * 0.92).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xe9c46a, transparent: true, opacity: 0.35, depthWrite: false }));
   hl.position.y = 0.08; hl.visible = false; scene.add(hl); world.highlight = hl;
@@ -1970,9 +2035,9 @@ class Unit {
     }
     this.fsm.update(dt);
     // Tách đơn vị chồng lấn + giữ trong đài.
-    if (this.alive && this.fsm.name !== 'dash') {
+    if (this.alive && this.fsm.name !== 'dash' && !this.dragging) {
       for (const o of units) {
-        if (o === this || !o.alive) continue;
+        if (o === this || !o.alive || o.dragging) continue;
         const dx = this.pos.x - o.pos.x, dz = this.pos.z - o.pos.z, d2 = dx * dx + dz * dz, min = 0.9;
         if (d2 > 0 && d2 < min * min) { const d = Math.sqrt(d2), push = (min - d) * 0.5; this.pos.x += dx / d * push; this.pos.z += dz / d * push; }
       }
@@ -2503,7 +2568,7 @@ const STAR_MUL = [0, 1, 1.8, 3.24], STAR_SCALE = [0, 1, 1.12, 1.24];
 const SHOP_POOL = { 1: ['kiemdong', 'hophap', 'thietve'], 2: ['loi', 'hoa', 'anhkiem'], 3: ['kiemtien', 'uhon'] };
 const SHOP_ODDS = [null, [100, 0, 0], [100, 0, 0], [75, 25, 0], [55, 35, 10], [40, 40, 20], [30, 40, 30], [25, 40, 35], [20, 40, 40]]; // % bậc 1/2/3 theo cấp
 const XP_NEED = [0, 2, 2, 6, 10, 20, 32, 48, Infinity]; // kinh nghiệm để lên cấp kế tiếp
-const MAX_LEVEL = 8, BENCH_SIZE = 8, SHOP_SIZE = 5, REROLL_COST = 2, XP_COST = 4, XP_BUY = 4, START_HP = 100;
+const MAX_LEVEL = 8, BENCH_SIZE = BENCH.slots, SHOP_SIZE = 5, REROLL_COST = 2, XP_COST = 4, XP_BUY = 4, START_HP = 100;
 const sellPrice = (key, star) => UNIT_DEFS[key].cost * Math.pow(3, star - 1) - (star > 1 ? 1 : 0);
 const game = { hp: START_HP, gold: 6, level: 3, xp: 0, streak: 0, bench: new Array(BENCH_SIZE).fill(null), shop: [], over: false, sel: null, lastSummary: '' };
 let customRigFactory = null;
@@ -2525,6 +2590,22 @@ function placeUnit(key, star, c, r) {
   const u = new Unit(key, 'ally', c, r, star); units.push(u);
   u.rig.setOutline && u.rig.setOutline(Q().outline);
   return u;
+}
+/** Đồng bộ quân 3D trên hàng chờ với dữ liệu game.bench (giữ lại object cũ khi chỉ đổi chỗ). */
+const benchUnits = new Array(BENCH_SIZE).fill(null);
+function syncBench() {
+  const pool = benchUnits.filter(Boolean); benchUnits.fill(null);
+  for (let i = 0; i < BENCH_SIZE; i++) {
+    const e = game.bench[i]; if (!e) continue;
+    let k = pool.findIndex(u => u.key === e.key && u.star === e.star && u.benchSlot === i);
+    if (k < 0) k = pool.findIndex(u => u.key === e.key && u.star === e.star);
+    let u;
+    if (k >= 0) u = pool.splice(k, 1)[0];
+    else { u = new Unit(e.key, 'ally', 0, 0, e.star); u.rig.setOutline && u.rig.setOutline(Q().outline); }
+    u.benchSlot = i; benchUnits[i] = u;
+    if (!u.dragging) benchSlotPos(i, u.pos);
+  }
+  pool.forEach(u => u.dispose());
 }
 function removeUnit(u) { const i = units.indexOf(u); if (i >= 0) units.splice(i, 1); if (battle.selected === u) battle.selected = null; u.dispose(); }
 function tileOccupant(c, r) { return boardAllies().find(u => u.homeTile.c === c && u.homeTile.r === r) || null; }
@@ -2555,7 +2636,12 @@ function mergeAll() {
         vfx.particles.burst(u.chest(new V3()), COLORS.allyB, 40, 6, 0.8, 0.35, { up: 3, drag: 2 });
         vfx.magicCircle(u.pos, 1.4, COLORS.allyB, COLORS.allyA, { reveal: 0.3, life: 0.8, spin: 3 });
         floatText(u.chest(new V3()), '★'.repeat(newStar), '#ffd166', 1.5, true);
-      } else game.bench[keepBench] = { key: g.key, star: newStar };
+      } else {
+        game.bench[keepBench] = { key: g.key, star: newStar };
+        const p = benchSlotPos(keepBench, new V3()); p.y = 1;
+        vfx.particles.burst(p, COLORS.allyB, 36, 5, 0.8, 0.3, { up: 3, drag: 2 });
+        floatText(p, '★'.repeat(newStar), '#ffd166', 1.4, true);
+      }
       Sfx.chime();
       ui.toast(UNIT_DEFS[g.key].name + ' lên ' + newStar + ' sao!');
       merged = true;
@@ -2573,7 +2659,7 @@ function buyShop(i) {
   const cost = UNIT_DEFS[key].cost;
   if (game.gold < cost) { ui.toast('Không đủ linh thạch'); return; }
   const slot = game.bench.indexOf(null);
-  if (slot < 0 && countCopies(key, 1) < 2) { ui.toast('Hàng chờ đã đầy – bán bớt hoặc đặt lên bàn'); return; }
+  if (slot < 0 && countCopies(key, 1) < 2) { ui.toast('Hàng chờ đã đầy – bán bớt hoặc kéo lên bàn'); return; }
   game.gold -= cost; game.shop[i] = null;
   if (slot >= 0) game.bench[slot] = { key, star: 1 }; else game.bench.push({ key, star: 1 });
   Sfx.chime(); mergeAll(); afterRosterChange();
@@ -2598,11 +2684,12 @@ function buyXP() {
   if (game.gold < XP_COST) { ui.toast('Cần ' + XP_COST + ' linh thạch'); return; }
   game.gold -= XP_COST; gainXP(XP_BUY); afterRosterChange();
 }
-function sellSelected() {
-  const sel = game.sel; if (!sel || battle.phase !== 'prep') return;
+function sellSelected() { if (game.sel) sellSrc(game.sel); }
+function sellSrc(sel) {
+  if (!sel || battle.phase !== 'prep') return;
   let key, star;
   if (sel.type === 'bench') { const e = game.bench[sel.i]; if (!e) return; key = e.key; star = e.star; game.bench[sel.i] = null; }
-  else { if (boardAllies().length <= 1) { ui.toast('Phải giữ ít nhất 1 tu sĩ trên bàn'); return; } key = sel.unit.key; star = sel.unit.star; removeUnit(sel.unit); }
+  else { key = sel.unit.key; star = sel.unit.star; removeUnit(sel.unit); }
   const price = sellPrice(key, star); game.gold += price;
   ui.toast('Đã bán ' + UNIT_DEFS[key].name + ' +' + price + ' linh thạch');
   select(null); afterRosterChange();
@@ -2610,25 +2697,31 @@ function sellSelected() {
 function moveToBench(unit, slot) {
   if (slot === undefined) slot = game.bench.indexOf(null);
   if (slot < 0) { ui.toast('Hàng chờ đã đầy'); return false; }
-  if (boardAllies().length <= 1) { ui.toast('Phải giữ ít nhất 1 tu sĩ trên bàn'); return false; }
   game.bench[slot] = { key: unit.key, star: unit.star }; removeUnit(unit);
   return true;
 }
 /** Đặt quân từ hàng chờ lên ô (c, r); nếu ô có người thì đổi chỗ với hàng chờ. */
 function benchToBoard(i, c, r) {
-  const e = game.bench[i]; if (!e) return;
+  const e = game.bench[i]; if (!e) return false;
   const occ = tileOccupant(c, r);
-  if (!occ && boardAllies().length >= boardCap()) { ui.toast('Cấp ' + game.level + ' chỉ đặt được ' + boardCap() + ' tu sĩ – mua kinh nghiệm để lên cấp'); return; }
+  if (!occ && boardAllies().length >= boardCap()) { ui.toast('Cấp ' + game.level + ' chỉ đặt được ' + boardCap() + ' tu sĩ – mua kinh nghiệm để lên cấp'); return false; }
   game.bench[i] = occ ? { key: occ.key, star: occ.star } : null;
   if (occ) removeUnit(occ);
   const u = placeUnit(e.key, e.star, c, r);
   vfx.particles.burst(_v1.set(u.pos.x, 0.3, u.pos.z), COLORS.allyA, 16, 3, 0.4, 0.25, { up: 2 });
+  return true;
 }
 function select(sel) {
   game.sel = sel; battle.selected = sel && sel.type === 'board' ? sel.unit : null;
-  if (battle.selected) { tileCenter(battle.selected.homeTile.c, battle.selected.homeTile.r, world.highlight.position); world.highlight.position.y = 0.08; world.highlight.visible = true; }
+  if (sel) showHighlight(sel.type === 'board' ? { type: 'tile', c: sel.unit.homeTile.c, r: sel.unit.homeTile.r } : { type: 'bench', i: sel.i }, true);
   else world.highlight.visible = false;
   ui.update();
+}
+function showHighlight(t, ok) {
+  const hl = world.highlight;
+  if (!t || t.type === 'sell') { hl.visible = false; return; }
+  if (t.type === 'tile') { tileCenter(t.c, t.r, hl.position); hl.scale.setScalar(1); } else { benchSlotPos(t.i, hl.position); hl.scale.set(0.72, 1, 0.68); }
+  hl.position.y = 0.08; hl.material.color.set(ok ? 0xe9c46a : 0xe2553f); hl.visible = true;
 }
 function afterRosterChange() { applyTraits(); boardAllies().forEach(u => u.reset(1)); saveGame(); ui.update(); }
 
@@ -2679,16 +2772,16 @@ const newGameState = () => ({ v: 1, hp: START_HP, gold: 6, level: 3, xp: 0, stre
   board: [{ key: 'kiemtien', star: 1, c: 4, r: 3 }, { key: 'hophap', star: 1, c: 3, r: 3 }] });
 function restoreGame(st) {
   for (const u of boardAllies()) removeUnit(u);
+  if (drag.src) cancelDrag();
   Object.assign(game, { hp: st.hp, gold: st.gold, level: st.level, xp: st.xp, streak: st.streak, over: !!st.over, sel: null, lastSummary: '' });
   game.bench = (st.bench || []).slice(0, BENCH_SIZE).map(e => (e && UNIT_DEFS[e.key] ? { key: e.key, star: e.star } : null));
   while (game.bench.length < BENCH_SIZE) game.bench.push(null);
   (st.board || []).forEach(b => { if (UNIT_DEFS[b.key]) placeUnit(b.key, b.star, b.c, b.r); });
-  if (!boardAllies().length) placeUnit('kiemtien', 1, 4, 3);
   battle.round = st.round || 1;
   if (st.shop && st.shop.length === SHOP_SIZE) game.shop = st.shop.map(k => (k && UNIT_DEFS[k] ? k : null)); else rollShop();
   setupRound();
 }
-function newGame() { restoreGame(newGameState()); ui.toast('Ván mới – mua tu sĩ ở cửa hàng rồi chạm ô xanh để đặt'); }
+function newGame() { restoreGame(newGameState()); ui.toast('Ván mới – mua tu sĩ rồi kéo từ hàng chờ lên ô xanh'); }
 
 /* ---------- Vòng đấu ---------- */
 function setupRound() {
@@ -2703,13 +2796,16 @@ function setupRound() {
   battle.phase = 'prep'; battle.time = 0; battle.result = null; battle.selected = null; game.sel = null;
   world.highlight.visible = false;
   ui.update(); ui.result(null); combatCam.cine = null;
+  applyPrepCamera();
   saveGame();
 }
 function startBattle() {
   if (battle.phase !== 'prep' || game.over) return;
-  if (!boardAllies().length) { ui.toast('Đặt ít nhất 1 tu sĩ lên bàn cờ'); return; }
+  if (drag.src) cancelDrag();
+  if (!boardAllies().length) ui.toast('Không có tu sĩ trên bàn – vòng này sẽ thua');
   applyTraits(); boardAllies().forEach(u => u.reset(1));
   battle.phase = 'fight'; battle.time = 0; select(null); ui.update();
+  combatCam.tDist = combatCam.defaults.dist;
 }
 function onUnitDeath(u) {
   vfx.particles.burst(u.chest(new V3()), u.team === 'ally' ? COLORS.allyA : COLORS.enemyA, 24, 5, 0.8, 0.3, { up: 1, drag: 2 });
@@ -2749,18 +2845,116 @@ function checkBattleEnd() {
  * ===================================================================*/
 const raycaster = new THREE.Raycaster(), ndc = new THREE.Vector2(), groundPlane = new THREE.Plane(new V3(0, 1, 0), 0);
 const pointers = new Map(); let pinchStart = 0, dragMoved = 0;
+/** Kéo thả quân (giống TFT): giữ một tu sĩ trên bàn hoặc hàng chờ rồi kéo tới ô khác, hàng chờ hoặc cửa hàng (bán). */
+const drag = { src: null, unit: null, id: -1, active: false, target: null };
+const canEdit = () => battle.phase === 'prep' && !game.over && !battle.bench;
+function groundAt(x, y) {
+  const r = canvas.getBoundingClientRect();
+  ndc.set(((x - r.left) / r.width) * 2 - 1, -((y - r.top) / r.height) * 2 + 1);
+  raycaster.setFromCamera(ndc, camera);
+  return raycaster.ray.intersectPlane(groundPlane, new V3());
+}
+/** Chọn quân theo khoảng cách trên màn hình tới đoạn chân → ngực (dễ chạm hơn raycast mặt đất). */
+function screenPick(x, y) {
+  const rc = canvas.getBoundingClientRect(), cands = [];
+  boardAllies().forEach(u => cands.push({ type: 'board', unit: u }));
+  benchUnits.forEach((u, i) => { if (u) cands.push({ type: 'bench', i, unit: u }); });
+  let best = null, bd = 34;
+  const toScreen = (v) => { v.project(camera); return { x: rc.left + (v.x * 0.5 + 0.5) * rc.width, y: rc.top + (-v.y * 0.5 + 0.5) * rc.height }; };
+  for (const c of cands) {
+    const sc = STAR_SCALE[c.unit.star];
+    const a = toScreen(_v1.set(c.unit.pos.x, 0.2, c.unit.pos.z)), b = toScreen(_v1.set(c.unit.pos.x, 1.5 * sc, c.unit.pos.z));
+    const abx = b.x - a.x, aby = b.y - a.y, t = clamp(((x - a.x) * abx + (y - a.y) * aby) / (abx * abx + aby * aby || 1), 0, 1);
+    const d = Math.hypot(x - a.x - abx * t, y - a.y - aby * t);
+    if (d < bd) { bd = d; best = c; }
+  }
+  return best;
+}
+function overShop(x, y) {
+  const el = $('prep-panel'); if (el.hidden) return false;
+  const r = el.getBoundingClientRect(); return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+}
+function targetAt(x, y) {
+  if (overShop(x, y)) return { type: 'sell' };
+  const p = groundAt(x, y); if (!p) return null;
+  const i = Math.round((BENCH.slots - 1) / 2 - p.x / BENCH.gap);
+  if (Math.abs(p.z - BENCH.z) < 1.25 && i >= 0 && i < BENCH.slots) return { type: 'bench', i };
+  const t = worldToTile(p.x, p.z);
+  if (t.c >= 0 && t.c < 8 && t.r >= 0 && t.r < 4) return { type: 'tile', c: t.c, r: t.r };
+  return null;
+}
+const pickTarget = (pk) => (pk.type === 'board' ? { type: 'tile', c: pk.unit.homeTile.c, r: pk.unit.homeTile.r } : { type: 'bench', i: pk.i });
+function targetOk(src, t) {
+  if (!t) return false;
+  if (t.type === 'tile' && src.type === 'bench' && !tileOccupant(t.c, t.r) && boardAllies().length >= boardCap()) return false;
+  return true;
+}
+/** Thực hiện di chuyển src → đích; trả về true nếu có thay đổi. */
+function moveTo(src, t) {
+  if (!t || !canEdit()) return false;
+  if (t.type === 'sell') { sellSrc(src); return true; }
+  if (src.type === 'board') {
+    const u = src.unit;
+    if (t.type === 'tile') {
+      if (u.homeTile.c === t.c && u.homeTile.r === t.r) return false;
+      const occ = tileOccupant(t.c, t.r);
+      if (occ) { occ.homeTile = { c: u.homeTile.c, r: u.homeTile.r }; tileCenter(occ.homeTile.c, occ.homeTile.r, occ.pos); }
+      u.homeTile = { c: t.c, r: t.r }; tileCenter(t.c, t.r, u.pos);
+      vfx.particles.burst(_v1.set(u.pos.x, 0.3, u.pos.z), COLORS.allyA, 14, 3, 0.4, 0.25, { up: 2 });
+      saveGame(); ui.update(); return true;
+    }
+    const e = game.bench[t.i];
+    if (!e) { if (!moveToBench(u, t.i)) return false; }
+    else { const tile = { ...u.homeTile }; game.bench[t.i] = { key: u.key, star: u.star }; removeUnit(u); placeUnit(e.key, e.star, tile.c, tile.r); }
+    afterRosterChange(); return true;
+  }
+  if (t.type === 'tile') { if (!benchToBoard(src.i, t.c, t.r)) return false; afterRosterChange(); return true; }
+  if (t.i === src.i) return false;
+  const tmp = game.bench[t.i]; game.bench[t.i] = game.bench[src.i]; game.bench[src.i] = tmp;
+  saveGame(); ui.update(); return true;
+}
+function snapBack(u) {
+  if (!u) return;
+  u.dragging = false; u.pos.y = 0;
+  if (u.benchSlot !== undefined && benchUnits[u.benchSlot] === u) benchSlotPos(u.benchSlot, u.pos); else tileCenter(u.homeTile.c, u.homeTile.r, u.pos);
+}
+function cancelDrag() { snapBack(drag.unit); Object.assign(drag, { src: null, unit: null, id: -1, active: false, target: null }); $('prep-panel').classList.remove('selling', 'hot'); world.highlight.visible = false; }
+function updateDrag(x, y) {
+  const p = groundAt(x, y), u = drag.unit;
+  if (p) { u.pos.set(clamp(p.x, -12, 12), 0.55, clamp(p.z, -12.2, 10)); }
+  const t = targetAt(x, y), ok = targetOk(drag.src, t);
+  drag.target = t; showHighlight(t, ok);
+  const panel = $('prep-panel'); panel.classList.add('selling'); panel.classList.toggle('hot', !!t && t.type === 'sell');
+}
 canvas.addEventListener('contextmenu', e => e.preventDefault());
 canvas.addEventListener('pointerdown', e => {
-  canvas.setPointerCapture && canvas.setPointerCapture(e.pointerId);
+  try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* con trỏ đã kết thúc */ }
   pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY });
-  if (pointers.size === 1) dragMoved = 0;
-  if (pointers.size === 2) { const [a, b] = [...pointers.values()]; pinchStart = Math.hypot(a.x - b.x, a.y - b.y); }
+  if (pointers.size === 1) {
+    dragMoved = 0;
+    const pk = canEdit() ? screenPick(e.clientX, e.clientY) : null;
+    if (pk) Object.assign(drag, { src: pk, unit: pk.unit, id: e.pointerId, active: false, target: null });
+  }
+  if (pointers.size === 2) { if (drag.src) cancelDrag(); const [a, b] = [...pointers.values()]; pinchStart = Math.hypot(a.x - b.x, a.y - b.y); }
+  closeSettings();
   Sfx.init();
 });
 canvas.addEventListener('pointermove', e => {
   const p = pointers.get(e.pointerId); if (!p) return;
   const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
-  if (pointers.size === 1) { dragMoved += Math.abs(dx) + Math.abs(dy); if (dragMoved > 6) combatCam.rotate(dx, dy); }
+  if (pointers.size === 1) {
+    dragMoved += Math.abs(dx) + Math.abs(dy);
+    if (drag.src && drag.id === e.pointerId) {
+      if (!drag.active && dragMoved > 8) {
+        if (!canEdit()) { cancelDrag(); return; }
+        drag.active = true; drag.unit.dragging = true; game.sel = null; battle.selected = null;
+        const price = sellPrice(drag.unit.key, drag.unit.star);
+        $('prep-panel').dataset.sell = 'Thả vào đây để bán · +' + price + ' linh thạch';
+        Sfx.tone && Sfx.ok('pick', 0.05) && Sfx.tone(660, 0.1, 0.05, 'sine');
+      }
+      if (drag.active) updateDrag(e.clientX, e.clientY);
+    } else if (dragMoved > 6) combatCam.rotate(dx, dy);
+  }
   else if (pointers.size === 2) {
     const [a, b] = [...pointers.values()]; const d = Math.hypot(a.x - b.x, a.y - b.y);
     if (pinchStart > 0) { combatCam.zoom(pinchStart / d); pinchStart = d; }
@@ -2770,48 +2964,38 @@ canvas.addEventListener('pointermove', e => {
 const endPointer = e => {
   const p = pointers.get(e.pointerId); if (!p) return;
   pointers.delete(e.pointerId);
-  if (pointers.size === 0 && dragMoved <= 6) onTap(e.clientX, e.clientY);
+  if (drag.src && drag.id === e.pointerId && drag.active) {
+    const src = drag.src, t = targetAt(e.clientX, e.clientY);
+    cancelDrag();
+    if (targetOk(src, t)) { if (moveTo(src, t)) Sfx.ok('drop', 0.05) && Sfx.tone(440, 0.14, 0.06, 'triangle'); }
+    else if (t && t.type === 'tile') ui.toast('Cấp ' + game.level + ' chỉ đặt được ' + boardCap() + ' tu sĩ – mua kinh nghiệm để lên cấp');
+    select(null);
+  } else {
+    if (drag.id === e.pointerId) cancelDrag();
+    if (pointers.size === 0 && dragMoved <= 6) onTap(e.clientX, e.clientY);
+  }
   if (pointers.size < 2) pinchStart = 0;
 };
-canvas.addEventListener('pointerup', endPointer); canvas.addEventListener('pointercancel', e => pointers.delete(e.pointerId));
+canvas.addEventListener('pointerup', endPointer);
+canvas.addEventListener('pointercancel', e => { pointers.delete(e.pointerId); if (drag.id === e.pointerId) cancelDrag(); });
 canvas.addEventListener('wheel', e => { e.preventDefault(); combatCam.zoom(e.deltaY > 0 ? 1.08 : 0.93); }, { passive: false });
 let lastTap = 0;
+/** Chạm (không kéo): chạm quân để chọn, chạm ô / hàng chờ / quân khác để chuyển hoặc đổi chỗ. */
 function onTap(x, y) {
-  const now = performance.now(); if (now - lastTap < 280) combatCam.reset(); lastTap = now;
-  if (battle.phase !== 'prep' || game.over) return;
-  const r = canvas.getBoundingClientRect();
-  ndc.set(((x - r.left) / r.width) * 2 - 1, -((y - r.top) / r.height) * 2 + 1);
-  raycaster.setFromCamera(ndc, camera);
-  const hitP = raycaster.ray.intersectPlane(groundPlane, new V3()); if (!hitP) return;
-  let pick = null, bd = 1.3;
-  for (const u of boardAllies()) { const d = Math.hypot(u.pos.x - hitP.x, u.pos.z - hitP.z); if (d < bd) { bd = d; pick = u; } }
-  const t = pick ? pick.homeTile : worldToTile(hitP.x, hitP.z);
-  const allyTile = t.c >= 0 && t.c < 8 && t.r >= 0 && t.r < 4;
+  const pk = canEdit() ? screenPick(x, y) : null;
+  const now = performance.now(); if (now - lastTap < 280 && !pk && !game.sel) combatCam.reset(); lastTap = now;
+  if (!canEdit()) return;
   const sel = game.sel;
-  if (sel && sel.type === 'bench' && allyTile) { benchToBoard(sel.i, t.c, t.r); select(null); afterRosterChange(); return; }
-  if (sel && sel.type === 'board' && allyTile && sel.unit !== pick) {
-    const u = sel.unit, occ = tileOccupant(t.c, t.r);
-    if (occ) { occ.homeTile = { c: u.homeTile.c, r: u.homeTile.r }; tileCenter(occ.homeTile.c, occ.homeTile.r, occ.pos); }
-    u.homeTile = { c: t.c, r: t.r }; tileCenter(t.c, t.r, u.pos);
-    vfx.particles.burst(_v1.set(u.pos.x, 0.3, u.pos.z), COLORS.allyA, 14, 3, 0.4, 0.25, { up: 2 });
-    select(null); saveGame(); return;
+  const same = pk && sel && (pk.type === 'board' ? sel.unit === pk.unit : sel.type === 'bench' && sel.i === pk.i);
+  if (sel && !same) {
+    const t = pk ? pickTarget(pk) : targetAt(x, y);
+    if (t && t.type !== 'sell') {
+      if (!targetOk(sel, t)) { ui.toast('Cấp ' + game.level + ' chỉ đặt được ' + boardCap() + ' tu sĩ – mua kinh nghiệm để lên cấp'); return; }
+      if (moveTo(sel, t)) { select(null); return; }
+    }
   }
-  if (pick) { select(sel && sel.unit === pick ? null : { type: 'board', unit: pick }); return; }
-  if (sel && !allyTile) ui.toast('Chỉ đặt được trên nửa bàn cờ màu xanh của phe ta');
+  if (pk && !same) { select(pk.type === 'board' ? { type: 'board', unit: pk.unit } : { type: 'bench', i: pk.i }); return; }
   select(null);
-}
-function onBenchTap(i) {
-  if (battle.phase !== 'prep' || game.over) return;
-  const sel = game.sel, e = game.bench[i];
-  if (sel && sel.type === 'board') {
-    const u = sel.unit;
-    if (!e) { if (moveToBench(u, i)) { select(null); afterRosterChange(); } return; }
-    const tile = { ...u.homeTile };   // đổi: quân trên bàn ↔ quân ở hàng chờ
-    game.bench[i] = { key: u.key, star: u.star }; removeUnit(u); placeUnit(e.key, e.star, tile.c, tile.r);
-    select(null); afterRosterChange(); return;
-  }
-  if (sel && sel.type === 'bench' && sel.i !== i) { const tmp = game.bench[i]; game.bench[i] = game.bench[sel.i]; game.bench[sel.i] = tmp; select(null); saveGame(); return; }
-  select(e && !(sel && sel.i === i) ? { type: 'bench', i } : null);
 }
 window.addEventListener('keydown', e => {
   if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT')) return;
@@ -2829,12 +3013,13 @@ const $ = id => document.getElementById(id);
 const ui = {
   toastTimer: 0, bannerTimer: 0,
   update() {
+    syncBench();
     const a = units.filter(u => u.team === 'ally' && u.alive).length, e = units.filter(u => u.team === 'enemy' && u.alive).length;
     $('round-title').textContent = 'Vòng ' + battle.round;
     $('ally-count').textContent = 'Đồng minh ' + a; $('enemy-count').textContent = 'Địch ' + e;
     const st = $('btn-start'), prep = battle.phase === 'prep' && !game.over;
     if (game.over && battle.phase !== 'fight') { $('phase-label').textContent = 'Kết thúc ván – trụ được ' + battle.round + ' vòng'; st.textContent = 'Ván mới'; st.disabled = false; }
-    else if (prep) { $('phase-label').textContent = 'Chuẩn bị – mua tu sĩ rồi đặt lên ô xanh'; st.textContent = 'Bắt đầu giao chiến'; st.disabled = false; }
+    else if (prep) { $('phase-label').textContent = 'Chuẩn bị – mua tu sĩ rồi kéo lên ô xanh'; st.textContent = 'Bắt đầu giao chiến'; st.disabled = false; }
     else if (battle.phase === 'fight') { $('phase-label').textContent = battle.bench ? 'Đang kiểm tra hiệu năng…' : 'Giao chiến – các tu sĩ tự chiến đấu'; st.textContent = 'Đang giao chiến'; st.disabled = true; }
     else { $('phase-label').textContent = game.lastSummary || (battle.result === 'win' ? 'Thắng' : 'Thua'); st.textContent = 'Vòng tiếp theo'; st.disabled = false; }
     $('btn-ult').disabled = !(battle.phase === 'fight' && units.some(u => u.key === 'kiemtien' && u.team === 'ally' && u.alive));
@@ -2844,8 +3029,8 @@ const ui = {
     $('xp-fill').style.transform = 'scaleX(' + (game.level >= MAX_LEVEL ? 1 : game.xp / XP_NEED[game.level]) + ')';
     $('xp-val').textContent = game.level >= MAX_LEVEL ? 'tối đa' : game.xp + '/' + XP_NEED[game.level];
     $('prep-panel').hidden = !prep;
-    $('hint').textContent = prep ? 'Chạm tu sĩ rồi chạm ô xanh để đặt · Kéo để xoay bàn cờ' : 'Kéo để xoay bàn cờ · Chụm hai ngón / lăn chuột để phóng to';
-    if (prep) { renderShop(); renderBench(); renderSelActions(); }
+    $('hint').textContent = prep ? 'Kéo tu sĩ giữa bàn cờ và hàng chờ · kéo vào cửa hàng để bán' : 'Kéo để xoay bàn cờ · Chụm hai ngón / lăn chuột để phóng to';
+    if (prep) { renderShop(); renderSelActions(); }
     renderTraits();
   },
   toast(text) { const t = $('toast'); t.textContent = text; t.hidden = false; this.toastTimer = 2.4; },
@@ -2871,17 +3056,6 @@ function renderShop() {
   });
   $('btn-reroll').disabled = game.gold < REROLL_COST;
   $('btn-xp').disabled = game.gold < XP_COST || game.level >= MAX_LEVEL;
-}
-function renderBench() {
-  const el = $('bench'); el.textContent = '';
-  for (let i = 0; i < BENCH_SIZE; i++) {
-    const e = game.bench[i], b = document.createElement('button');
-    b.className = 'slot' + (e ? ' filled t' + UNIT_DEFS[e.key].cost : '') + (game.sel && game.sel.type === 'bench' && game.sel.i === i ? ' sel' : '');
-    if (e) { const d = UNIT_DEFS[e.key]; b.innerHTML = `<span class="st">${'★'.repeat(e.star)}</span><span class="sn">${d.short || d.name}</span>`; b.setAttribute('aria-label', `${d.name} ${e.star} sao trong hàng chờ`); }
-    else b.setAttribute('aria-label', 'Ô hàng chờ trống');
-    b.addEventListener('click', () => onBenchTap(i));
-    el.appendChild(b);
-  }
 }
 function renderSelActions() {
   const sel = game.sel, sell = $('btn-sell'), back = $('btn-tobench');
@@ -2922,7 +3096,17 @@ $('btn-ult').addEventListener('click', forceUltimate);
 $('btn-cam').addEventListener('click', () => combatCam.reset());
 $('btn-pause').addEventListener('click', togglePause);
 $('btn-speed').addEventListener('click', () => { battle.speed = battle.speed === 1 ? 2 : battle.speed === 2 ? 0.5 : 1; $('btn-speed').textContent = 'Tốc độ ×' + (battle.speed === 0.5 ? '½' : battle.speed); $('btn-speed').setAttribute('aria-pressed', battle.speed !== 1); });
-$('btn-settings').addEventListener('click', () => { const s = $('settings'); s.hidden = !s.hidden; $('btn-settings').setAttribute('aria-expanded', !s.hidden); });
+$('btn-settings').addEventListener('click', () => {
+  const s = $('settings'); s.hidden = !s.hidden; $('btn-settings').setAttribute('aria-expanded', !s.hidden);
+  if (!s.hidden) {   // đặt bảng ngay dưới hàng nút trên cùng (màn dọc hàng nút xuống 2 dòng) để nút Cài đặt không bị che
+    const top = document.querySelector('.top-actions').getBoundingClientRect().bottom + 8;
+    s.style.top = top + 'px'; s.style.maxHeight = `calc(100% - ${top + 12}px - env(safe-area-inset-bottom, 0px))`;
+  }
+});
+function closeSettings() { if ($('settings').hidden) return; $('settings').hidden = true; $('btn-settings').setAttribute('aria-expanded', 'false'); }
+$('btn-close-settings').addEventListener('click', () => { closeSettings(); $('btn-settings').focus(); });
+window.addEventListener('keydown', e => { if (e.key === 'Escape') closeSettings(); });
+$('opt-sound').checked = !Sfx.muted; $('opt-sound').addEventListener('change', e => { Sfx.muted = !e.target.checked; store.set('mute', Sfx.muted); });
 $('btn-enter').addEventListener('click', () => { Sfx.init(); $('intro').hidden = true; canvas.focus(); });
 $('btn-newgame').addEventListener('click', () => { Sfx.init(); newGame(); $('intro').hidden = true; canvas.focus(); });
 function syncQualityButtons() { document.querySelectorAll('#quality-seg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.q === QualityManager.level)); }
@@ -2953,7 +3137,7 @@ function applyQuality(cur, reason) {
     scene.traverse(o => { if (o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => (m.needsUpdate = true)); });
   }
   if (wantShadows && sun.shadow.mapSize.x !== cur.shadowSize) { sun.shadow.mapSize.set(cur.shadowSize, cur.shadowSize); if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; } }
-  units.forEach(u => { u.rig.setOutline && u.rig.setOutline(cur.outline); });
+  units.concat(benchUnits.filter(Boolean)).forEach(u => { u.rig.setOutline && u.rig.setOutline(cur.outline); });
   vfx.particles.setBudget(cur.particles);
   resize();
   bloom.setLevel(cur.bloom, window.innerWidth, window.innerHeight);
@@ -2991,6 +3175,14 @@ function draw2D(dt) {
       g2.font = `700 ${12 * s}px system-ui, sans-serif`; g2.fillStyle = u.star === 3 ? '#ffd166' : '#d8e2ea';
       g2.fillText('★'.repeat(u.star), x, y - (battle.phase === 'prep' || u.status.stun > 0 ? 21 : 9) * s);
     }
+  }
+  g2.font = `700 ${12 * s}px system-ui, sans-serif`;
+  for (const u of benchUnits) {
+    if (!u) continue;
+    _v1.set(u.pos.x, 2.1 * STAR_SCALE[u.star] + u.pos.y, u.pos.z).project(camera); if (_v1.z > 1) continue;
+    const x = (_v1.x * 0.5 + 0.5) * W, y = (-_v1.y * 0.5 + 0.5) * H;
+    g2.lineWidth = 3 * s; g2.strokeStyle = 'rgba(0,0,0,0.75)'; const txt = '★'.repeat(u.star);
+    g2.strokeText(txt, x, y); g2.fillStyle = u.star === 3 ? '#ffd166' : u.star === 2 ? '#d8e2ea' : '#c79a6a'; g2.fillText(txt, x, y);
   }
   for (let i = floaters.length - 1; i >= 0; i--) {
     const f = floaters[i]; f.t += dt;
@@ -3085,6 +3277,8 @@ $('glb-file').addEventListener('change', e => {
 $('btn-glb-reset').addEventListener('click', () => { customRigFactory = null; replaceKiemTienRig(); disposeGltf(currentGltf); currentGltf = null; $('glb-out').textContent = 'Đã trở về mô hình thủ tục.'; });
 /** Thay rig cho mọi Kiếm Tiên phe ta đang trên bàn; trả về rig đầu tiên (để kiểm tra). */
 function replaceKiemTienRig() {
+  benchUnits.forEach((u, i) => { if (u && u.key === 'kiemtien') { u.dispose(); benchUnits[i] = null; } });
+  syncBench();
   let first = null;
   for (const u of units) {
     if (u.key !== 'kiemtien' || u.team !== 'ally') continue;
@@ -3102,12 +3296,12 @@ function replaceKiemTienRig() {
  * ===================================================================*/
 function resize() {
   const w = window.innerWidth, h = window.innerHeight;
-  renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+  renderer.setSize(w, h, false); camera.aspect = w / h; applyLensShift();
   const d = Math.min(2, window.devicePixelRatio || 1); fx2d.width = Math.round(w * d); fx2d.height = Math.round(h * d); fxScale = d * clamp(Math.min(w, h) / 700, 0.85, 1.3);
   vfx.particles.material.uniforms.uScale.value = (h * renderer.getPixelRatio()) / (2 * Math.tan(camera.fov * DEG / 2));
   if (bloom.level) bloom.resize(w, h);
 }
-window.addEventListener('resize', resize);
+window.addEventListener('resize', () => { resize(); if (battle.phase === 'prep') requestAnimationFrame(applyPrepCamera); });
 
 const STEP = 1 / 60;
 let acc = 0, last = performance.now(), fpsAcc = 0, fpsFrames = 0;
@@ -3131,13 +3325,17 @@ function frame(now) {
   while (acc >= STEP && steps < 6) { simStep(STEP); acc -= STEP; steps++; }
   if (steps === 6) acc = 0;
   for (const u of units) u.renderUpdate(sdt);
+  for (const u of benchUnits) if (u) u.renderUpdate(sdt);
   vfx.update(sdt, camera.position);
   world.sky.material.uniforms.uTime.value += dt; world.sea.material.uniforms.uTime.value += dt;
   world.env.forEach((e, i) => { e.lantern.scale.setScalar(1 + Math.sin(now * 0.003 + i) * 0.08); });
   if (Q().env > 0 && Math.random() < Q().env * 0.15) { // hạt môi trường: linh khí lơ lửng
     vfx.particles.emit(rand(-14, 14), rand(0, 1), rand(-14, 14), rand(-0.2, 0.2), rand(0.3, 0.8), rand(-0.2, 0.2), rand(2, 4), 0.12, 0.05, Math.random() < 0.5 ? COLORS.allyB : COLORS.shield, 0.5, 0.1);
   }
-  combatCam.target.z = damp(combatCam.target.z, battle.phase === 'prep' && !game.over ? -2.2 : 0, 4, dt);
+  const prepView = battle.phase === 'prep' && !game.over;
+  combatCam.target.z = damp(combatCam.target.z, prepView ? prepFit.tz : 0, 4, dt);
+  const lx = damp(lens.x, prepView ? prepFit.shiftX : 0, 4, dt), ly = damp(lens.y, prepView ? prepFit.shiftY : 0, 4, dt);
+  if (Math.abs(lx - lens.x) + Math.abs(ly - lens.y) > 0.05) { lens.x = Math.abs(lx) < 0.1 ? 0 : lx; lens.y = Math.abs(ly) < 0.1 ? 0 : ly; applyLensShift(); }
   combatCam.update(dt);
   sun.position.set(combatCam.focus.x - 14, 26, combatCam.focus.z - 10); sun.target.position.copy(combatCam.focus);
   benchTick(dt);
@@ -3155,6 +3353,6 @@ function frame(now) {
 })();
 applyQuality(Q(), 'init');
 requestAnimationFrame(frame);
-window.__vkkt = { units, battle, timelines, QualityManager, startBattle, forceUltimate, vfx, renderer, loadGlbBuffer, solveTwoBoneIK, options, game, buyShop, reroll, buyXP, nextRound, newGame, onBenchTap, benchToBoard, mergeAll, traitCounts, boardAllies };
+window.__vkkt = { units, battle, timelines, QualityManager, startBattle, forceUltimate, vfx, renderer, loadGlbBuffer, solveTwoBoneIK, options, game, buyShop, reroll, buyXP, nextRound, newGame, moveTo, benchToBoard, mergeAll, traitCounts, boardAllies, benchUnits, benchSlotPos, combatCam, camera, prepFit };
 })();
 </script>
