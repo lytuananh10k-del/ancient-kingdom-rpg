@@ -70,4 +70,5 @@ Nhân vật và animation là placeholder thủ tục, không phải animation d
 - **Số phi kiếm** (Vạn Kiếm Quy Tông): theo mức đồ hoạ (14 / 24 / 36 / 56) hoặc tự chọn 8–96.
 - **Âm thanh**: bật/tắt (lưu trên máy).
 - Bảng Cài đặt đóng bằng nút ✕, phím Esc hoặc chạm ra bàn cờ.
+- Bảng thông tin bên trái (vòng, máu, linh thạch, tộc/hệ) có nút thu gọn / mở rộng; khi thu gọn chỉ còn một dòng ♥ máu · ◆ linh thạch · cấp. Trạng thái được nhớ.
 - **IK chân**: bật/tắt để so sánh. Hàm `groundHeight(x, z)` là điểm nối khi có địa hình gồ ghề.

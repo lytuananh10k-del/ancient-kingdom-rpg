@@ -55,6 +55,25 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 }
 .cta.alt { background: var(--panel); color: var(--paper); border: 1px solid var(--panel-line); box-shadow: none; }
 .cta:disabled { opacity: 0.45; cursor: default; }
+/* ---------- Thu gọn / mở rộng bảng thông tin ---------- */
+.rc-head { display: flex; align-items: center; gap: 8px; }
+.rc-head h1 { flex: 0 0 auto; }
+.mini { display: none; min-width: 0; font-size: 0.8rem; font-variant-numeric: tabular-nums; color: var(--paper); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mini b { font-weight: 700; } .mini .h { color: #ff8a7a; } .mini .g { color: var(--gold); } .mini .l { color: var(--azure); }
+.hud-toggle { margin-left: auto; flex: 0 0 auto; width: 34px; height: 34px; margin-right: -6px; border-radius: 8px; display: grid; place-items: center; color: var(--muted); background: rgba(255,255,255,0.05); border: 1px solid var(--panel-line); }
+.hud-toggle svg { width: 14px; height: 14px; transition: transform 0.2s ease; }
+.left-col.collapsed .round-card > :not(.rc-head), .left-col.collapsed #traits { display: none; }
+.left-col.collapsed .round-card { padding: 4px 8px 4px 12px; }
+.left-col.collapsed .round-card h1 { font-size: 1.1rem; }
+.left-col.collapsed .mini { display: block; }
+.left-col.collapsed { max-width: min(300px, calc(100vw - 210px)); }
+@media (max-width: 560px) {  /* màn hẹp: tóm tắt xuống dòng dưới tiêu đề thay vì bị cắt */
+  .left-col.collapsed .rc-head { flex-wrap: wrap; row-gap: 0; }
+  .left-col.collapsed .mini { order: 3; flex-basis: 100%; padding-bottom: 2px; }
+}
+.left-col.collapsed .hud-toggle svg { transform: rotate(180deg); }
+@media (prefers-reduced-motion: reduce) { .hud-toggle svg { transition: none; } }
+
 /* ---------- Kinh tế, tộc/hệ ---------- */
 .left-col { display: flex; flex-direction: column; gap: 6px; min-width: 0; max-width: min(300px, 58vw); }
 .econ { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 5px; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
@@ -91,6 +110,12 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .sbtn:disabled { opacity: 0.45; cursor: default; }
 .sbtn.sell { border-color: rgba(226,85,63,0.6); color: #ffb3a6; }
 .main-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+@media (max-height: 340px) and (orientation: landscape) {
+  .card { min-height: 0; padding: 4px 5px; } .card .tr { display: none; }
+  .card .ft { margin-top: 2px; }
+  .sbtn { padding: 5px 8px; }
+  .main-actions .cta { padding: 7px 12px !important; font-size: 0.82rem !important; }
+}
 @media (max-height: 520px) and (orientation: landscape) {
   .hud-bottom { justify-content: space-between; align-items: flex-end; flex-wrap: nowrap; }
   #prep-panel { width: min(520px, 62vw); padding: 6px; gap: 4px; }
@@ -164,9 +189,13 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 <canvas id="fx2d" aria-hidden="true"></canvas>
 
 <div class="hud-top">
-  <div class="left-col">
+  <div class="left-col" id="left-col">
     <div class="round-card">
-      <h1 id="round-title">Vòng 1</h1>
+      <div class="rc-head">
+        <h1 id="round-title">Vòng 1</h1>
+        <span class="mini" id="hud-mini" aria-hidden="true"></span>
+        <button class="hud-toggle" id="btn-hud-toggle" aria-expanded="true" aria-controls="left-col" aria-label="Thu gọn bảng thông tin"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 7.5 6 4l3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </div>
       <div class="sub" id="phase-label">Chuẩn bị</div>
       <div class="count"><span class="ally" id="ally-count">Đồng minh 2</span><span class="enemy" id="enemy-count">Địch 2</span></div>
       <div class="econ">
@@ -3024,6 +3053,7 @@ const ui = {
     else { $('phase-label').textContent = game.lastSummary || (battle.result === 'win' ? 'Thắng' : 'Thua'); st.textContent = 'Vòng tiếp theo'; st.disabled = false; }
     $('btn-ult').disabled = !(battle.phase === 'fight' && units.some(u => u.key === 'kiemtien' && u.team === 'ally' && u.alive));
     // Kinh tế
+    $('hud-mini').innerHTML = `<b class="h">♥ ${game.hp}</b> · <b class="g">◆ ${game.gold}</b> · <b class="l">Cấp ${game.level}</b>`;
     $('hp-val').textContent = game.hp; $('gold-val').textContent = game.gold; $('lvl-val').textContent = game.level;
     $('cap-val').textContent = boardAllies().length + '/' + boardCap();
     $('xp-fill').style.transform = 'scaleX(' + (game.level >= MAX_LEVEL ? 1 : game.xp / XP_NEED[game.level]) + ')';
@@ -3104,6 +3134,15 @@ $('btn-settings').addEventListener('click', () => {
   }
 });
 function closeSettings() { if ($('settings').hidden) return; $('settings').hidden = true; $('btn-settings').setAttribute('aria-expanded', 'false'); }
+/** Thu gọn / mở rộng bảng thông tin bên trái (lưu trên máy); lúc chuẩn bị thì căn lại camera cho vùng trống mới. */
+function setHudCollapsed(on) {
+  $('left-col').classList.toggle('collapsed', on);
+  const b = $('btn-hud-toggle'); b.setAttribute('aria-expanded', String(!on)); b.setAttribute('aria-label', on ? 'Mở rộng bảng thông tin' : 'Thu gọn bảng thông tin');
+  store.set('hudCollapsed', on);
+  if (battle.phase === 'prep') requestAnimationFrame(applyPrepCamera);
+}
+$('btn-hud-toggle').addEventListener('click', () => setHudCollapsed(!$('left-col').classList.contains('collapsed')));
+setHudCollapsed(store.get('hudCollapsed', false));
 $('btn-close-settings').addEventListener('click', () => { closeSettings(); $('btn-settings').focus(); });
 window.addEventListener('keydown', e => { if (e.key === 'Escape') closeSettings(); });
 $('opt-sound').checked = !Sfx.muted; $('opt-sound').addEventListener('change', e => { Sfx.muted = !e.target.checked; store.set('mute', Sfx.muted); });
