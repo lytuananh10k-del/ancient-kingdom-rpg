@@ -113,7 +113,8 @@ async function main() {
         K.benchUnits.forEach((u, i) => { if (!u) return; const c = K.benchSlotPos(i); if (Math.hypot(u.pos.x - c.x, u.pos.z - c.z) > 0.01 || Math.abs(u.pos.y) > 0.001 || u.dragging) out.push('tướng lệch ô hàng chờ ' + i); });
       }
       // Hàng chờ không bị giao diện che (cửa hàng, nút…) – trừ khi bảng thông tin đang mở.
-      if (K.battle.phase === 'prep' && document.getElementById('unit-info').hidden && document.getElementById('settings').hidden) {
+      // (chỉ khi camera đã đứng yên – lúc mới vào vòng camera còn đang lướt từ góc nhìn trận về góc chuẩn bị)
+      if (K.battle.phase === 'prep' && K.cameraSettled() && document.getElementById('unit-info').hidden && document.getElementById('settings').hidden) {
         const cv = document.getElementById('game');
         K.benchUnits.forEach((u, i) => { if (!u) return; const v = u.pos.clone(); v.y = 0.8; v.project(K.camera); const x = (v.x * 0.5 + 0.5) * innerWidth, y = (-v.y * 0.5 + 0.5) * innerHeight;
           if (x > 4 && x < innerWidth - 4) { const e = document.elementFromPoint(x, y); if (e !== cv) out.push('tướng hàng chờ ô ' + i + ' bị che bởi ' + (e && (e.id || e.className))); } });
@@ -155,7 +156,11 @@ async function main() {
     await page.mouse.up(); await page.waitForTimeout(60);
   };
   const tapAt = async (p) => { if (TOUCH) await page.touchscreen.tap(p.x, p.y); else await page.mouse.click(p.x, p.y); await page.waitForTimeout(80); };
-  const waitCamera = () => page.waitForTimeout(1300); // camera chuẩn bị damp về khung mới
+  const waitCamera = async () => {   // camera chuẩn bị damp về khung mới; phải đứng yên trong ~3 s
+    await page.waitForFunction(() => window.__vkkt.cameraSettled(), null, { timeout: 4000 }).catch(() => {});
+    check(await V(() => window.__vkkt.cameraSettled()), 'camera chuẩn bị ổn định (không dao động căn lại liên tục)');
+    await invariants('sau khi camera ổn định');
+  };
   const onScreen = p => p && p.x > 4 && p.x < VW - 4 && p.y > 4 && p.y < VH - 4 - (TOUCH ? LIFT : 0);
   const value = s => s.bench.filter(Boolean).concat(s.board).reduce((a, x) => a + Math.pow(3, +x.split('*')[1][0] - 1), 0);
   const stats = { monsterRounds: 0, itemsEquipped: 0, autoFill: 0, infoChecks: 0, apiPlacements: 0, buys: 0, sells: 0, rerolls: 0, xpBuys: 0, merges: 0, mouseDrags: 0, swaps: 0, wins: 0, losses: 0, reloads: 0, gameOvers: 0 };
