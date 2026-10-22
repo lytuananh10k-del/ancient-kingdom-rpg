@@ -82,6 +82,7 @@ function renderUnitInfo() {
   $('ui-name').textContent = d.name; $('ui-stars').textContent = '★'.repeat(star);
   const counts = traitCounts(), tags = [];
   if (enemy) tags.push('<span class="ui-tag foe">Phe địch</span>');
+  if (ROLES[d.role]) tags.push(`<span class="ui-tag role">${ROLES[d.role].name}</span>`);
   if (d.cost) tags.push(`<span class="ui-tag cost">◆ ${d.cost}</span>`);
   (d.traits || []).forEach(t => {
     const T = TRAITS[t], n = enemy ? 0 : counts[t] || 0, lv = !enemy && !onBench && u ? traitLevel(t, n) : 0;
@@ -93,7 +94,8 @@ function renderUnitInfo() {
   const range = d.range > 3 ? 'Xa ' + Math.round(d.range / BOARD.tile) + ' ô' : 'Cận';
   $('ui-stats').innerHTML = `<dt>Công</dt><dd>${Math.round(atk)}</dd><dt>Giáp</dt><dd>${Math.round(def)}</dd>` +
     `<dt>Tốc đánh</dt><dd>${aspd.toFixed(2)}/s</dd><dt>Tầm</dt><dd>${range}</dd>` +
-    `<dt>Chí mạng</dt><dd>${Math.round(d.crit * 100)}% ×${d.critDmg}</dd><dt>Linh lực</dt><dd>${d.mana0}/${d.mana}</dd>`;
+    `<dt>Chí mạng</dt><dd>${Math.round(d.crit * 100)}% ×${d.critDmg}</dd><dt>Linh lực</dt><dd>${d.mana0}/${d.mana}</dd>` +
+    `<dt>Né</dt><dd>${Math.round((d.dodge || 0) * 100)}%</dd><dt>Kháng choáng</dt><dd>${Math.round((1 - (ROLES[d.role] ? ROLES[d.role].tenacity : 1)) * 100)}%</dd>`;
   const sk = SKILLS[d.skill];
   $('ui-skill-name').textContent = (!enemy && sk.allyName) || sk.name;
   $('ui-skill-mana').textContent = 'Cần ' + d.mana + ' linh lực';

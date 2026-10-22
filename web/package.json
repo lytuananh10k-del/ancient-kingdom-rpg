@@ -4,7 +4,8 @@
   "description": "Auto chess tu tiên 3D (Three.js) – bài chơi thử tự động",
   "scripts": {
     "test": "node tests/playtest.js",
-    "test:portrait": "VIEW=400x820 node tests/playtest.js"
+    "test:portrait": "VIEW=400x820 node tests/playtest.js",
+    "test:combat": "node tests/combat.js"
   },
   "devDependencies": {
     "playwright": "^1.47.0",

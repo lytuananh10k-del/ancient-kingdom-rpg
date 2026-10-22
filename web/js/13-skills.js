@@ -5,11 +5,45 @@
 /* =====================================================================
  * 19. SKILLS – định nghĩa kỹ năng bằng SkillTimeline
  * ===================================================================*/
+/** Chọn mục tiêu cho kỹ năng (mỗi kỹ năng một cách). Trả về đơn vị địch hoặc null. */
+const SkillAI = {
+  /** Địch có nhiều đồng đội đứng quanh nhất trong bán kính r (tâm vùng AoE); hoà thì lấy gần caster hơn. */
+  densest(caster, r) {
+    const foes = caster.enemies(); let best = null, bc = -1, bd = Infinity;
+    for (const f of foes) {
+      let n = 0; for (const g of foes) if (Math.hypot(g.pos.x - f.pos.x, g.pos.z - f.pos.z) <= r) n++;
+      const d = f.pos.distanceTo(caster.pos);
+      if (n > bc || (n === bc && d < bd)) { best = f; bc = n; bd = d; }
+    }
+    return best;
+  },
+  /** Địch máu thấp nhất (theo %), ưu tiên tuyến sau đánh xa; trong tầm maxDist nếu có. */
+  weakest(caster, maxDist = Infinity) {
+    const foes = caster.enemies(), near = foes.filter(f => f.pos.distanceTo(caster.pos) <= maxDist), list = near.length ? near : foes;
+    let best = null, bs = Infinity;
+    for (const f of list) { const s = f.hp / f.maxHp - (f.def.ranged ? 0.25 : 0); if (s < bs) { bs = s; best = f; } }
+    return best;
+  },
+  /** Hướng bắn thẳng xuyên thấu trúng nhiều địch nhất (đường dài len, rộng w). */
+  line(caster, len, w) {
+    const foes = caster.enemies(); let best = null, bc = -1, bd = Infinity;
+    for (const f of foes) {
+      const dx = f.pos.x - caster.pos.x, dz = f.pos.z - caster.pos.z, l = Math.hypot(dx, dz) || 1, ux = dx / l, uz = dz / l;
+      let n = 0;
+      for (const g of foes) { const gx = g.pos.x - caster.pos.x, gz = g.pos.z - caster.pos.z, along = gx * ux + gz * uz; if (along > 0 && along < len && Math.abs(gx * uz - gz * ux) < w) n++; }
+      if (n > bc || (n === bc && l < bd)) { best = f; bc = n; bd = l; }
+    }
+    return best;
+  },
+  countNear(caster, r) { return caster.enemies().filter(f => f.pos.distanceTo(caster.pos) <= r).length; }
+};
+
 const SKILLS = {
   /* -------- VẠN KIẾM QUY TÔNG (kỹ năng mẫu đầy đủ 5 giai đoạn) -------- */
   vanKiem: {
     name: 'Vạn Kiếm Quy Tông',
     desc: 'Triệu hồi phi kiếm vây quanh vùng địch đông nhất: 10 nhát chém liên tiếp (32% công mỗi nhát, bán kính 3,4 m), rồi cự kiếm giáng xuống gây 300% công trong bán kính 5 m, hất lùi và choáng 1,2 giây.',
+    pick: c => SkillAI.densest(c, 3.4),
     build(caster, target, release) {
       const tl = new SkillTimeline('Vạn Kiếm Quy Tông', caster);
       const N = swordCount(), A = COLORS.allyA, B = COLORS.allyB;
@@ -130,7 +164,7 @@ const SKILLS = {
         vfx.particles.emit(center.x + rand(-0.6, 0.6), y - rand(0, 4), center.z + rand(-0.6, 0.6), 0, 6, 0, 0.3, 0.4, 0.05, A, 0.8, 0);
       });
       tl.at(T.slam, 'ApplyDamage', (self) => { self.hitList = aoe(caster, center, 5, 3.0, { heavy: true, knock: 2.2, color: COLORS.white }); });
-      tl.at(T.slam, 'ApplyStatusEffect', (self) => { (self.hitList || []).forEach(u => { if (u.alive) u.status.stun = Math.max(u.status.stun, 1.2); }); });
+      tl.at(T.slam, 'ApplyStatusEffect', (self) => { (self.hitList || []).forEach(u => applyStun(u, 1.2)); });
       tl.at(T.slam, 'CameraImpulse', () => { hitStop(0.12); combatCam.shake(0.85); combatCam.kick(new V3(0, -1, 0), 14); flashLight(_v1.set(center.x, 2, center.z), 0xbfe4ff, 9, 4); });
       tl.at(T.slam, 'SpawnVFX', () => {
         const g = new V3(center.x, 0, center.z);
@@ -173,6 +207,7 @@ const SKILLS = {
   kiemKhi: {
     name: 'Kiếm Khí Trảm',
     desc: 'Chém một đạo kiếm khí bán nguyệt bay thẳng, xuyên qua mọi kẻ địch trên đường, gây 190% công.',
+    pick: c => SkillAI.line(c, 12, 1.4),
     build(caster, target, release) {
       const tl = new SkillTimeline('Kiếm Khí Trảm', caster);
       const col = caster.team === 'ally' ? COLORS.allyA : COLORS.enemyA;
@@ -198,6 +233,7 @@ const SKILLS = {
   thienLoi: {
     name: 'Thiên Lôi Quyết',
     desc: 'Gọi 3 tia sét giáng quanh mục tiêu: mỗi tia gây 160% công trong bán kính 2,4 m và choáng 0,8 giây.',
+    pick: c => SkillAI.densest(c, 2.4),
     build(caster, target, release) {
       const tl = new SkillTimeline('Thiên Lôi Quyết', caster);
       const spots = [];
@@ -212,7 +248,7 @@ const SKILLS = {
       [0.65, 0.9, 1.15].forEach((at, i) => {
         tl.at(at, 'SpawnVFX', () => { const s = spots[i]; if (s) lightningBolt(new V3(s.x + rand(-3, 3), 18, s.z + rand(-3, 3)), new V3(s.x, 0.1, s.z), COLORS.thunder, 0.22); });
         tl.at(at, 'ApplyDamage', (self) => { const s = spots[i]; if (!s) return; self.hit = aoe(caster, s, 2.4, 1.6, { color: COLORS.thunder }); combatCam.shake(0.25); hitStop(0.04); flashLight(_v1.set(s.x, 3, s.z), 0xbfe0ff, 7); Sfx.thunder(); vfx.shockwave(new V3(s.x, 0, s.z), 2.6, COLORS.thunder, 0.4); });
-        tl.at(at, 'ApplyStatusEffect', (self) => (self.hit || []).forEach(u => { if (u.alive) { u.status.stun = Math.max(u.status.stun, 0.8); } }));
+        tl.at(at, 'ApplyStatusEffect', (self) => (self.hit || []).forEach(u => applyStun(u, 0.8)));
       });
       tl.at(1.4, 'Cleanup', () => release());
       tl.onCleanup(c => { if (c) release(); });
@@ -224,6 +260,7 @@ const SKILLS = {
   hoaPhuong: {
     name: 'Hỏa Phượng Phần Thiên',
     desc: 'Phóng hỏa phượng truy đuổi mục tiêu, nổ gây 200% công trong bán kính 3 m và thiêu đốt theo thời gian.',
+    pick: c => SkillAI.densest(c, 3),
     build(caster, target, release) {
       const tl = new SkillTimeline('Hỏa Phượng', caster);
       tl.at(0, 'AnimationEvent', () => caster.anim.play('SkillCast', { dur: 1.1, windup: 0.45, active: 0.55, hold: 0.3 }));
@@ -253,6 +290,7 @@ const SKILLS = {
   hoThe: {
     name: 'Hộ Thể Chân Khí',
     desc: 'Tạo khiên bằng 30% máu tối đa của bản thân cho 3 đồng minh đang yếu nhất (luôn gồm bản thân), giữ 6 giây.',
+    pick: c => c.findTarget(), ready: c => c.allies().some(a => a.hp < a.maxHp * 0.8) || SkillAI.countNear(c, 5) >= 1,   // khiên khi có người bị thương / địch áp sát
     build(caster, target, release) {
       const tl = new SkillTimeline('Hộ Thể Chân Khí', caster);
       tl.at(0, 'AnimationEvent', () => caster.anim.play('SkillCast', { dur: 1.0, windup: 0.35, active: 0.45, hold: 0.3 }));
@@ -278,6 +316,7 @@ const SKILLS = {
   huyetAnh: {
     name: 'Huyết Ảnh Trảm',
     desc: 'Lướt xuyên qua mục tiêu, chém 210% công trong bán kính 1,8 m quanh mục tiêu.',
+    pick: c => SkillAI.weakest(c, 9),   // sát thủ: lướt vào kẻ yếu / tuyến sau
     build(caster, target, release) {
       const tl = new SkillTimeline('Huyết Ảnh Trảm', caster);
       const C1 = caster.team === 'ally' ? COLORS.allyA : COLORS.enemyA, C2 = caster.team === 'ally' ? COLORS.allyViolet : COLORS.blood;
@@ -298,13 +337,14 @@ const SKILLS = {
   uMinh: {
     name: 'U Minh Chú',
     desc: 'Phóng 3 u hồn truy đuổi 3 kẻ địch, mỗi u hồn gây 120% công.',
+    pick: c => SkillAI.weakest(c),
     build(caster, target, release) {
       const tl = new SkillTimeline('U Minh Chú', caster);
       const CV = caster.team === 'ally' ? COLORS.allyViolet : COLORS.enemyB, CR = caster.team === 'ally' ? COLORS.allyA : COLORS.enemyA;
       tl.at(0, 'AnimationEvent', () => caster.anim.play('SkillCast', { dur: 1.2, windup: 0.4, active: 0.5, hold: 0.4 }));
       tl.at(0, 'SpawnVFX', () => vfx.magicCircle(caster.pos, 1.8, CV, CR, { reveal: 0.3, life: 1.2, spin: -1.5 }));
       [0.45, 0.6, 0.75].forEach((at, i) => tl.at(at, 'LaunchProjectile', () => {
-        const foes = caster.enemies(); const t = foes[i % Math.max(1, foes.length)] || target;
+        const foes = caster.enemies().sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp); const t = foes[i % Math.max(1, foes.length)] || target;   // 3 kẻ yếu nhất
         Projectiles.spawn({ src: caster, target: t, pos: caster.chest(new V3()).add(new V3(rand(-1, 1), 1, rand(-1, 1))), speed: 9, homing: true, turn: 3, arc: 6, color: CV, size: 0.55, life: 3,
           onHit: (p, u) => { dealDamage(caster, u, 1.2, { color: CV, skill: true }); vfx.particles.burst(p.pos, CV, 18, 6, 0.5, 0.3, { drag: 3 }); } });
       }));
@@ -318,6 +358,7 @@ const SKILLS = {
   phaDia: {
     name: 'Phá Địa Hống', allyName: 'Trấn Sơn Kích',
     desc: 'Dậm đất gây 160% công trong bán kính 3,6 m quanh bản thân và hất lùi kẻ địch.',
+    pick: c => c.findTarget(), ready: c => SkillAI.countNear(c, 3.6) >= 1,   // dậm quanh mình: chỉ tung khi có địch trong 3,6 m
     build(caster, target, release) {
       const tl = new SkillTimeline('Phá Địa Hống', caster);
       const C1 = caster.team === 'ally' ? COLORS.allyB : COLORS.enemyA, C2 = caster.team === 'ally' ? COLORS.allyA : COLORS.blood;

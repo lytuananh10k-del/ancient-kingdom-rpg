@@ -100,6 +100,31 @@ rung nhẹ khi nhấc / thả (tắt được trong Cài đặt); không kéo-đ
 (thêm các hàng địch nếu hình không nhỏ đi quá 20%) nằm gọn trong vùng trống giữa HUD và cửa hàng, rồi dùng lens shift
 (dời tâm chiếu trong ma trận chiếu, không đổi phối cảnh) để đặt nội dung vào giữa vùng đó. Vào giao chiến camera trở về góc mặc định.
 
+## AI giao chiến
+| Vai trò | Tướng | Hành vi |
+|---|---|---|
+| Đỡ đòn | Hộ Pháp, Thiết Vệ, Ma Thú Hống | Đánh kẻ gần nhất, kháng choáng 40% |
+| Đấu sĩ | Kiếm Tiên, Kiếm Đồng | Đánh kẻ gần nhất, kháng choáng 15% |
+| Sát thủ | Ảnh Kiếm, Huyết Ảnh Kiếm Khách | Ưu tiên tuyến sau đánh xa và kẻ máu thấp, lướt vào khi xa > 6,5 m; né cao |
+| Pháp sư | Lôi Pháp Sư, Hỏa Linh, U Hồn Sư, U Minh Ma Tu | Dừng ở rìa tầm đánh; bị cận chiến áp sát (< 2,4 m) thì lùi ra nếu vẫn giữ được tầm và còn trong đài |
+
+- **Di chuyển**: cận chiến nhắm "ô đánh" quanh mục tiêu (tản theo góc theo thứ tự trong nhóm cùng đánh, không dồn một điểm),
+  lách sang bên khi đồng đội chắn phía trước; mục tiêu đã bị ≥ 2 đồng minh cận chiến vây thì ưu tiên kẻ khác.
+  Kẹt đường (1,2 s không lại gần được 0,2 m mỗi nửa giây) → bỏ qua mục tiêu đó 2,5 s và chọn kẻ khác. Có lực đẩy tách để không chồng lên nhau.
+- **Né**: chỉ né đòn đánh thường (kỹ năng và thiêu đốt luôn trúng); đang choáng hoặc đang tung chiêu thì không né.
+  **Chí mạng**: theo chỉ số từng tướng (cả kỹ năng). **Khống chế**: choáng (Thiên Lôi, Vạn Kiếm), hất lùi, thiêu đốt;
+  sau khi hết choáng được miễn khống chế 0,8 s; tướng đang tung chiêu không bị ngắt.
+- **Kỹ năng tự chọn mục tiêu**: Vạn Kiếm / Thiên Lôi / Hỏa Phượng → chỗ địch đứng dày nhất; Kiếm Khí Trảm → hướng xuyên được nhiều địch nhất;
+  Huyết Ảnh → kẻ yếu / tuyến sau trong 9 m; U Minh → 3 kẻ máu thấp nhất; Trấn Sơn / Phá Địa chỉ tung khi có địch trong 3,6 m,
+  Hộ Thể khi có đồng đội bị thương hoặc địch áp sát (chờ tối đa 4 s rồi tung).
+- **Đồng bộ animation**: sát thương cận chiến và lúc phóng đạn nằm trên timeline đúng mốc `active` – cũng là lúc rig đạt tư thế va chạm;
+  bài kiểm tra đo độ lệch thực tế (≤ 1 bước mô phỏng 1/60 s).
+
+`tests/combat.js` (`npm run test:combat`) dựng các trận: đội hình hỗn hợp, cận chiến dồn lên tuyến sau, đội đánh xa bị lao vào,
+8 đấu 8, bảy cận chiến vây một mục tiêu, hàng dọc phải lách, sát thủ vs tuyến sau, cộng các trận ngẫu nhiên; đo kẹt đường, chồng chéo,
+ra ngoài đài, thời gian cận chiến bắt đầu đánh, tỉ lệ đánh xa trong tầm / bị áp sát, sát thủ nhắm tuyến sau, né / chí mạng / choáng,
+loại kỹ năng được tung, độ lệch animation – sát thương. Có một trận tự kiểm tra cố tình đóng băng 1 tướng để chắc thước đo kẹt phát hiện được.
+
 ## GLB / GLTF
 Cài đặt → "Chọn file .glb". Mô hình thay cho mọi Kiếm Tiên phe ta (kể cả bản mua sau đó), giữ tỉ lệ theo sao. Tên clip được nhận theo mẫu: Idle, Walk, Run, Dash, Attack01–03, HeavyAttack,
 SkillCast, UltimateCast, Hit, Stun, Knockback, Death, Victory. Kiếm gắn vào xương có tên chứa RightHand / hand_r.

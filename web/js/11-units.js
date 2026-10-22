@@ -20,18 +20,25 @@ const LOOKS = {
 };
 
 /* cost: giá ở cửa hàng (bậc hiếm 1–3); traits: tộc/hệ. Đơn vị phe địch không có cost. */
+/** Vai trò quyết định cách chọn mục tiêu & giữ vị trí; tenacity nhân thời gian bị choáng. */
+const ROLES = {
+  tank: { name: 'Đỡ đòn', tenacity: 0.6 },
+  fighter: { name: 'Đấu sĩ', tenacity: 0.85 },
+  assassin: { name: 'Sát thủ', tenacity: 1 },
+  mage: { name: 'Pháp sư', tenacity: 1 }
+};
 const UNIT_DEFS = {
-  kiemtien: { name: 'Kiếm Tiên', cost: 3, traits: ['kiemtu'], look: 'kiemtien', hp: 820, atk: 62, def: 28, aspd: 1.0, range: 2.2, speed: 4.6, mana: 100, mana0: 45, crit: 0.15, critDmg: 1.7, skill: 'vanKiem', dash: true, poise: 50 },
-  loi: { name: 'Lôi Pháp Sư', short: 'Lôi Pháp', cost: 2, traits: ['phaptu'], look: 'loi', hp: 560, atk: 50, def: 16, aspd: 0.8, range: 8, speed: 3.6, mana: 80, mana0: 20, crit: 0.08, critDmg: 1.5, skill: 'thienLoi', ranged: 'thunder', poise: 30 },
-  hoa: { name: 'Hỏa Linh', cost: 2, traits: ['phaptu'], look: 'hoa', hp: 540, atk: 54, def: 15, aspd: 0.75, range: 7.5, speed: 3.6, mana: 90, mana0: 30, crit: 0.08, critDmg: 1.5, skill: 'hoaPhuong', ranged: 'fire', poise: 30 },
-  hophap: { name: 'Hộ Pháp', cost: 1, traits: ['hophap'], look: 'hophap', hp: 1100, atk: 42, def: 45, aspd: 0.85, range: 2.6, speed: 3.8, mana: 70, mana0: 30, crit: 0.05, critDmg: 1.5, skill: 'hoThe', poise: 80 },
-  huyetkiem: { name: 'Huyết Ảnh Kiếm Khách', look: 'huyetkiem', hp: 700, atk: 58, def: 22, aspd: 1.05, range: 2.2, speed: 4.8, mana: 80, mana0: 20, crit: 0.15, critDmg: 1.6, skill: 'huyetAnh', dash: true, poise: 45 },
-  uminh: { name: 'U Minh Ma Tu', look: 'uminh', hp: 520, atk: 48, def: 14, aspd: 0.8, range: 7.5, speed: 3.5, mana: 80, mana0: 20, crit: 0.08, critDmg: 1.5, skill: 'uMinh', ranged: 'nether', poise: 30 },
-  mathu: { name: 'Ma Thú Hống', look: 'mathu', hp: 1250, atk: 46, def: 38, aspd: 0.75, range: 2.4, speed: 3.6, mana: 90, mana0: 25, crit: 0.05, critDmg: 1.5, skill: 'phaDia', poise: 90 },
-  kiemdong: { name: 'Kiếm Đồng', cost: 1, traits: ['kiemtu'], look: 'kiemdong', hp: 600, atk: 48, def: 20, aspd: 0.95, range: 2.2, speed: 4.4, mana: 60, mana0: 20, crit: 0.1, critDmg: 1.5, skill: 'kiemKhi', poise: 40 },
-  thietve: { name: 'Thiết Vệ', cost: 1, traits: ['hophap'], look: 'thietve', hp: 920, atk: 40, def: 40, aspd: 0.8, range: 2.6, speed: 3.8, mana: 80, mana0: 30, crit: 0.05, critDmg: 1.5, skill: 'phaDia', poise: 80 },
-  anhkiem: { name: 'Ảnh Kiếm', cost: 2, traits: ['kiemtu', 'matu'], look: 'anhkiem', hp: 640, atk: 56, def: 20, aspd: 1.05, range: 2.2, speed: 4.8, mana: 70, mana0: 20, crit: 0.18, critDmg: 1.6, skill: 'huyetAnh', dash: true, poise: 45 },
-  uhon: { name: 'U Hồn Sư', short: 'U Hồn', cost: 3, traits: ['phaptu', 'matu'], look: 'uhon', hp: 600, atk: 56, def: 16, aspd: 0.8, range: 7.5, speed: 3.5, mana: 80, mana0: 30, crit: 0.1, critDmg: 1.5, skill: 'uMinh', ranged: 'nether', poise: 30 }
+  kiemtien: { name: 'Kiếm Tiên', cost: 3, traits: ['kiemtu'], look: 'kiemtien', hp: 820, atk: 62, def: 28, aspd: 1.0, range: 2.2, speed: 4.6, mana: 100, mana0: 45, dodge: 0.1, crit: 0.15, critDmg: 1.7, skill: 'vanKiem', dash: true, poise: 50, role: 'fighter' },
+  loi: { name: 'Lôi Pháp Sư', short: 'Lôi Pháp', cost: 2, traits: ['phaptu'], look: 'loi', hp: 560, atk: 50, def: 16, aspd: 0.8, range: 8, speed: 3.6, mana: 80, mana0: 20, dodge: 0.03, crit: 0.08, critDmg: 1.5, skill: 'thienLoi', ranged: 'thunder', poise: 30, role: 'mage' },
+  hoa: { name: 'Hỏa Linh', cost: 2, traits: ['phaptu'], look: 'hoa', hp: 540, atk: 54, def: 15, aspd: 0.75, range: 7.5, speed: 3.6, mana: 90, mana0: 30, dodge: 0.03, crit: 0.08, critDmg: 1.5, skill: 'hoaPhuong', ranged: 'fire', poise: 30, role: 'mage' },
+  hophap: { name: 'Hộ Pháp', cost: 1, traits: ['hophap'], look: 'hophap', hp: 1100, atk: 42, def: 45, aspd: 0.85, range: 2.6, speed: 3.8, mana: 70, mana0: 30, dodge: 0, crit: 0.05, critDmg: 1.5, skill: 'hoThe', poise: 80, role: 'tank' },
+  huyetkiem: { name: 'Huyết Ảnh Kiếm Khách', look: 'huyetkiem', hp: 700, atk: 58, def: 22, aspd: 1.05, range: 2.2, speed: 4.8, mana: 80, mana0: 20, dodge: 0.15, crit: 0.15, critDmg: 1.6, skill: 'huyetAnh', dash: true, poise: 45, role: 'assassin' },
+  uminh: { name: 'U Minh Ma Tu', look: 'uminh', hp: 520, atk: 48, def: 14, aspd: 0.8, range: 7.5, speed: 3.5, mana: 80, mana0: 20, dodge: 0.03, crit: 0.08, critDmg: 1.5, skill: 'uMinh', ranged: 'nether', poise: 30, role: 'mage' },
+  mathu: { name: 'Ma Thú Hống', look: 'mathu', hp: 1250, atk: 46, def: 38, aspd: 0.75, range: 2.4, speed: 3.6, mana: 90, mana0: 25, dodge: 0, crit: 0.05, critDmg: 1.5, skill: 'phaDia', poise: 90, role: 'tank' },
+  kiemdong: { name: 'Kiếm Đồng', cost: 1, traits: ['kiemtu'], look: 'kiemdong', hp: 600, atk: 48, def: 20, aspd: 0.95, range: 2.2, speed: 4.4, mana: 60, mana0: 20, dodge: 0.08, crit: 0.1, critDmg: 1.5, skill: 'kiemKhi', poise: 40, role: 'fighter' },
+  thietve: { name: 'Thiết Vệ', cost: 1, traits: ['hophap'], look: 'thietve', hp: 920, atk: 40, def: 40, aspd: 0.8, range: 2.6, speed: 3.8, mana: 80, mana0: 30, dodge: 0, crit: 0.05, critDmg: 1.5, skill: 'phaDia', poise: 80, role: 'tank' },
+  anhkiem: { name: 'Ảnh Kiếm', cost: 2, traits: ['kiemtu', 'matu'], look: 'anhkiem', hp: 640, atk: 56, def: 20, aspd: 1.05, range: 2.2, speed: 4.8, mana: 70, mana0: 20, dodge: 0.18, crit: 0.18, critDmg: 1.6, skill: 'huyetAnh', dash: true, poise: 45, role: 'assassin' },
+  uhon: { name: 'U Hồn Sư', short: 'U Hồn', cost: 3, traits: ['phaptu', 'matu'], look: 'uhon', hp: 600, atk: 56, def: 16, aspd: 0.8, range: 7.5, speed: 3.5, mana: 80, mana0: 30, dodge: 0.05, crit: 0.1, critDmg: 1.5, skill: 'uMinh', ranged: 'nether', poise: 30, role: 'mage' }
 };
 
 /* =====================================================================
@@ -85,6 +92,7 @@ class Unit {
     this.mana = Math.min(d.mana, d.mana0 + b.mana0); this.maxMana = d.mana; this.shield = 0; this.shieldTime = 0;
     this.status = { stun: 0, burn: 0, burnTick: 0, burnDmg: 0 };
     this.target = null; this.retarget = 0; this.atkCd = rand(0, 0.4); this.attackIdx = 0; this.dashCd = 0;
+    this.ccImmune = 0; this.avoid = null; this.stuckT = 0; this.progT = 0; this.progD = Infinity; this.fullManaT = 0;
     this.knock = new V3(); this.deathT = 0; this.casting = null; this.flash = 0; this.manaLock = false;
     tileCenter(this.homeTile.c, this.homeTile.r, this.pos); this.yaw = this.team === 'ally' ? 0 : Math.PI;
     this.U.uDissolve.value = 0; this.rig.root.visible = true;
@@ -101,21 +109,20 @@ class Unit {
       .add('move', {
         update(dt) {
           if (battle.phase !== 'fight') { self.fsm.set('idle'); return; }
-          if (self.mana >= self.maxMana && !self.manaLock && SKILLS[self.def.skill] && self.findTarget()) { self.fsm.set('cast'); return; }
+          if (self.castReady(dt)) { self.fsm.set('cast'); return; }
           const t = self.findTarget();
           if (!t) { self.anim.locomotion(0); return; }
-          const dx = t.pos.x - self.pos.x, dz = t.pos.z - self.pos.z, dist = Math.hypot(dx, dz);
+          const dist = Math.hypot(t.pos.x - self.pos.x, t.pos.z - self.pos.z);
+          if (self.def.ranged && self.kite(dt)) return;            // đánh xa: lùi khi cận chiến địch áp sát
           self.faceTo(t.pos, dt, 10);
           if (dist <= self.def.range + 0.35) {
-            self.anim.locomotion(0);
+            self.anim.locomotion(0); self.stuckT = 0; self.progD = dist;
             if (self.atkCd <= 0) self.fsm.set('attack');
           } else if (self.def.dash && dist > 6.5 && self.dashCd <= 0) {
             self.fsm.set('dash');
           } else {
-            const sp = self.def.speed;
-            self.vel.set(dx / dist * sp, 0, dz / dist * sp);
-            self.pos.addScaledVector(self.vel, dt);
-            self.anim.locomotion(sp);
+            self.steerTo(t, dt);
+            self.checkStuck(t, dist, dt);
           }
         }
       })
@@ -151,7 +158,7 @@ class Unit {
       .add('stun', {
         enter() { self.anim.hold('Stun', true); },
         update() { if (self.status.stun <= 0) self.fsm.set('move'); },
-        exit() { self.anim.hold('Stun', false); }
+        exit() { self.anim.hold('Stun', false); self.ccImmune = 0.8; }   // miễn khống chế ngắn sau khi hết choáng
       })
       .add('knockback', {
         maxTime: 1, fallback: 'move',
@@ -168,12 +175,94 @@ class Unit {
   }
   enemies() { return units.filter(u => u.team !== this.team && u.alive); }
   allies() { return units.filter(u => u.team === this.team && u.alive); }
+  /** Chọn mục tiêu theo vai trò (xét lại mỗi 0,6 s):
+   *  - mặc định: gần nhất, có ưu tiên giữ mục tiêu cũ để không đổi qua đổi lại;
+   *  - sát thủ: ưu tiên tuyến sau đánh xa và kẻ máu thấp;
+   *  - cận chiến: tránh dồn vào mục tiêu đã có ≥ 2 đồng minh cận chiến đang đánh (tản ra);
+   *  - bỏ qua tạm thời mục tiêu vừa bị kẹt đường (this.avoid). */
   findTarget() {
     if (this.target && this.target.alive && this.retarget > 0) return this.target;
-    let best = null, bd = Infinity;
-    for (const u of units) if (u.team !== this.team && u.alive) { const d = u.pos.distanceToSquared(this.pos); if (d < bd) { bd = d; best = u; } }
+    const role = this.def.role, melee = !this.def.ranged;
+    let best = null, bs = Infinity;
+    for (const pass of [0, 1]) {   // lượt 2: bỏ điều kiện tránh nếu không còn ai khác
+      for (const u of units) {
+        if (u.team === this.team || !u.alive) continue;
+        if (pass === 0 && this.avoid && this.avoid.t > 0 && this.avoid.unit === u) continue;
+        const d = Math.hypot(u.pos.x - this.pos.x, u.pos.z - this.pos.z);
+        let sc = d;
+        if (role === 'assassin') sc = d * 0.4 + (u.def.ranged ? -2.5 : 0) + (u.hp / u.maxHp) * 2.5;
+        if (u === this.target) sc -= 1;
+        if (melee) {
+          let crowd = 0;
+          for (const m of units) if (m !== this && m.team === this.team && m.alive && !m.def.ranged && m.target === u && Math.hypot(m.pos.x - u.pos.x, m.pos.z - u.pos.z) < m.def.range + 0.6) crowd++;
+          sc += Math.max(0, crowd - 1) * 1.2;
+        }
+        if (sc < bs) { bs = sc; best = u; }
+      }
+      if (best) break;
+    }
+    if (best !== this.target) { this.progD = Infinity; this.stuckT = 0; }
     this.target = best; this.retarget = 0.6; this.anim.look(best);
     return best;
+  }
+  /** Đủ linh lực và kỹ năng có mục tiêu hợp lệ; kỹ năng có điều kiện (ready) được chờ tối đa 4 s cho đúng thời điểm. */
+  castReady(dt) {
+    const sk = SKILLS[this.def.skill];
+    if (!sk || this.manaLock || this.mana < this.maxMana) { this.fullManaT = 0; return false; }
+    this.fullManaT += dt;
+    if (sk.ready && !sk.ready(this) && this.fullManaT < 4) return false;
+    return !!(sk.pick ? sk.pick(this) : this.findTarget());
+  }
+  /** Đánh xa: khi cận chiến địch áp sát (< 2,4 m) mà chưa tới lượt đánh thì lùi ra, miễn vẫn còn trong tầm mục tiêu và trong đài. */
+  kite(dt) {
+    if (this.atkCd < 0.2) return false;
+    let th = null, td = 2.4;
+    for (const u of units) if (u.team !== this.team && u.alive && !u.def.ranged) { const d = Math.hypot(u.pos.x - this.pos.x, u.pos.z - this.pos.z); if (d < td) { td = d; th = u; } }
+    if (!th) return false;
+    const ax = this.pos.x - th.pos.x, az = this.pos.z - th.pos.z, l = Math.hypot(ax, az) || 1, sp = this.def.speed * 0.75;
+    const nx = this.pos.x + ax / l * sp * dt, nz = this.pos.z + az / l * sp * dt, lim = BOARD.tile * 4 - 0.4;
+    if (Math.abs(nx) > lim || Math.abs(nz) > lim) return false;                       // sát mép đài: đứng lại đánh
+    const t = this.target;
+    if (t && t.alive && Math.hypot(t.pos.x - nx, t.pos.z - nz) > this.def.range + 0.2) return false;   // lùi nữa là ra khỏi tầm
+    this.pos.x = nx; this.pos.z = nz;
+    this.faceTo(_v1.set(nx + ax, 0, nz + az), dt, 12); this.anim.locomotion(sp);
+    combatLog.kites += dt;
+    return true;
+  }
+  /** Tiến tới mục tiêu: cận chiến nhắm ô đánh quanh mục tiêu (tản theo góc theo thứ tự trong nhóm cùng đánh),
+   *  đánh xa dừng ở rìa tầm; lách sang bên khi đồng đội chắn phía trước. */
+  steerTo(t, dt) {
+    let ax = this.pos.x - t.pos.x, az = this.pos.z - t.pos.z; const al = Math.hypot(ax, az) || 1; ax /= al; az /= al;
+    const ranged = !!this.def.ranged, reachD = ranged ? this.def.range - 0.4 : Math.max(0.9, this.def.range * 0.8);
+    if (!ranged) {
+      let k = 0;
+      for (const u of units) if (u !== this && u.team === this.team && u.alive && !u.def.ranged && u.target === t && u.id < this.id) k++;
+      if (k > 0) { const ang = (k % 2 ? 1 : -1) * Math.ceil(k / 2) * 0.8, c = Math.cos(ang), sn = Math.sin(ang); const rx = ax * c - az * sn; az = ax * sn + az * c; ax = rx; }
+    }
+    let vx = t.pos.x + ax * reachD - this.pos.x, vz = t.pos.z + az * reachD - this.pos.z;
+    let vl = Math.hypot(vx, vz);
+    if (vl < 0.05) { vx = t.pos.x - this.pos.x; vz = t.pos.z - this.pos.z; vl = Math.hypot(vx, vz) || 1; }
+    vx /= vl; vz /= vl;
+    let sx = 0, sz = 0;
+    for (const o of units) {
+      if (o === this || !o.alive || o.team !== this.team) continue;
+      const ox = o.pos.x - this.pos.x, oz = o.pos.z - this.pos.z, od = Math.hypot(ox, oz);
+      if (od > 1.8 || od < 1e-3) continue;
+      const ahead = (ox * vx + oz * vz) / od; if (ahead < 0.3) continue;
+      const side = -ox * vz + oz * vx, sgn = side > 0 || (side === 0 && this.id % 2) ? -1 : 1, w = (1.8 - od) / 1.8 * ahead;
+      sx += -vz * sgn * w; sz += vx * sgn * w;   // vuông góc hướng đi, về phía không có đồng đội
+    }
+    vx += sx * 1.4; vz += sz * 1.4; const l2 = Math.hypot(vx, vz) || 1;
+    const sp = this.def.speed;
+    this.vel.set(vx / l2 * sp, 0, vz / l2 * sp); this.pos.addScaledVector(this.vel, dt); this.anim.locomotion(sp);
+  }
+  /** Kẹt đường: 1,2 s mà khoảng cách tới mục tiêu không giảm được 0,2 m mỗi nửa giây → bỏ qua mục tiêu đó 2,5 s. */
+  checkStuck(t, dist, dt) {
+    this.progT += dt;
+    if (this.progT < 0.5) return;
+    this.stuckT = this.progD - dist < 0.2 ? this.stuckT + this.progT : 0;
+    this.progT = 0; this.progD = dist;
+    if (this.stuckT >= 1.2) { this.avoid = { unit: t, t: 2.5 }; this.retarget = 0; this.stuckT = 0; combatLog.unstuck++; }
   }
   faceTo(p, dt, k) { const want = Math.atan2(p.x - this.pos.x, p.z - this.pos.z); this.yaw += angDiff(this.yaw, want) * Math.min(1, k * dt); }
   snapFace(p) { this.yaw = Math.atan2(p.x - this.pos.x, p.z - this.pos.z); }
@@ -192,6 +281,7 @@ class Unit {
     const heavy = name === 'HeavyAttack';
     this.anim.play(name, tim);
     this.atkCd = 1 / (this.def.aspd * this.bonus.aspd);
+    const act = this.rig.action || null;   // rig thủ tục: đo độ lệch giữa tư thế va chạm và lúc gây sát thương
     const tl = new SkillTimeline(name, this);
     tl.at(tim.windup, 'AnimationEvent', () => { if (!ranged) { this.anim.trail(true); Sfx.whoosh(); } });
     tl.at(tim.windup + 0.02, 'SpawnVFX', () => {
@@ -202,6 +292,7 @@ class Unit {
       else vfx.slash(this.pos, this.yaw, col, this.def.range * 0.95, tilt, 0.24, 1.1, name === 'Attack02');
     });
     tl.at(tim.active, ranged ? 'LaunchProjectile' : 'ApplyDamage', () => {
+      if (act && this.rig.action === act) { combatLog.syncChecks++; combatLog.syncMaxErr = Math.max(combatLog.syncMaxErr, Math.abs(act.t - act.ae)); }
       if (!t.alive) return;
       if (ranged) Projectiles.basic(this, t, heavy);
       else if (t.pos.distanceTo(this.pos) <= this.def.range + 0.9) {
@@ -214,8 +305,10 @@ class Unit {
     this.attackTl = runTimeline(tl);
   }
   startCast() {
-    const skill = SKILLS[this.def.skill], t = this.findTarget();
+    const skill = SKILLS[this.def.skill], t = skill && (skill.pick ? skill.pick(this) : this.findTarget());
     if (!skill || !t) { this.fsm.set('move'); return; }
+    combatLog.casts[this.def.skill] = (combatLog.casts[this.def.skill] || 0) + 1;
+    if (skill.ready && !skill.ready(this)) combatLog.forcedCasts = (combatLog.forcedCasts || 0) + 1;
     this.mana = 0;
     this.casting = { released: false, tl: null };
     showBanner(this.team === 'ally' && skill.allyName ? skill.allyName : skill.name, this.team);
@@ -223,6 +316,8 @@ class Unit {
   }
   simStep(dt) {
     this.retarget -= dt; this.atkCd -= dt; this.dashCd -= dt;
+    if (this.ccImmune > 0) this.ccImmune -= dt;
+    if (this.avoid) { this.avoid.t -= dt; if (this.avoid.t <= 0) this.avoid = null; }
     if (this.alive) {
       if (this.status.stun > 0) { this.status.stun -= dt; if (this.fsm.name !== 'stun' && this.fsm.name !== 'cast' && this.fsm.name !== 'knockback') this.fsm.set('stun'); if (Math.random() < 0.25) vfx.particles.emit(this.pos.x + Math.sin(performance.now() * 0.01) * 0.4, 2.15, this.pos.z + Math.cos(performance.now() * 0.01) * 0.4, 0, 0.2, 0, 0.3, 0.16, 0.05, COLORS.allyB, 0.9, 0); }
       if (this.status.burn > 0) { this.status.burn -= dt; this.status.burnTick -= dt; if (this.status.burnTick <= 0) { this.status.burnTick = 0.5; dealDamage(this.status.burnSrc, this, this.status.burnDmg, { dot: true }); }

@@ -16,9 +16,32 @@ function floatText(pos, text, color, size = 1, crit = false) {
   floaters.push({ x: pos.x + rand(-0.3, 0.3), y: pos.y + 0.5, z: pos.z + rand(-0.3, 0.3), text, color, size, crit, t: 0 });
 }
 
+/** Thống kê giao chiến (cộng dồn) – dùng cho bài kiểm thử AI và để soi cân bằng. */
+const combatLog = { dodges: 0, crits: 0, stuns: 0, resisted: 0, kites: 0, unstuck: 0, syncChecks: 0, syncMaxErr: 0, casts: {}, badCasts: 0 };
+
+/** Khống chế: thời gian choáng nhân theo vai trò (tướng đỡ đòn kháng 40%), và sau khi hết choáng được miễn
+ *  khống chế 0,8 giây để không bị khoá choáng liên hoàn. Tướng đang tung chiêu có giáp chiêu (không bị ngắt). */
+function applyStun(u, dur) {
+  if (!u || !u.alive || dur <= 0) return false;
+  if (u.ccImmune > 0) { combatLog.resisted++; floatText(u.chest(_v2.clone()), 'Kháng', '#c9d6df', 0.75); return false; }
+  const d = dur * (ROLES[u.def.role] ? ROLES[u.def.role].tenacity : 1);
+  if (u.status.stun <= 0) floatText(u.chest(_v2.clone()), 'Choáng', '#ffe08a', 0.8);
+  u.status.stun = Math.max(u.status.stun, d); combatLog.stuns++;
+  return true;
+}
+
 function dealDamage(src, dst, mult, opts = {}) {
   if (!dst || !dst.alive || !src) return 0;
+  // Né tránh: chỉ với đòn đánh thường (kỹ năng và sát thương theo thời gian luôn trúng); đang choáng / tung chiêu thì không né được.
+  if (!opts.skill && !opts.dot && dst.def.dodge > 0 && dst.status.stun <= 0 && dst.fsm.name !== 'cast' && Math.random() < dst.def.dodge) {
+    combatLog.dodges++;
+    floatText(dst.chest(_v2.clone()), 'Né', '#bfe3ff', 0.85);
+    dst.anim.hit(src.pos, 0.3);   // nghiêng người tránh
+    if (!src.manaLock && src.alive) src.mana = Math.min(src.maxMana, src.mana + 10);
+    return 0;
+  }
   const crit = opts.crit !== undefined ? opts.crit : Math.random() < src.def.crit;
+  if (crit && !opts.dot) combatLog.crits++;
   const mitig = dst.def_ / (dst.def_ + 100);
   let dmg = Math.round(src.atk * mult * (1 - mitig) * (crit ? src.def.critDmg : 1) * rand(0.95, 1.05));
   if (opts.skill && src.bonus) dmg = Math.round(dmg * src.bonus.skill);
@@ -44,7 +67,7 @@ function dealDamage(src, dst, mult, opts = {}) {
     const dx = dst.pos.x - (opts.from || src.pos).x, dz = dst.pos.z - (opts.from || src.pos).z, l = Math.hypot(dx, dz) || 1;
     dst.knock.set(dx / l * opts.knock * 2.2, 0, dz / l * opts.knock * 2.2); dst.fsm.set('knockback');
   }
-  if (opts.stun && dst.hp > 0) { dst.status.stun = Math.max(dst.status.stun, opts.stun); floatText(c, 'Choáng', '#ffe08a', 0.8); }
+  if (opts.stun && dst.hp > 0) applyStun(dst, opts.stun);
   if (opts.burn && dst.hp > 0) { dst.status.burn = 3; dst.status.burnSrc = src; dst.status.burnDmg = opts.burn; }
   if (dst.hp <= 0) { dst.fsm.set('dead'); onUnitDeath(dst); }
   return dmg;
