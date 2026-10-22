@@ -1,7 +1,7 @@
 # Vạn Kiếm Kỳ Trận (bản HTML5 / Three.js)
 
 Auto chess tu tiên anime 3D chạy trực tiếp trên trình duyệt (Android, iOS, Windows). Một file: `index.html`.
-Thư viện: Three.js r128 (cdnjs) + GLTFLoader (jsDelivr).
+Thư viện: Three.js r128 (cdnjs) + GLTFLoader, SkeletonUtils (jsDelivr).
 
 Chạy thử: mở `index.html` qua một web server tĩnh (ví dụ `npx serve web`) hoặc dùng link artifact.
 
@@ -15,7 +15,7 @@ Chạy thử: mở `index.html` qua một web server tĩnh (ví dụ `npx serve 
 | 5 | RibbonBatch | Nhiều dải vệt hướng camera trong 1 draw call (vệt kiếm, sét, tóc, dải lụa) |
 | 6 | VFXManager | Pool mesh hiệu ứng, cập nhật, dọn dẹp |
 | 7 | CharacterRig | Nhân vật thủ tục có khớp, động tác chuẩn bị → va chạm → thu chiêu, IK hướng nhìn, IK chân 2 khớp (bàn chân bám đất, gối tự gập, bàn chân phẳng), váy/tóc/dải lụa có chuyển động phụ |
-| 8 | GLTFRig | Thay bằng GLB/GLTF có xương: AnimationMixer, crossfade, bỏ root motion ngang, socket tay phải |
+| 8 | GLTFRig | Thay bằng GLB/GLTF có xương: nhân bản bộ xương (SkeletonUtils), AnimationMixer, crossfade, bỏ root motion ngang, socket tay phải, IK chân 2 khớp |
 | 9 | AnimationStateMachine | Trạng thái logic có chặn kẹt (maxTime → fallback) |
 | 10 | SkillTimeline | Sự kiện theo thời gian mô phỏng: AnimationEvent, SpawnVFX, PlaySound, LaunchProjectile, ApplyDamage, ApplyStatusEffect, CameraImpulse, Cleanup; pause / resume / seek / cancel |
 | 12 | CombatCamera | Góc nhìn auto chess, xoay / zoom chuột & cảm ứng, rung (trauma), impulse lò xo, camera điện ảnh có thể tắt |
@@ -30,8 +30,13 @@ Cài đặt → "Chọn file .glb". Tên clip được nhận theo mẫu: Idle, 
 SkillCast, UltimateCast, Hit, Stun, Knockback, Death, Victory. Kiếm gắn vào xương có tên chứa RightHand / hand_r.
 Mô hình được tự co về cao 1.8 m; dịch chuyển ngang của xương Hips bị loại bỏ (logic tự di chuyển nhân vật).
 
+**IK chân cho GLB**: tìm xương bàn chân theo tên (Foot/Ankle + Left/Right, `.L/.R`, `_l/_r`, `_L_` – Mixamo, Rigify, Unreal, VRM),
+lấy 2 xương cha làm cẳng chân và đùi. Sau khi AnimationMixer chạy, nếu cổ chân thấp hơn độ cao lúc đứng (đo từ tư thế gốc)
+thì giải two-bone IK trong không gian thế giới (gối gập theo hướng mặt nhân vật), giữ nguyên hướng bàn chân.
+Xương bị IK chỉnh được trả về giá trị cũ trước khung kế tiếp nên không cộng dồn sai số. Bảng Cài đặt hiển thị chuỗi xương nhận được.
+
 ## Giới hạn hiện tại
-Nhân vật và animation là placeholder thủ tục, không phải animation dựng tay. IK chân chỉ áp dụng cho nhân vật thủ tục (chưa cho GLB). Chưa có VFX Graph.
+Nhân vật và animation là placeholder thủ tục, không phải animation dựng tay. Chưa có VFX Graph. IK chân chỉ nâng chân lên khi bị xuyên đất, chưa khoá chân khi đứng yên (foot locking).
 
 ## Cài đặt liên quan
 - **Số phi kiếm** (Vạn Kiếm Quy Tông): theo mức đồ hoạ (14 / 24 / 36 / 56) hoặc tự chọn 8–96.
