@@ -55,6 +55,55 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 }
 .cta.alt { background: var(--panel); color: var(--paper); border: 1px solid var(--panel-line); box-shadow: none; }
 .cta:disabled { opacity: 0.45; cursor: default; }
+/* ---------- Kinh tế, tộc/hệ ---------- */
+.left-col { display: flex; flex-direction: column; gap: 6px; min-width: 0; max-width: min(300px, 58vw); }
+.econ { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 5px; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.econ b { font-weight: 700; } .econ .hp b { color: #ff8a7a; } .econ .gold b { color: var(--gold); } .econ .lvl b { color: var(--azure); }
+.xp { height: 4px; border-radius: 2px; background: rgba(255,255,255,0.1); margin-top: 5px; overflow: hidden; }
+.xp i { display: block; height: 100%; background: var(--azure); transform-origin: left; transform: scaleX(0); transition: transform 0.25s ease; }
+.xp-label { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+#traits { display: flex; flex-direction: column; gap: 4px; pointer-events: none; }
+.trait { background: var(--panel); border: 1px solid var(--panel-line); border-left: 3px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 4px 8px; font-size: 0.74rem; color: var(--muted); }
+.trait.on { border-left-color: var(--c); color: var(--paper); }
+.trait b { color: var(--c); } .trait .cnt { font-variant-numeric: tabular-nums; }
+.trait .fx { display: block; font-size: 0.7rem; color: var(--muted); }
+
+/* ---------- Hàng chờ & cửa hàng ---------- */
+#prep-panel { pointer-events: auto; width: min(560px, 100%); display: flex; flex-direction: column; gap: 6px; background: var(--panel); border: 1px solid var(--panel-line); border-radius: 12px; padding: 8px; }
+#prep-panel[hidden] { display: none; }
+.bench-row { display: flex; align-items: center; gap: 6px; }
+.bench-row .lbl { font-size: 0.7rem; color: var(--muted); writing-mode: vertical-rl; transform: rotate(180deg); }
+#bench { flex: 1; display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
+.slot { aspect-ratio: 1; min-height: 40px; border-radius: 8px; border: 1px dashed rgba(196,220,214,0.22); background: rgba(255,255,255,0.03); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 2px; overflow: hidden; }
+.slot.filled { border-style: solid; background: var(--tb, #33413f); border-color: var(--tl, #7f9a95); }
+.slot.sel, .slot.filled.sel { outline: 2px solid var(--gold); outline-offset: 1px; }
+.slot .st { font-size: 0.62rem; color: #ffd166; line-height: 1; }
+.slot .sn { font-size: 0.64rem; font-weight: 600; line-height: 1.1; text-align: center; overflow-wrap: anywhere; }
+#shop { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+.card { min-height: 64px; border-radius: 9px; border: 1px solid var(--tl, #7f9a95); background: linear-gradient(180deg, var(--tb, #33413f), rgba(10,18,24,0.9)); padding: 5px 5px 4px; display: flex; flex-direction: column; align-items: flex-start; text-align: left; gap: 2px; min-width: 0; }
+.card .nm { font-weight: 700; font-size: 0.76rem; line-height: 1.15; }
+.card .tr { font-size: 0.62rem; color: var(--muted); line-height: 1.2; }
+.card .ft { margin-top: auto; display: flex; width: 100%; justify-content: space-between; align-items: center; }
+.cost { font-weight: 700; color: var(--gold); font-variant-numeric: tabular-nums; }
+.cost::before { content: ""; display: inline-block; width: 0.55em; height: 0.55em; background: var(--gold); transform: rotate(45deg); margin-right: 0.3em; vertical-align: 0.05em; }
+.card .own { font-size: 0.64rem; color: var(--paper); background: rgba(0,0,0,0.35); border-radius: 4px; padding: 0 4px; }
+.card.ready { box-shadow: 0 0 0 2px #ffd166 inset; }
+.card.poor { opacity: 0.5; }
+.card.sold { border-style: dashed; border-color: rgba(196,220,214,0.15); background: transparent; }
+.t1 { --tb: #33413f; --tl: #7f9a95; } .t2 { --tb: #22405f; --tl: #7cc4ff; } .t3 { --tb: #4a3366; --tl: #c9a0ff; }
+.shop-actions { display: flex; gap: 5px; flex-wrap: wrap; }
+.sbtn { flex: 1 1 auto; background: rgba(255,255,255,0.06); border: 1px solid var(--panel-line); border-radius: 8px; padding: 8px 10px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; }
+.sbtn:disabled { opacity: 0.45; cursor: default; }
+.sbtn.sell { border-color: rgba(226,85,63,0.6); color: #ffb3a6; }
+.main-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+@media (max-height: 520px) and (orientation: landscape) {
+  .hud-bottom { justify-content: space-between; align-items: flex-end; flex-wrap: nowrap; }
+  #prep-panel { width: min(520px, 62vw); padding: 6px; gap: 4px; }
+  .card { min-height: 52px; } .slot { aspect-ratio: auto; min-height: 0; height: 36px; }
+  .main-actions { flex-direction: column; gap: 6px; } .main-actions .cta { padding: 9px 14px; font-size: 0.88rem; }
+  .hint { display: none; }
+  .xp-label, #traits .fx { display: none; }
+}
 .hint { pointer-events: none; width: 100%; text-align: center; font-size: 0.78rem; color: var(--muted); text-shadow: 0 1px 2px #000; }
 
 /* ---------- Banner chiêu thức ---------- */
@@ -71,7 +120,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
   font-family: var(--font-display); font-weight: 700; font-size: clamp(2.6rem, 11vw, 5rem); color: var(--gold);
   text-shadow: 0 0 24px rgba(233, 196, 106, 0.6), 0 3px 6px #000;
 }
-#toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 92px); transform: translateX(-50%); z-index: 7; pointer-events: none;
+#toast { position: fixed; left: 50%; top: 27%; transform: translateX(-50%); z-index: 7; pointer-events: none;
   background: var(--panel); border: 1px solid var(--panel-line); border-radius: 10px; padding: 8px 14px; font-size: 0.85rem; max-width: 90vw; text-align: center; }
 
 /* ---------- Bảng cài đặt ---------- */
@@ -117,10 +166,20 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 <canvas id="fx2d" aria-hidden="true"></canvas>
 
 <div class="hud-top">
-  <div class="round-card">
-    <h1 id="round-title">Vòng 1</h1>
-    <div class="sub" id="phase-label">Chuẩn bị – chạm một đồng đội rồi chạm ô để đổi vị trí</div>
-    <div class="count"><span class="ally" id="ally-count">Đồng minh 4</span><span class="enemy" id="enemy-count">Địch 3</span></div>
+  <div class="left-col">
+    <div class="round-card">
+      <h1 id="round-title">Vòng 1</h1>
+      <div class="sub" id="phase-label">Chuẩn bị</div>
+      <div class="count"><span class="ally" id="ally-count">Đồng minh 2</span><span class="enemy" id="enemy-count">Địch 2</span></div>
+      <div class="econ">
+        <span class="hp" title="Máu người chơi">Máu <b id="hp-val">100</b></span>
+        <span class="gold" title="Linh thạch">Linh thạch <b id="gold-val">6</b></span>
+        <span class="lvl">Cấp <b id="lvl-val">3</b> · <b id="cap-val">2/3</b> quân</span>
+      </div>
+      <div class="xp" aria-hidden="true"><i id="xp-fill"></i></div>
+      <div class="xp-label">Kinh nghiệm <span id="xp-val">0/6</span></div>
+    </div>
+    <div id="traits" aria-label="Tộc / hệ đang kích hoạt"></div>
   </div>
   <div class="top-actions">
     <span class="chip" id="fps">— fps</span>
@@ -135,9 +194,21 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 <div id="toast" hidden></div>
 
 <div class="hud-bottom">
-  <button class="cta" id="btn-start">Bắt đầu giao chiến</button>
-  <button class="cta alt" id="btn-ult">Thi triển Vạn Kiếm</button>
-  <button class="cta alt" id="btn-cam">Góc nhìn</button>
+  <div id="prep-panel">
+    <div class="bench-row"><span class="lbl">Hàng chờ</span><div id="bench"></div></div>
+    <div id="shop" aria-label="Cửa hàng tu sĩ"></div>
+    <div class="shop-actions">
+      <button class="sbtn" id="btn-reroll">Làm mới <span class="cost">2</span></button>
+      <button class="sbtn" id="btn-xp">Mua kinh nghiệm <span class="cost">4</span></button>
+      <button class="sbtn sell" id="btn-sell" hidden>Bán</button>
+      <button class="sbtn" id="btn-tobench" hidden>Về hàng chờ</button>
+    </div>
+  </div>
+  <div class="main-actions">
+    <button class="cta" id="btn-start">Bắt đầu giao chiến</button>
+    <button class="cta alt" id="btn-ult">Thi triển Vạn Kiếm</button>
+    <button class="cta alt" id="btn-cam">Góc nhìn</button>
+  </div>
   <div class="hint" id="hint">Kéo để xoay bàn cờ · Chụm hai ngón / lăn chuột để phóng to</div>
 </div>
 
@@ -176,13 +247,15 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
   <div class="intro-card">
     <div class="seal">Tu tiên · Kỳ trận</div>
     <h1>Vạn Kiếm Kỳ Trận</h1>
-    <p>Bốn tu sĩ trấn giữ Vân Đài trước làn sóng ma tu. Xếp đội hình trên bàn cờ, rồi xem họ tự giao chiến. Khi linh lực đầy, mỗi người tự tung tuyệt kỹ.</p>
+    <p>Trấn giữ Vân Đài trước những làn sóng ma tu. Dùng linh thạch chiêu mộ tu sĩ, xếp đội hình trên bàn cờ rồi xem họ tự giao chiến. Thua một vòng là mất máu – hết máu là hết ván.</p>
     <ul>
-      <li><b>Kiếm Tiên</b> – tuyệt kỹ Vạn Kiếm Quy Tông</li>
-      <li><b>Lôi Pháp Sư</b> – Thiên Lôi Quyết · <b>Hỏa Linh</b> – Hỏa Phượng Phần Thiên</li>
-      <li><b>Hộ Pháp</b> – Hộ Thể Chân Khí cho đồng đội</li>
+      <li><b>3 bản giống nhau</b> tự gộp thành ★2, 3 bản ★2 thành ★3</li>
+      <li><b>Tộc/hệ:</b> Kiếm Tu · Pháp Tu · Hộ Pháp · Ma Tu – đủ số tướng khác nhau sẽ kích hoạt</li>
+      <li>Lãi 1 linh thạch cho mỗi 10 đang giữ (tối đa 5) · chuỗi thắng/thua được thưởng thêm</li>
+      <li>Tiến trình tự lưu trên máy này sau mỗi thao tác</li>
     </ul>
     <button class="cta" id="btn-enter">Nhập trận</button>
+    <button class="cta alt" id="btn-newgame" hidden>Ván mới</button>
     <p class="fine">Nhân vật và animation là bản thủ tục (placeholder) – có thể thay bằng file GLB trong Cài đặt.</p>
   </div>
 </div>
@@ -706,7 +779,7 @@ class RibbonBatch {
  *  6. VFXManager – điều phối hiệu ứng (pool mesh, cập nhật, dọn dẹp)
  * ===================================================================*/
 const COLORS = {
-  allyA: new THREE.Color(0x7cc4ff), allyB: new THREE.Color(0xf2cf73), allyCore: new THREE.Color(0xd9f1ff),
+  allyA: new THREE.Color(0x7cc4ff), allyViolet: new THREE.Color(0x9fa8ff), allyB: new THREE.Color(0xf2cf73), allyCore: new THREE.Color(0xd9f1ff),
   enemyA: new THREE.Color(0xe2553f), enemyB: new THREE.Color(0xb07cff), fire: new THREE.Color(0xff8a3a), fireHot: new THREE.Color(0xffd27a),
   thunder: new THREE.Color(0xa9d4ff), shield: new THREE.Color(0x8ff0d0), white: new THREE.Color(0xffffff), blood: new THREE.Color(0xff3b30)
 };
@@ -1678,17 +1751,26 @@ const LOOKS = {
   hophap: { robe: 0x5b6b4a, trim: 0xd9b45a, inner: 0x343d2a, hair: 0x1a1612, skin: 0xe6c3a5, accent: 0xd9b45a, weapon: 'spear', bulk: 1.12, hairLen: 5, trailColor: new THREE.Color(0xe9d58a) },
   huyetkiem: { robe: 0x2a1216, trim: 0xc2302a, inner: 0x1a0a0c, hair: 0x0a0a0c, skin: 0xd8b8a8, accent: 0xc2302a, weapon: 'blade', hairLen: 8, trailColor: new THREE.Color(0xff4a3a), mask: 0x1a1a1a },
   uminh: { robe: 0x3a2350, trim: 0xb07cff, inner: 0x22143a, hair: 0x6a4a8a, skin: 0xcfc0d8, accent: 0xb07cff, weapon: 'staff', orb: 0xb07cff, hairLen: 7, trailColor: new THREE.Color(0xc08cff) },
-  mathu: { robe: 0x4a3a2c, trim: 0xa83a2a, inner: 0x2a1f18, hair: 0x2a1a10, skin: 0xb88a70, accent: 0xa83a2a, weapon: 'claws', bulk: 1.3, hairLen: 5, trailColor: new THREE.Color(0xff5a3a) }
+  mathu: { robe: 0x4a3a2c, trim: 0xa83a2a, inner: 0x2a1f18, hair: 0x2a1a10, skin: 0xb88a70, accent: 0xa83a2a, weapon: 'claws', bulk: 1.3, hairLen: 5, trailColor: new THREE.Color(0xff5a3a) },
+  kiemdong: { robe: 0xd6e4f0, trim: 0x5b9bd5, inner: 0x3b5f86, hair: 0x2a1d14, skin: 0xf2d6c2, accent: 0xc0c8d0, weapon: 'sword', hairLen: 6, trailColor: new THREE.Color(0x9fd8ff) },
+  thietve: { robe: 0x4f5560, trim: 0xb0b8c0, inner: 0x2c3038, hair: 0x141414, skin: 0xe2c0a2, accent: 0xb0b8c0, weapon: 'spear', bulk: 1.15, hairLen: 4, crown: true, trailColor: new THREE.Color(0xd8e0e8) },
+  anhkiem: { robe: 0x1d2433, trim: 0x6fb7ff, inner: 0x101522, hair: 0x0c0c10, skin: 0xe8cdb8, accent: 0x6fb7ff, weapon: 'blade', hairLen: 8, mask: 0x2a3550, trailColor: new THREE.Color(0x8fc8ff) },
+  uhon: { robe: 0x2c2448, trim: 0x9fa8ff, inner: 0x1a1630, hair: 0xe8e8f0, skin: 0xe6d6e6, accent: 0x9fa8ff, weapon: 'staff', orb: 0x9fa8ff, hairLen: 8, trailColor: new THREE.Color(0xa8b0ff) }
 };
 
+/* cost: giá ở cửa hàng (bậc hiếm 1–3); traits: tộc/hệ. Đơn vị phe địch không có cost. */
 const UNIT_DEFS = {
-  kiemtien: { name: 'Kiếm Tiên', look: 'kiemtien', hp: 820, atk: 62, def: 28, aspd: 1.0, range: 2.2, speed: 4.6, mana: 100, mana0: 45, crit: 0.15, critDmg: 1.7, skill: 'vanKiem', dash: true, poise: 50 },
-  loi: { name: 'Lôi Pháp Sư', look: 'loi', hp: 560, atk: 50, def: 16, aspd: 0.8, range: 8, speed: 3.6, mana: 80, mana0: 20, crit: 0.08, critDmg: 1.5, skill: 'thienLoi', ranged: 'thunder', poise: 30 },
-  hoa: { name: 'Hỏa Linh', look: 'hoa', hp: 540, atk: 54, def: 15, aspd: 0.75, range: 7.5, speed: 3.6, mana: 90, mana0: 30, crit: 0.08, critDmg: 1.5, skill: 'hoaPhuong', ranged: 'fire', poise: 30 },
-  hophap: { name: 'Hộ Pháp', look: 'hophap', hp: 1100, atk: 42, def: 45, aspd: 0.85, range: 2.6, speed: 3.8, mana: 70, mana0: 30, crit: 0.05, critDmg: 1.5, skill: 'hoThe', poise: 80 },
+  kiemtien: { name: 'Kiếm Tiên', cost: 3, traits: ['kiemtu'], look: 'kiemtien', hp: 820, atk: 62, def: 28, aspd: 1.0, range: 2.2, speed: 4.6, mana: 100, mana0: 45, crit: 0.15, critDmg: 1.7, skill: 'vanKiem', dash: true, poise: 50 },
+  loi: { name: 'Lôi Pháp Sư', short: 'Lôi Pháp', cost: 2, traits: ['phaptu'], look: 'loi', hp: 560, atk: 50, def: 16, aspd: 0.8, range: 8, speed: 3.6, mana: 80, mana0: 20, crit: 0.08, critDmg: 1.5, skill: 'thienLoi', ranged: 'thunder', poise: 30 },
+  hoa: { name: 'Hỏa Linh', cost: 2, traits: ['phaptu'], look: 'hoa', hp: 540, atk: 54, def: 15, aspd: 0.75, range: 7.5, speed: 3.6, mana: 90, mana0: 30, crit: 0.08, critDmg: 1.5, skill: 'hoaPhuong', ranged: 'fire', poise: 30 },
+  hophap: { name: 'Hộ Pháp', cost: 1, traits: ['hophap'], look: 'hophap', hp: 1100, atk: 42, def: 45, aspd: 0.85, range: 2.6, speed: 3.8, mana: 70, mana0: 30, crit: 0.05, critDmg: 1.5, skill: 'hoThe', poise: 80 },
   huyetkiem: { name: 'Huyết Ảnh Kiếm Khách', look: 'huyetkiem', hp: 700, atk: 58, def: 22, aspd: 1.05, range: 2.2, speed: 4.8, mana: 80, mana0: 20, crit: 0.15, critDmg: 1.6, skill: 'huyetAnh', dash: true, poise: 45 },
   uminh: { name: 'U Minh Ma Tu', look: 'uminh', hp: 520, atk: 48, def: 14, aspd: 0.8, range: 7.5, speed: 3.5, mana: 80, mana0: 20, crit: 0.08, critDmg: 1.5, skill: 'uMinh', ranged: 'nether', poise: 30 },
-  mathu: { name: 'Ma Thú Hống', look: 'mathu', hp: 1250, atk: 46, def: 38, aspd: 0.75, range: 2.4, speed: 3.6, mana: 90, mana0: 25, crit: 0.05, critDmg: 1.5, skill: 'phaDia', poise: 90 }
+  mathu: { name: 'Ma Thú Hống', look: 'mathu', hp: 1250, atk: 46, def: 38, aspd: 0.75, range: 2.4, speed: 3.6, mana: 90, mana0: 25, crit: 0.05, critDmg: 1.5, skill: 'phaDia', poise: 90 },
+  kiemdong: { name: 'Kiếm Đồng', cost: 1, traits: ['kiemtu'], look: 'kiemdong', hp: 600, atk: 48, def: 20, aspd: 0.95, range: 2.2, speed: 4.4, mana: 60, mana0: 20, crit: 0.1, critDmg: 1.5, skill: 'kiemKhi', poise: 40 },
+  thietve: { name: 'Thiết Vệ', cost: 1, traits: ['hophap'], look: 'thietve', hp: 920, atk: 40, def: 40, aspd: 0.8, range: 2.6, speed: 3.8, mana: 80, mana0: 30, crit: 0.05, critDmg: 1.5, skill: 'phaDia', poise: 80 },
+  anhkiem: { name: 'Ảnh Kiếm', cost: 2, traits: ['kiemtu', 'matu'], look: 'anhkiem', hp: 640, atk: 56, def: 20, aspd: 1.05, range: 2.2, speed: 4.8, mana: 70, mana0: 20, crit: 0.18, critDmg: 1.6, skill: 'huyetAnh', dash: true, poise: 45 },
+  uhon: { name: 'U Hồn Sư', short: 'U Hồn', cost: 3, traits: ['phaptu', 'matu'], look: 'uhon', hp: 600, atk: 56, def: 16, aspd: 0.8, range: 7.5, speed: 3.5, mana: 80, mana0: 30, crit: 0.1, critDmg: 1.5, skill: 'uMinh', ranged: 'nether', poise: 30 }
 };
 
 /* =====================================================================
@@ -1720,13 +1802,15 @@ class AnimationController {
 
 let unitIdSeq = 0;
 class Unit {
-  constructor(key, team, c, r) {
+  constructor(key, team, c, r, star = 1) {
     const d = UNIT_DEFS[key];
     this.id = ++unitIdSeq; this.key = key; this.def = d; this.team = team; this.homeTile = { c, r };
+    this.star = star; this.bonus = defaultBonus();
     this.U = ShaderLibrary.makeUnitUniforms(team === 'ally' ? 0x9fd8ff : 0xff6a50);
     this.U.uEdgeColor.value.set(team === 'ally' ? 0x9fd8ff : 0xff5030);
     this.rig = customRigFactory && key === 'kiemtien' && team === 'ally' ? customRigFactory() : new CharacterRig(LOOKS[d.look], this.U);
     scene.add(this.rig.root);
+    this.rig.root.scale.setScalar(STAR_SCALE[star]);
     this.anim = new AnimationController(this);
     this.pos = tileCenter(c, r); this.yaw = team === 'ally' ? 0 : Math.PI; this.vel = new V3();
     this.fsm = new AnimationStateMachine(this);
@@ -1735,9 +1819,9 @@ class Unit {
   }
   get alive() { return this.hp > 0; }
   reset(scale) {
-    const d = this.def;
-    this.maxHp = Math.round(d.hp * scale); this.hp = this.maxHp; this.atk = d.atk * scale; this.def_ = d.def * Math.sqrt(scale);
-    this.mana = d.mana0; this.maxMana = d.mana; this.shield = 0; this.shieldTime = 0;
+    const d = this.def, b = this.bonus, sm = STAR_MUL[this.star];
+    this.maxHp = Math.round(d.hp * scale * sm * b.hp); this.hp = this.maxHp; this.atk = d.atk * scale * sm * b.atk; this.def_ = d.def * Math.sqrt(scale) + b.def;
+    this.mana = Math.min(d.mana, d.mana0 + b.mana0); this.maxMana = d.mana; this.shield = 0; this.shieldTime = 0;
     this.status = { stun: 0, burn: 0, burnTick: 0, burnDmg: 0 };
     this.target = null; this.retarget = 0; this.atkCd = rand(0, 0.4); this.attackIdx = 0; this.dashCd = 0;
     this.knock = new V3(); this.deathT = 0; this.casting = null; this.flash = 0; this.manaLock = false;
@@ -1846,7 +1930,7 @@ class Unit {
     const tim = ATTACK_TIMING[ranged ? 'ranged' : 'melee'][name];
     const heavy = name === 'HeavyAttack';
     this.anim.play(name, tim);
-    this.atkCd = 1 / this.def.aspd;
+    this.atkCd = 1 / (this.def.aspd * this.bonus.aspd);
     const tl = new SkillTimeline(name, this);
     tl.at(tim.windup, 'AnimationEvent', () => { if (!ranged) { this.anim.trail(true); Sfx.whoosh(); } });
     tl.at(tim.windup + 0.02, 'SpawnVFX', () => {
@@ -1873,7 +1957,7 @@ class Unit {
     if (!skill || !t) { this.fsm.set('move'); return; }
     this.mana = 0;
     this.casting = { released: false, tl: null };
-    showBanner(skill.name, this.team);
+    showBanner(this.team === 'ally' && skill.allyName ? skill.allyName : skill.name, this.team);
     this.casting.tl = runTimeline(skill.build(this, t, () => { if (this.casting) this.casting.released = true; }));
   }
   simStep(dt) {
@@ -1925,11 +2009,13 @@ function dealDamage(src, dst, mult, opts = {}) {
   const crit = opts.crit !== undefined ? opts.crit : Math.random() < src.def.crit;
   const mitig = dst.def_ / (dst.def_ + 100);
   let dmg = Math.round(src.atk * mult * (1 - mitig) * (crit ? src.def.critDmg : 1) * rand(0.95, 1.05));
+  if (opts.skill && src.bonus) dmg = Math.round(dmg * src.bonus.skill);
   dmg = Math.max(1, dmg);
   if (battle.bench) { dst.hp = dst.maxHp; }
   let absorbed = 0;
   if (dst.shield > 0) { absorbed = Math.min(dst.shield, dmg); dst.shield -= absorbed; dmg -= absorbed; if (dst.shieldFx) dst.shieldFx.hit(); if (dst.shield <= 0 && dst.shieldFx) { dst.shieldFx.shatter(); dst.shieldFx = null; } }
   dst.hp = Math.max(0, dst.hp - dmg);
+  if (src.bonus && src.bonus.ls > 0 && src.alive && !opts.dot) src.hp = Math.min(src.maxHp, src.hp + dmg * src.bonus.ls);
   if (!dst.manaLock) dst.mana = Math.min(dst.maxMana, dst.mana + Math.min(12, (dmg + absorbed) * 0.04 + 2));
   if (!opts.dot && !src.manaLock && src.alive) src.mana = Math.min(src.maxMana, src.mana + (opts.skill ? 0 : 10));
   dst.flash = Math.max(dst.flash, opts.dot ? 0.25 : opts.skill ? 0.55 : 1);
@@ -2201,6 +2287,30 @@ const SKILLS = {
     }
   },
 
+  /* -------- KIẾM KHÍ TRẢM (Kiếm Đồng): lưỡi kiếm khí bán nguyệt bay thẳng, xuyên mục tiêu -------- */
+  kiemKhi: {
+    name: 'Kiếm Khí Trảm',
+    build(caster, target, release) {
+      const tl = new SkillTimeline('Kiếm Khí Trảm', caster);
+      const col = caster.team === 'ally' ? COLORS.allyA : COLORS.enemyA;
+      tl.at(0, 'AnimationEvent', () => { caster.snapFace(target.pos); caster.anim.play('Attack03', { dur: 0.75, windup: 0.28, active: 0.36 }); });
+      tl.at(0, 'SpawnVFX', () => vfx.magicCircle(caster.pos, 1.2, col, COLORS.allyB, { reveal: 0.25, life: 0.6, spin: 2 }));
+      tl.at(0.32, 'LaunchProjectile', () => {
+        const dir = new V3(Math.sin(caster.yaw), 0, Math.cos(caster.yaw)), side = new V3(-dir.z, 0, dir.x);
+        Sfx.whoosh();
+        vfx.slash(caster.pos, caster.yaw, col, 2.2, Math.PI / 2, 0.25, 1.1);
+        Projectiles.spawn({ src: caster, target: null, pierce: true, hitSet: new Set(), pos: caster.pos.clone().setY(1.1).addScaledVector(dir, 0.8),
+          vel: dir.clone().multiplyScalar(17), speed: 17, color: col, size: 0.45, life: 0.75, radius: 1.4,
+          update: (p) => { for (let k = -3; k <= 3; k++) { const w = k / 3; // hình bán nguyệt
+            vfx.particles.emit(p.pos.x + side.x * w * 1.3 - dir.x * Math.abs(w) * 0.55, p.pos.y + w * 0.12, p.pos.z + side.z * w * 1.3 - dir.z * Math.abs(w) * 0.55, 0, 0, 0, 0.12, 0.38 * (1 - Math.abs(w) * 0.5), 0.05, col, 0.9, 0); } },
+          onHit: (p, u) => { dealDamage(caster, u, 1.9, { skill: true, color: col }); hitStop(0.03); combatCam.shake(0.08); } });
+      });
+      tl.at(0.75, 'Cleanup', () => release());
+      tl.onCleanup(c => { if (c) release(); });
+      return tl;
+    }
+  },
+
   /* -------- THIÊN LÔI QUYẾT: 3 đạo sét thủ tục -------- */
   thienLoi: {
     name: 'Thiên Lôi Quyết',
@@ -2283,13 +2393,14 @@ const SKILLS = {
     name: 'Huyết Ảnh Trảm',
     build(caster, target, release) {
       const tl = new SkillTimeline('Huyết Ảnh Trảm', caster);
+      const C1 = caster.team === 'ally' ? COLORS.allyA : COLORS.enemyA, C2 = caster.team === 'ally' ? COLORS.allyViolet : COLORS.blood;
       const dir = new V3(); let start = new V3();
       tl.at(0, 'AnimationEvent', () => { caster.anim.play('Dash', { dur: 0.6, windup: 0.25, active: 0.35 }); caster.snapFace(target.pos); });
-      tl.at(0, 'SpawnVFX', () => vfx.magicCircle(caster.pos, 1.5, COLORS.enemyA, COLORS.blood, { reveal: 0.2, life: 0.5, spin: -3 }));
+      tl.at(0, 'SpawnVFX', () => vfx.magicCircle(caster.pos, 1.5, C1, C2, { reveal: 0.2, life: 0.5, spin: -3 }));
       tl.at(0.25, 'SpawnVFX', () => { start = caster.pos.clone(); dir.set(target.pos.x - start.x, 0, target.pos.z - start.z); const len = dir.length(); dir.normalize().multiplyScalar(len + 2.5); Sfx.whoosh(); });
-      tl.track(0.25, 0.45, 'AnimationEvent', (k) => { caster.pos.copy(start).addScaledVector(dir, easeOut(k)); vfx.particles.emit(caster.pos.x, rand(0.4, 1.6), caster.pos.z, 0, 0, 0, 0.4, 0.5, 0.1, COLORS.blood, 0.6, 0); });
-      tl.at(0.4, 'ApplyDamage', () => { aoe(caster, target.pos, 1.8, 2.1, { color: COLORS.blood }); hitStop(0.06); combatCam.shake(0.3); });
-      tl.at(0.42, 'SpawnVFX', () => { for (let i = 0; i < 3; i++) vfx.slash(target.pos, caster.yaw + rand(-0.6, 0.6), COLORS.blood, 2.2, rand(-1.2, 1.2), 0.3, 1.1); });
+      tl.track(0.25, 0.45, 'AnimationEvent', (k) => { caster.pos.copy(start).addScaledVector(dir, easeOut(k)); vfx.particles.emit(caster.pos.x, rand(0.4, 1.6), caster.pos.z, 0, 0, 0, 0.4, 0.5, 0.1, C2, 0.6, 0); });
+      tl.at(0.4, 'ApplyDamage', () => { aoe(caster, target.pos, 1.8, 2.1, { color: C2 }); hitStop(0.06); combatCam.shake(0.3); });
+      tl.at(0.42, 'SpawnVFX', () => { for (let i = 0; i < 3; i++) vfx.slash(target.pos, caster.yaw + rand(-0.6, 0.6), C2, 2.2, rand(-1.2, 1.2), 0.3, 1.1); });
       tl.at(0.75, 'Cleanup', () => release());
       tl.onCleanup(c => { if (c) release(); });
       return tl;
@@ -2301,12 +2412,13 @@ const SKILLS = {
     name: 'U Minh Chú',
     build(caster, target, release) {
       const tl = new SkillTimeline('U Minh Chú', caster);
+      const CV = caster.team === 'ally' ? COLORS.allyViolet : COLORS.enemyB, CR = caster.team === 'ally' ? COLORS.allyA : COLORS.enemyA;
       tl.at(0, 'AnimationEvent', () => caster.anim.play('SkillCast', { dur: 1.2, windup: 0.4, active: 0.5, hold: 0.4 }));
-      tl.at(0, 'SpawnVFX', () => vfx.magicCircle(caster.pos, 1.8, COLORS.enemyB, COLORS.enemyA, { reveal: 0.3, life: 1.2, spin: -1.5 }));
+      tl.at(0, 'SpawnVFX', () => vfx.magicCircle(caster.pos, 1.8, CV, CR, { reveal: 0.3, life: 1.2, spin: -1.5 }));
       [0.45, 0.6, 0.75].forEach((at, i) => tl.at(at, 'LaunchProjectile', () => {
         const foes = caster.enemies(); const t = foes[i % Math.max(1, foes.length)] || target;
-        Projectiles.spawn({ src: caster, target: t, pos: caster.chest(new V3()).add(new V3(rand(-1, 1), 1, rand(-1, 1))), speed: 9, homing: true, turn: 3, arc: 6, color: COLORS.enemyB, size: 0.55, life: 3,
-          onHit: (p, u) => { dealDamage(caster, u, 1.2, { color: COLORS.enemyB, skill: true }); vfx.particles.burst(p.pos, COLORS.enemyB, 18, 6, 0.5, 0.3, { drag: 3 }); } });
+        Projectiles.spawn({ src: caster, target: t, pos: caster.chest(new V3()).add(new V3(rand(-1, 1), 1, rand(-1, 1))), speed: 9, homing: true, turn: 3, arc: 6, color: CV, size: 0.55, life: 3,
+          onHit: (p, u) => { dealDamage(caster, u, 1.2, { color: CV, skill: true }); vfx.particles.burst(p.pos, CV, 18, 6, 0.5, 0.3, { drag: 3 }); } });
       }));
       tl.at(1.0, 'Cleanup', () => release());
       tl.onCleanup(c => { if (c) release(); });
@@ -2316,13 +2428,14 @@ const SKILLS = {
 
   /* -------- PHÁ ĐỊA HỐNG (địch): nhảy lên đập đất, xung kích đỏ hất lùi -------- */
   phaDia: {
-    name: 'Phá Địa Hống',
+    name: 'Phá Địa Hống', allyName: 'Trấn Sơn Kích',
     build(caster, target, release) {
       const tl = new SkillTimeline('Phá Địa Hống', caster);
+      const C1 = caster.team === 'ally' ? COLORS.allyB : COLORS.enemyA, C2 = caster.team === 'ally' ? COLORS.allyA : COLORS.blood;
       tl.at(0, 'AnimationEvent', () => caster.anim.play('HeavyAttack', { dur: 1.2, windup: 0.55, active: 0.7, hold: 0.25 }));
-      tl.at(0, 'SpawnVFX', () => vfx.magicCircle(caster.pos, 3.4, COLORS.enemyA, COLORS.blood, { reveal: 0.6, life: 1.0, spin: 0.6 }));
-      tl.at(0.7, 'ApplyDamage', () => { aoe(caster, caster.pos, 3.6, 1.6, { heavy: true, knock: 2.5, color: COLORS.enemyA }); combatCam.shake(0.45); hitStop(0.07); Sfx.boom(); });
-      tl.at(0.7, 'SpawnVFX', () => { const g = new V3(caster.pos.x, 0, caster.pos.z); vfx.shockwave(g, 4.2, COLORS.enemyA, 0.55, 0.1); vfx.particles.burst(_v1.set(g.x, 0.3, g.z), COLORS.enemyA, 40, 9, 0.6, 0.35, { up: 4, gravity: 10, drag: 1.5 }); flashLight(_v1.set(g.x, 1.5, g.z), 0xff5a3a, 6); });
+      tl.at(0, 'SpawnVFX', () => vfx.magicCircle(caster.pos, 3.4, C1, C2, { reveal: 0.6, life: 1.0, spin: 0.6 }));
+      tl.at(0.7, 'ApplyDamage', () => { aoe(caster, caster.pos, 3.6, 1.6, { heavy: true, knock: 2.5, color: C1 }); combatCam.shake(0.45); hitStop(0.07); Sfx.boom(); });
+      tl.at(0.7, 'SpawnVFX', () => { const g = new V3(caster.pos.x, 0, caster.pos.z); vfx.shockwave(g, 4.2, C1, 0.55, 0.1); vfx.particles.burst(_v1.set(g.x, 0.3, g.z), C1, 40, 9, 0.6, 0.35, { up: 4, gravity: 10, drag: 1.5 }); flashLight(_v1.set(g.x, 1.5, g.z), caster.team === 'ally' ? 0xffd27a : 0xff5a3a, 6); });
       tl.at(1.1, 'Cleanup', () => release());
       tl.onCleanup(c => { if (c) release(); });
       return tl;
@@ -2376,28 +2489,247 @@ function makeShield(u) {
 /* =====================================================================
  * 20. Trận đấu: vòng, đội hình, thắng / thua
  * ===================================================================*/
-const ALLY_LINEUP = [['hophap', 3, 3], ['kiemtien', 4, 3], ['loi', 2, 1], ['hoa', 5, 1]];
-function enemyLineup(round) {
-  const pool = [['mathu', 3, 4], ['huyetkiem', 4, 4], ['uminh', 2, 6], ['huyetkiem', 6, 5], ['uminh', 5, 7], ['mathu', 1, 5]];
-  return pool.slice(0, Math.min(pool.length, 2 + round));
-}
+/* ---------- Tộc / hệ ---------- */
+const TRAITS = {
+  kiemtu: { name: 'Kiếm Tu', tiers: [2, 3], color: '#7cc4ff', desc: ['+20% công', '+45% công, +15% tốc đánh'] },
+  phaptu: { name: 'Pháp Tu', tiers: [2, 3], color: '#c9a0ff', desc: ['Tuyệt kỹ +25%, linh lực đầu +20', 'Tuyệt kỹ +60%, linh lực đầu +40'] },
+  hophap: { name: 'Hộ Pháp', tiers: [2], color: '#e9c46a', desc: ['+30% máu, +20 phòng thủ'] },
+  matu: { name: 'Ma Tu', tiers: [2], color: '#ff8a7a', desc: ['Hút máu 25% sát thương gây ra'] }
+};
+const defaultBonus = () => ({ atk: 1, hp: 1, skill: 1, mana0: 0, ls: 0, aspd: 1, def: 0 });
+const STAR_MUL = [0, 1, 1.8, 3.24], STAR_SCALE = [0, 1, 1.12, 1.24];
+
+/* ---------- Kinh tế & cửa hàng ---------- */
+const SHOP_POOL = { 1: ['kiemdong', 'hophap', 'thietve'], 2: ['loi', 'hoa', 'anhkiem'], 3: ['kiemtien', 'uhon'] };
+const SHOP_ODDS = [null, [100, 0, 0], [100, 0, 0], [75, 25, 0], [55, 35, 10], [40, 40, 20], [30, 40, 30], [25, 40, 35], [20, 40, 40]]; // % bậc 1/2/3 theo cấp
+const XP_NEED = [0, 2, 2, 6, 10, 20, 32, 48, Infinity]; // kinh nghiệm để lên cấp kế tiếp
+const MAX_LEVEL = 8, BENCH_SIZE = 8, SHOP_SIZE = 5, REROLL_COST = 2, XP_COST = 4, XP_BUY = 4, START_HP = 100;
+const sellPrice = (key, star) => UNIT_DEFS[key].cost * Math.pow(3, star - 1) - (star > 1 ? 1 : 0);
+const game = { hp: START_HP, gold: 6, level: 3, xp: 0, streak: 0, bench: new Array(BENCH_SIZE).fill(null), shop: [], over: false, sel: null, lastSummary: '' };
 let customRigFactory = null;
 
-function setupRound(keepAllies = true) {
+const boardAllies = () => units.filter(u => u.team === 'ally');
+const boardCap = () => game.level;
+function rollShop() {
+  const odds = SHOP_ODDS[game.level];
+  game.shop = [];
+  for (let i = 0; i < SHOP_SIZE; i++) {
+    const r = Math.random() * 100, tier = r < odds[0] ? 1 : r < odds[0] + odds[1] ? 2 : 3;
+    const pool = SHOP_POOL[tier]; game.shop.push(pool[Math.floor(Math.random() * pool.length)]);
+  }
+}
+function countCopies(key, star) {
+  return game.bench.filter(e => e && e.key === key && e.star === star).length + boardAllies().filter(u => u.key === key && u.star === star).length;
+}
+function placeUnit(key, star, c, r) {
+  const u = new Unit(key, 'ally', c, r, star); units.push(u);
+  u.rig.setOutline && u.rig.setOutline(Q().outline);
+  return u;
+}
+function removeUnit(u) { const i = units.indexOf(u); if (i >= 0) units.splice(i, 1); if (battle.selected === u) battle.selected = null; u.dispose(); }
+function tileOccupant(c, r) { return boardAllies().find(u => u.homeTile.c === c && u.homeTile.r === r) || null; }
+function freeAllyTile() { for (let r = 3; r >= 0; r--) for (const c of [3, 4, 2, 5, 1, 6, 0, 7]) if (!tileOccupant(c, r)) return { c, r }; return null; }
+
+/** Gộp 3 bản cùng tướng cùng sao → lên sao. Ưu tiên giữ vị trí của bản đang đứng trên bàn. */
+function mergeAll() {
+  let merged = true;
+  while (merged) {
+    merged = false;
+    const groups = {};
+    game.bench.forEach((e, i) => { if (e && e.star < 3) (groups[e.key + '|' + e.star] = groups[e.key + '|' + e.star] || { key: e.key, star: e.star, bench: [], board: [] }).bench.push(i); });
+    boardAllies().forEach(u => { if (u.star < 3) (groups[u.key + '|' + u.star] = groups[u.key + '|' + u.star] || { key: u.key, star: u.star, bench: [], board: [] }).board.push(u); });
+    for (const g of Object.values(groups)) {
+      if (g.bench.length + g.board.length < 3) continue;
+      const keepBoard = g.board[0] || null;
+      let need = 3;
+      const take = [];
+      if (keepBoard) { take.push({ board: keepBoard }); need--; }
+      for (const u of g.board.slice(keepBoard ? 1 : 0)) { if (need <= 0) break; take.push({ board: u }); need--; }
+      let keepBench = -1;
+      for (const i of g.bench) { if (need <= 0) break; if (!keepBoard && keepBench < 0) keepBench = i; take.push({ bench: i }); need--; }
+      const newStar = g.star + 1;
+      let spot;
+      take.forEach(t => { if (t.board) { if (t.board === keepBoard) spot = { ...t.board.homeTile }; removeUnit(t.board); } else game.bench[t.bench] = null; });
+      if (keepBoard) {
+        const u = placeUnit(g.key, newStar, spot.c, spot.r);
+        vfx.particles.burst(u.chest(new V3()), COLORS.allyB, 40, 6, 0.8, 0.35, { up: 3, drag: 2 });
+        vfx.magicCircle(u.pos, 1.4, COLORS.allyB, COLORS.allyA, { reveal: 0.3, life: 0.8, spin: 3 });
+        floatText(u.chest(new V3()), '★'.repeat(newStar), '#ffd166', 1.5, true);
+      } else game.bench[keepBench] = { key: g.key, star: newStar };
+      Sfx.chime();
+      ui.toast(UNIT_DEFS[g.key].name + ' lên ' + newStar + ' sao!');
+      merged = true;
+      break;
+    }
+  }
+  // Dồn phần tràn (khi mua lúc hàng chờ đầy nhưng gộp được) vào chỗ trống.
+  while (game.bench.length > BENCH_SIZE) {
+    const extra = game.bench.pop(); if (!extra) continue;
+    const i = game.bench.indexOf(null); if (i >= 0) game.bench[i] = extra;
+  }
+}
+function buyShop(i) {
+  const key = game.shop[i]; if (!key || battle.phase !== 'prep') return;
+  const cost = UNIT_DEFS[key].cost;
+  if (game.gold < cost) { ui.toast('Không đủ linh thạch'); return; }
+  const slot = game.bench.indexOf(null);
+  if (slot < 0 && countCopies(key, 1) < 2) { ui.toast('Hàng chờ đã đầy – bán bớt hoặc đặt lên bàn'); return; }
+  game.gold -= cost; game.shop[i] = null;
+  if (slot >= 0) game.bench[slot] = { key, star: 1 }; else game.bench.push({ key, star: 1 });
+  Sfx.chime(); mergeAll(); afterRosterChange();
+}
+function reroll() {
+  if (battle.phase !== 'prep') return;
+  if (game.gold < REROLL_COST) { ui.toast('Cần ' + REROLL_COST + ' linh thạch để làm mới'); return; }
+  game.gold -= REROLL_COST; rollShop(); afterRosterChange();
+}
+function gainXP(n) {
+  if (game.level >= MAX_LEVEL) return;
+  game.xp += n;
+  while (game.level < MAX_LEVEL && game.xp >= XP_NEED[game.level]) {
+    game.xp -= XP_NEED[game.level]; game.level++;
+    ui.toast('Lên cấp ' + game.level + ' – đặt được tối đa ' + game.level + ' tu sĩ');
+  }
+  if (game.level >= MAX_LEVEL) game.xp = 0;
+}
+function buyXP() {
+  if (battle.phase !== 'prep') return;
+  if (game.level >= MAX_LEVEL) { ui.toast('Đã đạt cấp tối đa'); return; }
+  if (game.gold < XP_COST) { ui.toast('Cần ' + XP_COST + ' linh thạch'); return; }
+  game.gold -= XP_COST; gainXP(XP_BUY); afterRosterChange();
+}
+function sellSelected() {
+  const sel = game.sel; if (!sel || battle.phase !== 'prep') return;
+  let key, star;
+  if (sel.type === 'bench') { const e = game.bench[sel.i]; if (!e) return; key = e.key; star = e.star; game.bench[sel.i] = null; }
+  else { if (boardAllies().length <= 1) { ui.toast('Phải giữ ít nhất 1 tu sĩ trên bàn'); return; } key = sel.unit.key; star = sel.unit.star; removeUnit(sel.unit); }
+  const price = sellPrice(key, star); game.gold += price;
+  ui.toast('Đã bán ' + UNIT_DEFS[key].name + ' +' + price + ' linh thạch');
+  select(null); afterRosterChange();
+}
+function moveToBench(unit, slot) {
+  if (slot === undefined) slot = game.bench.indexOf(null);
+  if (slot < 0) { ui.toast('Hàng chờ đã đầy'); return false; }
+  if (boardAllies().length <= 1) { ui.toast('Phải giữ ít nhất 1 tu sĩ trên bàn'); return false; }
+  game.bench[slot] = { key: unit.key, star: unit.star }; removeUnit(unit);
+  return true;
+}
+/** Đặt quân từ hàng chờ lên ô (c, r); nếu ô có người thì đổi chỗ với hàng chờ. */
+function benchToBoard(i, c, r) {
+  const e = game.bench[i]; if (!e) return;
+  const occ = tileOccupant(c, r);
+  if (!occ && boardAllies().length >= boardCap()) { ui.toast('Cấp ' + game.level + ' chỉ đặt được ' + boardCap() + ' tu sĩ – mua kinh nghiệm để lên cấp'); return; }
+  game.bench[i] = occ ? { key: occ.key, star: occ.star } : null;
+  if (occ) removeUnit(occ);
+  const u = placeUnit(e.key, e.star, c, r);
+  vfx.particles.burst(_v1.set(u.pos.x, 0.3, u.pos.z), COLORS.allyA, 16, 3, 0.4, 0.25, { up: 2 });
+}
+function select(sel) {
+  game.sel = sel; battle.selected = sel && sel.type === 'board' ? sel.unit : null;
+  if (battle.selected) { tileCenter(battle.selected.homeTile.c, battle.selected.homeTile.r, world.highlight.position); world.highlight.position.y = 0.08; world.highlight.visible = true; }
+  else world.highlight.visible = false;
+  ui.update();
+}
+function afterRosterChange() { applyTraits(); boardAllies().forEach(u => u.reset(1)); saveGame(); ui.update(); }
+
+/* ---------- Tộc / hệ: đếm tướng khác nhau trên bàn ---------- */
+function traitCounts() {
+  const keys = new Set(boardAllies().map(u => u.key)), counts = {};
+  for (const k of keys) for (const t of UNIT_DEFS[k].traits || []) counts[t] = (counts[t] || 0) + 1;
+  return counts;
+}
+function traitLevel(t, n) { let lv = 0; TRAITS[t].tiers.forEach((m, i) => { if (n >= m) lv = i + 1; }); return lv; }
+function applyTraits() {
+  const counts = traitCounts();
+  for (const u of units) {
+    const b = defaultBonus();
+    if (u.team === 'ally') for (const t of u.def.traits || []) {
+      const lv = traitLevel(t, counts[t] || 0); if (!lv) continue;
+      if (t === 'kiemtu') { b.atk *= lv === 1 ? 1.2 : 1.45; if (lv >= 2) b.aspd *= 1.15; }
+      if (t === 'phaptu') { b.skill *= lv === 1 ? 1.25 : 1.6; b.mana0 += lv === 1 ? 20 : 40; }
+      if (t === 'hophap') { b.hp *= 1.3; b.def += 20; }
+      if (t === 'matu') b.ls = 0.25;
+    }
+    u.bonus = b;
+  }
+  return counts;
+}
+
+/* ---------- Đội hình địch theo vòng ---------- */
+function enemyLineup(round) {
+  const n = Math.min(8, 1 + Math.ceil(round * 0.75));
+  const spots = [[3, 4], [4, 4], [2, 5], [5, 5], [3, 6], [4, 6], [1, 5], [6, 5]];
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const key = i === 0 ? 'mathu' : i === 1 ? 'huyetkiem' : ['uminh', 'huyetkiem', 'mathu'][(i + round) % 3];
+    const star = (round >= 9 && i < 4) || (round >= 6 && i < 2) || (round >= 4 && i === 0) ? 2 : 1;
+    out.push([key, spots[i][0], spots[i][1], round >= 12 && i === 0 ? 3 : star]);
+  }
+  return out;
+}
+
+/* ---------- Lưu / tải ván ---------- */
+function snapshotGame(roundOverride) {
+  return { v: 1, hp: game.hp, gold: game.gold, level: game.level, xp: game.xp, streak: game.streak, round: roundOverride || battle.round,
+    bench: game.bench.slice(0, BENCH_SIZE), shop: game.shop.slice(), over: game.over,
+    board: boardAllies().map(u => ({ key: u.key, star: u.star, c: u.homeTile.c, r: u.homeTile.r })) };
+}
+function saveGame(roundOverride) { if (!battle.bench) store.set('save', snapshotGame(roundOverride)); }
+const newGameState = () => ({ v: 1, hp: START_HP, gold: 6, level: 3, xp: 0, streak: 0, round: 1, bench: new Array(BENCH_SIZE).fill(null), shop: null, over: false,
+  board: [{ key: 'kiemtien', star: 1, c: 4, r: 3 }, { key: 'hophap', star: 1, c: 3, r: 3 }] });
+function restoreGame(st) {
+  for (const u of boardAllies()) removeUnit(u);
+  Object.assign(game, { hp: st.hp, gold: st.gold, level: st.level, xp: st.xp, streak: st.streak, over: !!st.over, sel: null, lastSummary: '' });
+  game.bench = (st.bench || []).slice(0, BENCH_SIZE).map(e => (e && UNIT_DEFS[e.key] ? { key: e.key, star: e.star } : null));
+  while (game.bench.length < BENCH_SIZE) game.bench.push(null);
+  (st.board || []).forEach(b => { if (UNIT_DEFS[b.key]) placeUnit(b.key, b.star, b.c, b.r); });
+  if (!boardAllies().length) placeUnit('kiemtien', 1, 4, 3);
+  battle.round = st.round || 1;
+  if (st.shop && st.shop.length === SHOP_SIZE) game.shop = st.shop.map(k => (k && UNIT_DEFS[k] ? k : null)); else rollShop();
+  setupRound();
+}
+function newGame() { restoreGame(newGameState()); ui.toast('Ván mới – mua tu sĩ ở cửa hàng rồi chạm ô xanh để đặt'); }
+
+/* ---------- Vòng đấu ---------- */
+function setupRound() {
   timelines.forEach(t => t.cancel()); timelines.length = 0;
   Projectiles.clear(); vfx.clear(); floaters.length = 0;
-  for (let i = units.length - 1; i >= 0; i--) { if (units[i].team === 'enemy' || !keepAllies) { units[i].dispose(); units.splice(i, 1); } }
-  if (!units.some(u => u.team === 'ally')) ALLY_LINEUP.forEach(([k, c, r]) => units.push(new Unit(k, 'ally', c, r)));
-  const scale = Math.pow(1.18, battle.round - 1);
-  enemyLineup(battle.round).forEach(([k, c, r]) => units.push(new Unit(k, 'enemy', c, r)));
+  for (let i = units.length - 1; i >= 0; i--) if (units[i].team === 'enemy') { units[i].dispose(); units.splice(i, 1); }
+  const scale = 0.85 * Math.pow(1.13, battle.round - 1);
+  enemyLineup(battle.round).forEach(([k, c, r, star]) => units.push(new Unit(k, 'enemy', c, r, star)));
+  units.forEach(u => u.rig.setOutline && u.rig.setOutline(Q().outline));
+  applyTraits();
   units.forEach(u => u.reset(u.team === 'enemy' ? scale : 1));
-  battle.phase = 'prep'; battle.time = 0; battle.result = null; battle.selected = null;
+  battle.phase = 'prep'; battle.time = 0; battle.result = null; battle.selected = null; game.sel = null;
+  world.highlight.visible = false;
   ui.update(); ui.result(null); combatCam.cine = null;
+  saveGame();
 }
-function startBattle() { if (battle.phase !== 'prep') return; battle.phase = 'fight'; battle.time = 0; world.highlight.visible = false; battle.selected = null; ui.update(); }
+function startBattle() {
+  if (battle.phase !== 'prep' || game.over) return;
+  if (!boardAllies().length) { ui.toast('Đặt ít nhất 1 tu sĩ lên bàn cờ'); return; }
+  applyTraits(); boardAllies().forEach(u => u.reset(1));
+  battle.phase = 'fight'; battle.time = 0; select(null); ui.update();
+}
 function onUnitDeath(u) {
   vfx.particles.burst(u.chest(new V3()), u.team === 'ally' ? COLORS.allyA : COLORS.enemyA, 24, 5, 0.8, 0.3, { up: 1, drag: 2 });
   ui.update();
+}
+/** Thu nhập & mất máu sau mỗi vòng. */
+function settleRound(win) {
+  const interest = Math.min(5, Math.floor(game.gold / 10));
+  game.streak = win ? Math.max(1, game.streak + 1) : Math.min(-1, game.streak - 1);
+  const s = Math.abs(game.streak), streakBonus = s >= 5 ? 3 : s >= 4 ? 2 : s >= 2 ? 1 : 0;
+  const income = 5 + interest + streakBonus + (win ? 1 : 0);
+  let dmg = 0;
+  if (!win) {
+    dmg = 2 + Math.floor(battle.round / 2) + units.filter(u => u.team === 'enemy' && u.alive).reduce((a, u) => a + u.star, 0);
+    game.hp = Math.max(0, game.hp - dmg);
+  }
+  game.gold += income; gainXP(2);
+  game.lastSummary = `+${income} linh thạch (cơ bản 5 · lãi ${interest} · chuỗi ${streakBonus}${win ? ' · thắng 1' : ''})` + (dmg ? ` · mất ${dmg} máu` : '');
+  if (game.hp <= 0) game.over = true;
+  saveGame(battle.round + 1);
 }
 function checkBattleEnd() {
   if (battle.phase !== 'fight' || battle.bench) return;
@@ -2406,7 +2738,9 @@ function checkBattleEnd() {
   const win = allies && !enemies;
   battle.phase = 'end'; battle.result = win ? 'win' : 'lose';
   units.forEach(u => { if (u.alive && ((u.team === 'ally') === win)) u.fsm.set('victory'); else if (u.alive) u.fsm.set('idle'); });
-  ui.result(win ? 'Đại thắng' : 'Bại trận');
+  settleRound(win);
+  if (game.over) { ui.result('Đạo tâm tan vỡ'); ui.toast('Hết máu – trụ được ' + battle.round + ' vòng'); }
+  else { ui.result(win ? 'Đại thắng' : 'Bại trận'); ui.toast(game.lastSummary); }
   ui.update();
 }
 
@@ -2444,28 +2778,46 @@ canvas.addEventListener('wheel', e => { e.preventDefault(); combatCam.zoom(e.del
 let lastTap = 0;
 function onTap(x, y) {
   const now = performance.now(); if (now - lastTap < 280) combatCam.reset(); lastTap = now;
-  if (battle.phase !== 'prep') return;
+  if (battle.phase !== 'prep' || game.over) return;
   const r = canvas.getBoundingClientRect();
   ndc.set(((x - r.left) / r.width) * 2 - 1, -((y - r.top) / r.height) * 2 + 1);
   raycaster.setFromCamera(ndc, camera);
   const hitP = raycaster.ray.intersectPlane(groundPlane, new V3()); if (!hitP) return;
-  // Chọn đồng đội gần điểm chạm nhất (bán kính 1.2 m)
   let pick = null, bd = 1.3;
-  for (const u of units) if (u.team === 'ally') { const d = Math.hypot(u.pos.x - hitP.x, u.pos.z - hitP.z); if (d < bd) { bd = d; pick = u; } }
-  if (pick) { battle.selected = pick; tileCenter(pick.homeTile.c, pick.homeTile.r, world.highlight.position); world.highlight.position.y = 0.08; world.highlight.visible = true; ui.toast('Đã chọn ' + pick.def.name + ' – chạm ô xanh để di chuyển'); return; }
-  const t = worldToTile(hitP.x, hitP.z);
-  if (battle.selected && t.c >= 0 && t.c < 8 && t.r >= 0 && t.r < 4) {
-    const occ = units.find(u => u.team === 'ally' && u !== battle.selected && u.homeTile.c === t.c && u.homeTile.r === t.r);
-    const sel = battle.selected;
-    if (occ) { occ.homeTile = { c: sel.homeTile.c, r: sel.homeTile.r }; tileCenter(occ.homeTile.c, occ.homeTile.r, occ.pos); }
-    sel.homeTile = { c: t.c, r: t.r }; tileCenter(t.c, t.r, sel.pos);
-    vfx.particles.burst(_v1.set(sel.pos.x, 0.3, sel.pos.z), COLORS.allyA, 14, 3, 0.4, 0.25, { up: 2 });
-    battle.selected = null; world.highlight.visible = false;
-  } else if (battle.selected) ui.toast('Chỉ đặt được trên nửa bàn cờ màu xanh của phe ta');
+  for (const u of boardAllies()) { const d = Math.hypot(u.pos.x - hitP.x, u.pos.z - hitP.z); if (d < bd) { bd = d; pick = u; } }
+  const t = pick ? pick.homeTile : worldToTile(hitP.x, hitP.z);
+  const allyTile = t.c >= 0 && t.c < 8 && t.r >= 0 && t.r < 4;
+  const sel = game.sel;
+  if (sel && sel.type === 'bench' && allyTile) { benchToBoard(sel.i, t.c, t.r); select(null); afterRosterChange(); return; }
+  if (sel && sel.type === 'board' && allyTile && sel.unit !== pick) {
+    const u = sel.unit, occ = tileOccupant(t.c, t.r);
+    if (occ) { occ.homeTile = { c: u.homeTile.c, r: u.homeTile.r }; tileCenter(occ.homeTile.c, occ.homeTile.r, occ.pos); }
+    u.homeTile = { c: t.c, r: t.r }; tileCenter(t.c, t.r, u.pos);
+    vfx.particles.burst(_v1.set(u.pos.x, 0.3, u.pos.z), COLORS.allyA, 14, 3, 0.4, 0.25, { up: 2 });
+    select(null); saveGame(); return;
+  }
+  if (pick) { select(sel && sel.unit === pick ? null : { type: 'board', unit: pick }); return; }
+  if (sel && !allyTile) ui.toast('Chỉ đặt được trên nửa bàn cờ màu xanh của phe ta');
+  select(null);
+}
+function onBenchTap(i) {
+  if (battle.phase !== 'prep' || game.over) return;
+  const sel = game.sel, e = game.bench[i];
+  if (sel && sel.type === 'board') {
+    const u = sel.unit;
+    if (!e) { if (moveToBench(u, i)) { select(null); afterRosterChange(); } return; }
+    const tile = { ...u.homeTile };   // đổi: quân trên bàn ↔ quân ở hàng chờ
+    game.bench[i] = { key: u.key, star: u.star }; removeUnit(u); placeUnit(e.key, e.star, tile.c, tile.r);
+    select(null); afterRosterChange(); return;
+  }
+  if (sel && sel.type === 'bench' && sel.i !== i) { const tmp = game.bench[i]; game.bench[i] = game.bench[sel.i]; game.bench[sel.i] = tmp; select(null); saveGame(); return; }
+  select(e && !(sel && sel.i === i) ? { type: 'bench', i } : null);
 }
 window.addEventListener('keydown', e => {
   if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT')) return;
-  if (e.code === 'Space') { e.preventDefault(); if (battle.phase === 'prep') startBattle(); else if (battle.phase === 'end') nextRound(); }
+  if (e.code === 'Space') { e.preventDefault(); if (game.over) newGame(); else if (battle.phase === 'prep') startBattle(); else if (battle.phase === 'end') nextRound(); }
+  if (battle.phase === 'prep' && (e.key === 'd' || e.key === 'D')) reroll();
+  if (battle.phase === 'prep' && (e.key === 'f' || e.key === 'F')) buyXP();
   if (e.key === 'u' || e.key === 'U') forceUltimate();
   if (e.key === 'p' || e.key === 'P') togglePause();
 });
@@ -2480,11 +2832,21 @@ const ui = {
     const a = units.filter(u => u.team === 'ally' && u.alive).length, e = units.filter(u => u.team === 'enemy' && u.alive).length;
     $('round-title').textContent = 'Vòng ' + battle.round;
     $('ally-count').textContent = 'Đồng minh ' + a; $('enemy-count').textContent = 'Địch ' + e;
-    const st = $('btn-start');
-    if (battle.phase === 'prep') { $('phase-label').textContent = 'Chuẩn bị – chạm một đồng đội rồi chạm ô để đổi vị trí'; st.textContent = 'Bắt đầu giao chiến'; st.disabled = false; }
+    const st = $('btn-start'), prep = battle.phase === 'prep' && !game.over;
+    if (game.over && battle.phase !== 'fight') { $('phase-label').textContent = 'Kết thúc ván – trụ được ' + battle.round + ' vòng'; st.textContent = 'Ván mới'; st.disabled = false; }
+    else if (prep) { $('phase-label').textContent = 'Chuẩn bị – mua tu sĩ rồi đặt lên ô xanh'; st.textContent = 'Bắt đầu giao chiến'; st.disabled = false; }
     else if (battle.phase === 'fight') { $('phase-label').textContent = battle.bench ? 'Đang kiểm tra hiệu năng…' : 'Giao chiến – các tu sĩ tự chiến đấu'; st.textContent = 'Đang giao chiến'; st.disabled = true; }
-    else { $('phase-label').textContent = battle.result === 'win' ? 'Thắng – chuẩn bị vòng tiếp theo' : 'Thua – thử lại vòng này'; st.textContent = battle.result === 'win' ? 'Vòng tiếp theo' : 'Đánh lại'; st.disabled = false; }
-    $('btn-ult').disabled = !(battle.phase === 'fight' && units.some(u => u.key === 'kiemtien' && u.alive));
+    else { $('phase-label').textContent = game.lastSummary || (battle.result === 'win' ? 'Thắng' : 'Thua'); st.textContent = 'Vòng tiếp theo'; st.disabled = false; }
+    $('btn-ult').disabled = !(battle.phase === 'fight' && units.some(u => u.key === 'kiemtien' && u.team === 'ally' && u.alive));
+    // Kinh tế
+    $('hp-val').textContent = game.hp; $('gold-val').textContent = game.gold; $('lvl-val').textContent = game.level;
+    $('cap-val').textContent = boardAllies().length + '/' + boardCap();
+    $('xp-fill').style.transform = 'scaleX(' + (game.level >= MAX_LEVEL ? 1 : game.xp / XP_NEED[game.level]) + ')';
+    $('xp-val').textContent = game.level >= MAX_LEVEL ? 'tối đa' : game.xp + '/' + XP_NEED[game.level];
+    $('prep-panel').hidden = !prep;
+    $('hint').textContent = prep ? 'Chạm tu sĩ rồi chạm ô xanh để đặt · Kéo để xoay bàn cờ' : 'Kéo để xoay bàn cờ · Chụm hai ngón / lăn chuột để phóng to';
+    if (prep) { renderShop(); renderBench(); renderSelActions(); }
+    renderTraits();
   },
   toast(text) { const t = $('toast'); t.textContent = text; t.hidden = false; this.toastTimer = 2.4; },
   result(text) { const r = $('result'); r.hidden = !text; r.textContent = text || ''; },
@@ -2493,23 +2855,76 @@ const ui = {
     if (this.bannerTimer > 0) { this.bannerTimer -= dt; if (this.bannerTimer <= 0) $('skill-banner').classList.remove('show'); }
   }
 };
+const TIER_LABEL = ['', 'Phàm', 'Linh', 'Tiên'];
+function renderShop() {
+  const el = $('shop'); el.textContent = '';
+  game.shop.forEach((key, i) => {
+    const b = document.createElement('button');
+    if (!key) { b.className = 'card sold'; b.disabled = true; b.setAttribute('aria-label', 'Đã mua'); el.appendChild(b); return; }
+    const d = UNIT_DEFS[key], owned = countCopies(key, 1);
+    b.className = 'card t' + d.cost + (game.gold < d.cost ? ' poor' : '') + (owned >= 2 ? ' ready' : '');
+    b.innerHTML = `<span class="nm">${d.name}</span><span class="tr">${d.traits.map(t => TRAITS[t].name).join(' · ')}</span>` +
+      `<span class="ft"><span class="cost">${d.cost}</span>${owned ? `<span class="own">${owned}/3</span>` : ''}</span>`;
+    b.setAttribute('aria-label', `Mua ${d.name}, giá ${d.cost} linh thạch${owned ? ', đang có ' + owned : ''}`);
+    b.addEventListener('click', () => buyShop(i));
+    el.appendChild(b);
+  });
+  $('btn-reroll').disabled = game.gold < REROLL_COST;
+  $('btn-xp').disabled = game.gold < XP_COST || game.level >= MAX_LEVEL;
+}
+function renderBench() {
+  const el = $('bench'); el.textContent = '';
+  for (let i = 0; i < BENCH_SIZE; i++) {
+    const e = game.bench[i], b = document.createElement('button');
+    b.className = 'slot' + (e ? ' filled t' + UNIT_DEFS[e.key].cost : '') + (game.sel && game.sel.type === 'bench' && game.sel.i === i ? ' sel' : '');
+    if (e) { const d = UNIT_DEFS[e.key]; b.innerHTML = `<span class="st">${'★'.repeat(e.star)}</span><span class="sn">${d.short || d.name}</span>`; b.setAttribute('aria-label', `${d.name} ${e.star} sao trong hàng chờ`); }
+    else b.setAttribute('aria-label', 'Ô hàng chờ trống');
+    b.addEventListener('click', () => onBenchTap(i));
+    el.appendChild(b);
+  }
+}
+function renderSelActions() {
+  const sel = game.sel, sell = $('btn-sell'), back = $('btn-tobench');
+  let key = null, star = 1;
+  if (sel && sel.type === 'bench' && game.bench[sel.i]) { key = game.bench[sel.i].key; star = game.bench[sel.i].star; }
+  if (sel && sel.type === 'board') { key = sel.unit.key; star = sel.unit.star; }
+  sell.hidden = !key; back.hidden = !(sel && sel.type === 'board');
+  if (key) sell.textContent = 'Bán ' + (UNIT_DEFS[key].short || UNIT_DEFS[key].name) + ' +' + sellPrice(key, star);
+}
+function renderTraits() {
+  const counts = traitCounts(), el = $('traits'); el.textContent = '';
+  Object.keys(TRAITS).filter(t => counts[t]).sort((a, b) => traitLevel(b, counts[b]) - traitLevel(a, counts[a]) || counts[b] - counts[a]).forEach(t => {
+    const T = TRAITS[t], n = counts[t], lv = traitLevel(t, n), div = document.createElement('div');
+    div.className = 'trait' + (lv ? ' on' : ''); div.style.setProperty('--c', T.color);
+    div.innerHTML = `<b>${T.name}</b> <span class="cnt">${n}/${T.tiers.find(m => m > n) || T.tiers[T.tiers.length - 1]}</span>${lv ? `<span class="fx">${T.desc[lv - 1]}</span>` : ''}`;
+    el.appendChild(div);
+  });
+}
 function showBanner(name, team) { const b = $('skill-banner'); b.textContent = name; b.classList.toggle('enemy', team !== 'ally'); b.classList.add('show'); ui.bannerTimer = 1.6; }
-function nextRound() { if (battle.result === 'win') battle.round++; setupRound(true); }
+function nextRound() {
+  if (game.over) { newGame(); return; }
+  battle.round++; rollShop(); setupRound();
+}
 function forceUltimate() {
   if (battle.phase !== 'fight') { ui.toast('Bắt đầu giao chiến trước, rồi thi triển'); return; }
   const k = units.find(u => u.key === 'kiemtien' && u.team === 'ally' && u.alive);
-  if (!k) return;
+  if (!k) { ui.toast('Chưa có Kiếm Tiên trên bàn – mua ở cửa hàng (3 linh thạch)'); return; }
   if (k.fsm.name === 'cast') { ui.toast('Kiếm Tiên đang thi triển'); return; }
   k.mana = k.maxMana; if (k.fsm.name !== 'dead' && k.fsm.name !== 'stun') k.fsm.set('move');
 }
 function togglePause() { battle.paused = !battle.paused; $('btn-pause').setAttribute('aria-pressed', battle.paused); $('btn-pause').textContent = battle.paused ? 'Tiếp tục' : 'Tạm dừng'; timelines.forEach(t => (battle.paused ? t.pause() : t.resume())); }
-$('btn-start').addEventListener('click', () => { Sfx.init(); if (battle.phase === 'prep') startBattle(); else if (battle.phase === 'end') nextRound(); });
+$('btn-start').addEventListener('click', () => { Sfx.init(); if (game.over) newGame(); else if (battle.phase === 'prep') startBattle(); else if (battle.phase === 'end') nextRound(); });
+$('btn-reroll').addEventListener('click', reroll);
+$('btn-xp').addEventListener('click', buyXP);
+$('btn-sell').addEventListener('click', sellSelected);
+$('btn-tobench').addEventListener('click', () => { const s = game.sel; if (s && s.type === 'board' && moveToBench(s.unit)) { select(null); afterRosterChange(); } });
 $('btn-ult').addEventListener('click', forceUltimate);
 $('btn-cam').addEventListener('click', () => combatCam.reset());
 $('btn-pause').addEventListener('click', togglePause);
 $('btn-speed').addEventListener('click', () => { battle.speed = battle.speed === 1 ? 2 : battle.speed === 2 ? 0.5 : 1; $('btn-speed').textContent = 'Tốc độ ×' + (battle.speed === 0.5 ? '½' : battle.speed); $('btn-speed').setAttribute('aria-pressed', battle.speed !== 1); });
 $('btn-settings').addEventListener('click', () => { const s = $('settings'); s.hidden = !s.hidden; $('btn-settings').setAttribute('aria-expanded', !s.hidden); });
 $('btn-enter').addEventListener('click', () => { Sfx.init(); $('intro').hidden = true; canvas.focus(); });
+$('btn-newgame').addEventListener('click', () => { Sfx.init(); newGame(); $('intro').hidden = true; canvas.focus(); });
 function syncQualityButtons() { document.querySelectorAll('#quality-seg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.q === QualityManager.level)); }
 document.querySelectorAll('#quality-seg button').forEach(b => b.addEventListener('click', () => QualityManager.set(b.dataset.q, 'user')));
 $('opt-auto').checked = QualityManager.auto; $('opt-auto').addEventListener('change', e => { QualityManager.auto = e.target.checked; store.set('autoQuality', e.target.checked); });
@@ -2572,6 +2987,10 @@ function draw2D(dt) {
       g2.font = `600 ${11 * s}px "Be Vietnam Pro", system-ui, sans-serif`; g2.fillStyle = u.status.stun > 0 ? '#ffe08a' : 'rgba(236,228,208,0.9)';
       g2.fillText(u.status.stun > 0 ? 'Choáng' : u.def.name, x, y - 9 * s);
     }
+    if (u.star > 1) {
+      g2.font = `700 ${12 * s}px system-ui, sans-serif`; g2.fillStyle = u.star === 3 ? '#ffd166' : '#d8e2ea';
+      g2.fillText('★'.repeat(u.star), x, y - (battle.phase === 'prep' || u.status.stun > 0 ? 21 : 9) * s);
+    }
   }
   for (let i = floaters.length - 1; i >= 0; i--) {
     const f = floaters[i]; f.t += dt;
@@ -2593,9 +3012,12 @@ const bench = { running: false, t: 0, frames: [], calls: 0, tris: 0, peakParticl
 $('btn-bench').addEventListener('click', () => {
   if (bench.running) return;
   $('settings').hidden = true; $('btn-settings').setAttribute('aria-expanded', 'false');
-  Object.assign(bench, { running: true, t: 0, frames: [], calls: 0, tris: 0, peakParticles: 0, nextUlt: 1.5, prevAuto: QualityManager.auto, prevRound: battle.round });
+  Object.assign(bench, { running: true, t: 0, frames: [], calls: 0, tris: 0, peakParticles: 0, nextUlt: 1.5, prevAuto: QualityManager.auto, snap: snapshotGame() });
   QualityManager.auto = false;
-  battle.round = 3; setupRound(false); battle.bench = true; startBattle();
+  battle.bench = true;
+  for (const u of boardAllies()) removeUnit(u);
+  [['hophap', 3, 3], ['kiemtien', 4, 3], ['anhkiem', 5, 3], ['loi', 2, 1], ['hoa', 5, 1]].forEach(([k, c, r]) => placeUnit(k, 1, c, r));
+  battle.round = 5; setupRound(); game.over = false; startBattle();
   ui.toast('Đang kiểm tra hiệu năng 15 giây…');
 });
 function benchTick(dt) {
@@ -2605,7 +3027,7 @@ function benchTick(dt) {
   bench.peakParticles = Math.max(bench.peakParticles, vfx.particles.live);
   if (bench.t > bench.nextUlt) { bench.nextUlt += 3; const c = units.filter(u => u.alive && u.fsm.name !== 'cast'); const k = c.find(u => u.key === 'kiemtien') || c[0]; if (k) { k.mana = k.maxMana; } c.forEach(u => { if (Math.random() < 0.4) u.mana = u.maxMana; }); }
   if (bench.t < 15) return;
-  bench.running = false; battle.bench = false; QualityManager.auto = bench.prevAuto;
+  bench.running = false; QualityManager.auto = bench.prevAuto;
   const fr = bench.frames.slice(30).sort((a, b) => a - b);
   const avg = fr.reduce((s, v) => s + v, 0) / Math.max(1, fr.length);
   const p99 = fr[Math.floor(fr.length * 0.99)] || avg;
@@ -2616,9 +3038,10 @@ function benchTick(dt) {
   let rec = QualityManager.level;
   if (fps < 30 || low < 20) rec = QualityManager.order[Math.max(0, idx - 1)];
   else if (fps > 58 && low > 45 && idx < 3) rec = QualityManager.order[idx + 1];
+  battle.bench = false;
   const out = $('bench-out'); out.hidden = false;
   out.textContent = `Mức đang chạy: ${Q().label}\nFPS trung bình: ${fps.toFixed(1)}\n1% thấp nhất: ${low.toFixed(1)} FPS\nDraw call tối đa: ${bench.calls}\nTam giác tối đa: ${bench.tris.toLocaleString('vi-VN')}\nHạt đồng thời tối đa: ${bench.peakParticles}\nĐộ phân giải: ${renderer.domElement.width}×${renderer.domElement.height} (DPR ${renderer.getPixelRatio().toFixed(2)})\nWebGL2: ${renderer.capabilities.isWebGL2 ? 'có' : 'không'}${gpu ? '\nGPU: ' + gpu : ''}\nĐề xuất: ${QualityManager.presets[rec].label}${rec !== QualityManager.level ? ' (bấm mức đó ở trên để áp dụng)' : ' (giữ nguyên)'}`;
-  battle.round = bench.prevRound; setupRound(false);
+  restoreGame(bench.snap);
   $('settings').hidden = false; $('btn-settings').setAttribute('aria-expanded', 'true');
 }
 
@@ -2660,12 +3083,18 @@ $('glb-file').addEventListener('change', e => {
   reader.readAsArrayBuffer(file);
 });
 $('btn-glb-reset').addEventListener('click', () => { customRigFactory = null; replaceKiemTienRig(); disposeGltf(currentGltf); currentGltf = null; $('glb-out').textContent = 'Đã trở về mô hình thủ tục.'; });
+/** Thay rig cho mọi Kiếm Tiên phe ta đang trên bàn; trả về rig đầu tiên (để kiểm tra). */
 function replaceKiemTienRig() {
-  const u = units.find(x => x.key === 'kiemtien' && x.team === 'ally'); if (!u) return;
-  u.rig.dispose();
-  u.rig = customRigFactory ? customRigFactory() : new CharacterRig(LOOKS.kiemtien, u.U);
-  scene.add(u.rig.root); u.rig.setOutline && u.rig.setOutline(Q().outline);
-  return u.rig;
+  let first = null;
+  for (const u of units) {
+    if (u.key !== 'kiemtien' || u.team !== 'ally') continue;
+    u.rig.dispose();
+    u.rig = customRigFactory ? customRigFactory() : new CharacterRig(LOOKS.kiemtien, u.U);
+    u.rig.root.scale.setScalar(STAR_SCALE[u.star]);
+    scene.add(u.rig.root); u.rig.setOutline && u.rig.setOutline(Q().outline);
+    first = first || u.rig;
+  }
+  return first;
 }
 
 /* =====================================================================
@@ -2708,6 +3137,7 @@ function frame(now) {
   if (Q().env > 0 && Math.random() < Q().env * 0.15) { // hạt môi trường: linh khí lơ lửng
     vfx.particles.emit(rand(-14, 14), rand(0, 1), rand(-14, 14), rand(-0.2, 0.2), rand(0.3, 0.8), rand(-0.2, 0.2), rand(2, 4), 0.12, 0.05, Math.random() < 0.5 ? COLORS.allyB : COLORS.shield, 0.5, 0.1);
   }
+  combatCam.target.z = damp(combatCam.target.z, battle.phase === 'prep' && !game.over ? -2.2 : 0, 4, dt);
   combatCam.update(dt);
   sun.position.set(combatCam.focus.x - 14, 26, combatCam.focus.z - 10); sun.target.position.copy(combatCam.focus);
   benchTick(dt);
@@ -2717,9 +3147,14 @@ function frame(now) {
   draw2D(dt);
 }
 
-setupRound(true);
+(function boot() {
+  const saved = store.get('save', null);
+  const ok = saved && saved.v === 1 && saved.hp > 0 && !saved.over;
+  restoreGame(ok ? saved : newGameState());
+  if (ok) { $('btn-enter').textContent = 'Tiếp tục – Vòng ' + battle.round; $('btn-newgame').hidden = false; }
+})();
 applyQuality(Q(), 'init');
 requestAnimationFrame(frame);
-window.__vkkt = { units, battle, timelines, QualityManager, startBattle, forceUltimate, vfx, renderer, loadGlbBuffer, solveTwoBoneIK, options };
+window.__vkkt = { units, battle, timelines, QualityManager, startBattle, forceUltimate, vfx, renderer, loadGlbBuffer, solveTwoBoneIK, options, game, buyShop, reroll, buyXP, nextRound, newGame, onBenchTap, benchToBoard, mergeAll, traitCounts, boardAllies };
 })();
 </script>
