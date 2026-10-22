@@ -44,3 +44,7 @@ sysinfo.txt
 # OS
 .DS_Store
 Thumbs.db
+
+# Web
+web/node_modules/
+web/package-lock.json

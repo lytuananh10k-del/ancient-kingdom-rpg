@@ -1,11 +1,50 @@
 # Vạn Kiếm Kỳ Trận (bản HTML5 / Three.js)
 
-Auto chess tu tiên anime 3D chạy trực tiếp trên trình duyệt (Android, iOS, Windows). Một file: `index.html`.
+Auto chess tu tiên anime 3D chạy trực tiếp trên trình duyệt (Android, iOS, Windows).
 Thư viện: Three.js r128 (cdnjs) + GLTFLoader, SkeletonUtils (jsDelivr).
 
-Chạy thử: mở `index.html` qua một web server tĩnh (ví dụ `npx serve web`) hoặc dùng link artifact.
+Chạy thử: mở qua một web server tĩnh (ví dụ `npx serve web`) hoặc dùng link artifact.
 
-## Cấu trúc mã (các module trong `index.html`)
+## File
+`index.html` chứa HTML + CSS; mã nằm trong `js/`, là **script thường** (không phải ES module) dùng chung phạm vi toàn cục
+và phải nạp đúng thứ tự số. Thêm file mới: đặt số thứ tự sau mọi file mà nó dùng lúc nạp, rồi thêm thẻ `<script>` vào `index.html`.
+
+| File | Nội dung |
+|---|---|
+| `js/01-core.js` | Tiện ích (vector, easing, `store` localStorage), QualityManager |
+| `js/02-shaders.js` | ShaderLibrary |
+| `js/03-renderer.js` | Renderer, scene, ánh sáng, bloom |
+| `js/04-vfx.js` | ParticlePool, RibbonBatch, VFXManager |
+| `js/05-character-rig.js` | CharacterRig (nhân vật thủ tục, IK chân, chuyển động phụ) |
+| `js/06-gltf-rig.js` | GLTFRig (GLB/GLTF, IK chân GLB) |
+| `js/07-animation.js` | AnimationStateMachine, SkillTimeline |
+| `js/08-audio.js` | Âm thanh WebAudio |
+| `js/09-camera.js` | CombatCamera, khung camera lúc chuẩn bị, lens shift |
+| `js/10-world.js` | Vân Đài, bàn cờ, hàng chờ 3D |
+| `js/11-units.js` | Định nghĩa tướng, Unit, AnimationController |
+| `js/12-combat.js` | Sát thương, hit stop, đạn, phi kiếm |
+| `js/13-skills.js` | Kỹ năng (SkillTimeline) |
+| `js/14-game.js` | Kinh tế, cửa hàng, nâng sao, tộc/hệ, vòng đấu, lưu ván |
+| `js/15-input.js` | Xoay/zoom, chọn, kéo thả kiểu TFT |
+| `js/16-ui.js` | Giao diện, áp dụng chất lượng, lớp 2D |
+| `js/17-benchmark.js` | Kiểm tra hiệu năng (có nút sao chép kết quả) |
+| `js/18-glb-import.js` | Nhập GLB |
+| `js/19-main.js` | Vòng lặp chính, khởi động, móc kiểm thử `window.__vkkt` |
+
+## Kiểm thử tự động
+```bash
+cd web && npm install && npm test          # chơi 12 vòng liên tục, màn ngang 844×390
+ROUNDS=20 VIEW=400x820 node tests/playtest.js
+```
+`tests/playtest.js` mở game trong Chromium (Playwright) và tự chơi. Sau mỗi thao tác nó kiểm tra:
+linh thạch khi mua / bán / làm mới / mua kinh nghiệm; nâng sao bảo toàn số bản ★1 quy đổi và không còn nhóm 3 bản chưa gộp;
+kéo thả bằng chuột thật (hàng chờ → bàn, đổi chỗ, bàn → hàng chờ, kéo vào cửa hàng để bán, bị chặn khi đủ quân);
+hàng chờ 3D khớp dữ liệu; tộc/hệ; AI (không NaN, không ra ngoài đài, có sát thương, trận ≤ 90 s);
+thu nhập, mất máu, chuỗi thắng/thua theo công thức; bản lưu khớp trạng thái; tải lại trang giữa chừng (vòng 3, 6, 9…);
+rò rỉ object trong scene; lỗi console. Trận được tua nhanh bằng `__vkkt.simulate(giây)` (bỏ qua render) để chạy được cả khi không có GPU.
+`SHOTS=thư-mục` để lưu ảnh chụp mỗi vòng.
+
+## Cấu trúc mã (các module)
 | Mục | Module | Vai trò |
 |---|---|---|
 | 1 | QualityManager | 4 mức Thấp / Vừa / Cao / Tối đa, tự giảm khi FPS < 38 kéo dài 4 giây |
@@ -46,7 +85,7 @@ Mô phỏng chạy bước cố định 60 Hz; sát thương nằm trên timelin
 | Hộ Pháp (Hộ Pháp, Thiết Vệ) | 2 | +30% máu, +20 phòng thủ |
 | Ma Tu (Ảnh Kiếm, U Hồn Sư) | 2 | Hút máu 25% sát thương gây ra |
 
-Tộc/hệ đếm số **tướng khác nhau** trên bàn (2 bản cùng tướng chỉ tính 1). Địch: số lượng tăng theo vòng (tối đa 8), chỉ số ×1.13 mỗi vòng, có ★2 từ vòng 4 và ★3 từ vòng 12.
+Tộc/hệ đếm số **tướng khác nhau** trên bàn (2 bản cùng tướng chỉ tính 1). Địch: 2 quân ở vòng 1, cứ 2 vòng thêm 1 (tối đa 8); máu và công ×1.07 mỗi vòng; ★2 từ vòng 5 (thêm quân ★2 ở vòng 8, 11), ★3 từ vòng 15.
 Benchmark chụp lại ván đang chơi, chạy đội hình cố định rồi khôi phục nguyên trạng.
 
 **Camera lúc chuẩn bị** tự căn khung theo kích thước màn hình (`fitPrepCamera`): tìm khoảng cách nhỏ nhất để hàng chờ + nửa bàn phe ta
