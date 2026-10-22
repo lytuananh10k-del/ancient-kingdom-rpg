@@ -14,7 +14,7 @@ Chạy thử: mở `index.html` qua một web server tĩnh (ví dụ `npx serve 
 | 4 | ParticlePool | Hạt GPU dùng bộ đệm vòng, giới hạn theo mức đồ hoạ |
 | 5 | RibbonBatch | Nhiều dải vệt hướng camera trong 1 draw call (vệt kiếm, sét, tóc, dải lụa) |
 | 6 | VFXManager | Pool mesh hiệu ứng, cập nhật, dọn dẹp |
-| 7 | CharacterRig | Nhân vật thủ tục có khớp, động tác chuẩn bị → va chạm → thu chiêu, IK hướng nhìn, váy/tóc/dải lụa có chuyển động phụ |
+| 7 | CharacterRig | Nhân vật thủ tục có khớp, động tác chuẩn bị → va chạm → thu chiêu, IK hướng nhìn, IK chân 2 khớp (bàn chân bám đất, gối tự gập, bàn chân phẳng), váy/tóc/dải lụa có chuyển động phụ |
 | 8 | GLTFRig | Thay bằng GLB/GLTF có xương: AnimationMixer, crossfade, bỏ root motion ngang, socket tay phải |
 | 9 | AnimationStateMachine | Trạng thái logic có chặn kẹt (maxTime → fallback) |
 | 10 | SkillTimeline | Sự kiện theo thời gian mô phỏng: AnimationEvent, SpawnVFX, PlaySound, LaunchProjectile, ApplyDamage, ApplyStatusEffect, CameraImpulse, Cleanup; pause / resume / seek / cancel |
@@ -31,4 +31,8 @@ SkillCast, UltimateCast, Hit, Stun, Knockback, Death, Victory. Kiếm gắn vào
 Mô hình được tự co về cao 1.8 m; dịch chuyển ngang của xương Hips bị loại bỏ (logic tự di chuyển nhân vật).
 
 ## Giới hạn hiện tại
-Nhân vật và animation là placeholder thủ tục, không phải animation dựng tay. Chưa có IK chân, chưa có VFX Graph.
+Nhân vật và animation là placeholder thủ tục, không phải animation dựng tay. IK chân chỉ áp dụng cho nhân vật thủ tục (chưa cho GLB). Chưa có VFX Graph.
+
+## Cài đặt liên quan
+- **Số phi kiếm** (Vạn Kiếm Quy Tông): theo mức đồ hoạ (14 / 24 / 36 / 56) hoặc tự chọn 8–96.
+- **IK chân**: bật/tắt để so sánh. Hàm `groundHeight(x, z)` là điểm nối khi có địa hình gồ ghề.

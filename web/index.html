@@ -89,6 +89,9 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0; }
 .row label { flex: 1; min-width: 0; }
 .row input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--gold); }
+.row input[type="range"] { width: 46%; accent-color: var(--gold); touch-action: none; }
+.row input[type="range"]:disabled { opacity: 0.4; }
+#sword-val { color: var(--gold); font-variant-numeric: tabular-nums; }
 .sheet .note { color: var(--muted); font-size: 0.78rem; line-height: 1.45; margin: 6px 0 0; }
 .sheet .btn { display: inline-block; background: rgba(255,255,255,0.06); border: 1px solid var(--panel-line); border-radius: 8px; padding: 8px 12px; font-weight: 600; margin-top: 6px; }
 #bench-out { margin-top: 8px; font-variant-numeric: tabular-nums; white-space: pre-wrap; font-size: 0.8rem; color: var(--paper); background: rgba(255,255,255,0.04); border-radius: 8px; padding: 8px; }
@@ -150,6 +153,12 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
   <div class="row"><label for="opt-shake">Rung màn hình</label><input type="checkbox" id="opt-shake" checked></div>
   <div class="row"><label for="opt-reduce">Giảm rung (nhẹ hơn 60%)</label><input type="checkbox" id="opt-reduce"></div>
   <div class="row"><label for="opt-hitstop">Khựng hình khi đánh trúng</label><input type="checkbox" id="opt-hitstop" checked></div>
+  <h3>Vạn Kiếm Quy Tông</h3>
+  <div class="row"><label for="opt-sword-auto">Số phi kiếm theo mức đồ hoạ</label><input type="checkbox" id="opt-sword-auto" checked></div>
+  <div class="row"><label for="opt-swords">Số phi kiếm: <b id="sword-val">24</b></label><input type="range" id="opt-swords" min="8" max="96" step="4" value="24"></div>
+  <p class="note">Nhiều kiếm đẹp hơn nhưng nặng hơn (mỗi kiếm thêm một vệt sáng). Áp dụng từ lần thi triển kế tiếp.</p>
+  <h3>Animation</h3>
+  <div class="row"><label for="opt-ik">IK chân – bàn chân bám mặt đất khi hạ trọng tâm, gối tự gập</label><input type="checkbox" id="opt-ik" checked></div>
   <h3>Kiểm tra hiệu năng</h3>
   <p class="note">Chạy 15 giây cảnh nặng nhất: 5 đấu 5, tuyệt kỹ liên tục. Kết quả gồm FPS trung bình, 1% thấp nhất, draw call, tam giác, hạt, và đề xuất mức đồ hoạ.</p>
   <button class="btn" id="btn-bench">Chạy kiểm tra 15 giây</button>
@@ -706,7 +715,7 @@ class VFXManager {
     this.particles = new ParticlePool(5000);
     this.particles.setBudget(Q().particles);
     scene.add(this.particles.points);
-    this.ribbons = new RibbonBatch(150, 16, true);
+    this.ribbons = new RibbonBatch(200, 16, true);
     scene.add(this.ribbons.mesh);
     this.hairRibbons = new RibbonBatch(40, 10, false);
     scene.add(this.hairRibbons.mesh);
@@ -1027,8 +1036,9 @@ class CharacterRig {
       this.part(cyl, inner, th, 0, -0.22, 0, 0.075 * s, 0.44, 0.075 * s);
       const sh = this.group(pre + 'Shin', th, 0, -0.44, 0);
       this.part(cyl, inner, sh, 0, -0.2, 0, 0.065 * s, 0.4, 0.065 * s);
-      this.part(box, dark, sh, 0, -0.43, 0.04, 0.09 * s, 0.07, 0.22, false);
+      this.feet[pre] = this.part(box, dark, sh, 0, -0.43, 0.04, 0.09 * s, 0.07, 0.22, false);
     };
+    this.feet = {};
     leg(1); leg(-1);
     this.buildWeapon();
     // Bóng tròn dưới chân (luôn có, nhẹ hơn shadow map).
@@ -1170,11 +1180,48 @@ class CharacterRig {
     this.body.rotation.set(out[R_PITCH], out[R_YAW], 0);
     this.root.position.copy(worldPos); this.root.rotation.y = yaw;
     this.blob.visible = (this.holdW.Death || 0) < 0.9;
+    this.solveFootIK(dt, out, worldPos);
 
     this.root.updateMatrixWorld(true);
     this.updateSecondary(dt, yaw);
     this.updateTrail();
     if (this.orb) this.orb.scale.setScalar(1 + Math.sin(this.time * 6) * 0.12);
+  }
+  /**
+   * IK chân 2 khớp (giải tích, luật cos) trong mặt phẳng dọc của chân:
+   * khi tư thế hạ hông làm cổ chân xuyên xuống đất, tính lại góc đùi / gối để cổ chân nằm đúng
+   * trên mặt đất (giữ nguyên vị trí trước–sau), gối gập tự nhiên, bàn chân xoay phẳng.
+   * Tắt khi thân người ngã (chết / bị hất văng mạnh).
+   */
+  solveFootIK(dt, out, worldPos) {
+    const want = options.footIK && Math.abs(out[R_PITCH]) < 0.25 && (this.holdW.Death || 0) < 0.05 ? 1 : 0;
+    this.ikW = damp(this.ikW || 0, want, 12, dt || 1);
+    if (this.ikW < 0.01) { for (const k in this.feet) this.feet[k].rotation.x = 0; return; }
+    const L1 = 0.44, L2 = 0.43, ankleMin = 0.05;
+    const ground = groundHeight(worldPos.x, worldPos.z) - worldPos.y;
+    const hipY = this.j.hips.position.y - 0.04 - ground;   // độ cao khớp háng so với mặt đất
+    for (const side of ['l', 'r']) {
+      const th = this.j[side + 'Thigh'], sh = this.j[side + 'Shin'], foot = this.feet[side];
+      const a = th.rotation.x, b = sh.rotation.x;
+      const z = -L1 * Math.sin(a) - L2 * Math.sin(a + b);   // FK: cổ chân so với háng (z trước, y lên)
+      const y = -L1 * Math.cos(a) - L2 * Math.cos(a + b);
+      let na = a, nb = b;
+      if (hipY + y < ankleMin) {
+        let dz = z, dy = hipY - ankleMin;                     // dy: khoảng cách xuống từ háng tới mục tiêu
+        let d = Math.hypot(dz, dy);
+        const maxD = L1 + L2 - 1e-3;
+        if (d > maxD) { dz *= maxD / d; dy *= maxD / d; d = maxD; }
+        d = Math.max(d, 0.05);
+        const knee = Math.PI - Math.acos(clamp((L1 * L1 + L2 * L2 - d * d) / (2 * L1 * L2), -1, 1));
+        const alpha = Math.acos(clamp((L1 * L1 + d * d - L2 * L2) / (2 * L1 * d), -1, 1));
+        na = Math.atan2(-dz, dy) - alpha; nb = knee;
+      }
+      th.rotation.x = lerp(a, na, this.ikW); sh.rotation.x = lerp(b, nb, this.ikW);
+      // Bàn chân phẳng với mặt đất khi đang chạm đất.
+      const footH = hipY - L1 * Math.cos(th.rotation.x) - L2 * Math.cos(th.rotation.x + sh.rotation.x);
+      const planted = 1 - smooth(ankleMin + 0.02, ankleMin + 0.12, footH);
+      foot.rotation.x = -(th.rotation.x + sh.rotation.x) * planted * this.ikW;
+    }
   }
   updateSecondary(dt, yaw) {
     if (!this.hairColor) { this.hairColor = new THREE.Color(this.look.hair); this.trimColor = new THREE.Color(this.look.trim); }
@@ -1473,6 +1520,8 @@ const combatCam = new CombatCamera(camera);
  * 13. Thế giới: Vân Đài lơ lửng trên biển mây, bàn cờ 8×8
  * ===================================================================*/
 const BOARD = { cols: 8, rows: 8, tile: 2.3 };
+/** Độ cao mặt đất tại (x, z) – bàn cờ phẳng; thay hàm này khi có địa hình gồ ghề, IK chân tự thích nghi. */
+const groundHeight = (x, z) => 0;
 const tileCenter = (c, r, out = new V3()) => out.set((c - 3.5) * BOARD.tile, 0, (r - 3.5) * BOARD.tile);
 const worldToTile = (x, z) => ({ c: Math.floor(x / BOARD.tile + 4), r: Math.floor(z / BOARD.tile + 4) });
 
@@ -1766,7 +1815,9 @@ class Unit {
  * 16. Sát thương, khiên, trạng thái, hit stop
  * ===================================================================*/
 let hitStopTimer = 0;
-const options = { hitstop: store.get('hitstop', true) };
+const options = { hitstop: store.get('hitstop', true), swordCount: store.get('swords', 0), footIK: store.get('footIK', true) };
+/** 0 = theo mức đồ hoạ; > 0 = số người chơi chọn. */
+const swordCount = () => (options.swordCount > 0 ? options.swordCount : Q().swords);
 function hitStop(d) { if (options.hitstop) hitStopTimer = Math.max(hitStopTimer, d); }
 const floaters = [];
 function floatText(pos, text, color, size = 1, crit = false) {
@@ -1898,7 +1949,7 @@ const SKILLS = {
     name: 'Vạn Kiếm Quy Tông',
     build(caster, target, release) {
       const tl = new SkillTimeline('Vạn Kiếm Quy Tông', caster);
-      const N = Q().swords, A = COLORS.allyA, B = COLORS.allyB;
+      const N = swordCount(), A = COLORS.allyA, B = COLORS.allyB;
       const T = { summon: 0.75, point: 1.35, launch: 1.5, array: 2.15, giant: 3.3, slam: 3.85, end: 5.1 };
       const center = new V3().copy(target.pos);
       let circle = null, circle2 = null, swarm = null, giant = null, giantGlow = null;
@@ -2370,6 +2421,14 @@ $('opt-auto').checked = QualityManager.auto; $('opt-auto').addEventListener('cha
 $('opt-cine').checked = combatCam.enableCinematic; $('opt-cine').addEventListener('change', e => { combatCam.enableCinematic = e.target.checked; store.set('cine', e.target.checked); if (!e.target.checked) combatCam.cine = null; });
 $('opt-shake').checked = combatCam.enableShake; $('opt-shake').addEventListener('change', e => { combatCam.enableShake = e.target.checked; store.set('shake', e.target.checked); });
 $('opt-reduce').checked = combatCam.reduceShake; $('opt-reduce').addEventListener('change', e => { combatCam.reduceShake = e.target.checked; store.set('reduce', e.target.checked); });
+function syncSwordUI() {
+  const auto = options.swordCount <= 0;
+  $('opt-sword-auto').checked = auto; $('opt-swords').disabled = auto;
+  $('opt-swords').value = swordCount(); $('sword-val').textContent = swordCount() + (auto ? ' (theo mức ' + Q().label + ')' : '');
+}
+$('opt-sword-auto').addEventListener('change', e => { options.swordCount = e.target.checked ? 0 : Q().swords; store.set('swords', options.swordCount); syncSwordUI(); });
+$('opt-swords').addEventListener('input', e => { options.swordCount = +e.target.value; store.set('swords', options.swordCount); syncSwordUI(); });
+$('opt-ik').checked = options.footIK; $('opt-ik').addEventListener('change', e => { options.footIK = e.target.checked; store.set('footIK', e.target.checked); });
 $('opt-hitstop').checked = options.hitstop; $('opt-hitstop').addEventListener('change', e => { options.hitstop = e.target.checked; store.set('hitstop', e.target.checked); });
 
 /* =====================================================================
@@ -2389,6 +2448,7 @@ function applyQuality(cur, reason) {
   resize();
   bloom.setLevel(cur.bloom, window.innerWidth, window.innerHeight);
   syncQualityButtons();
+  if (typeof syncSwordUI === 'function') syncSwordUI();
   if (reason === 'auto') ui.toast('FPS thấp kéo dài – đã giảm đồ hoạ xuống ' + cur.label);
 }
 QualityManager.onChange(applyQuality);
