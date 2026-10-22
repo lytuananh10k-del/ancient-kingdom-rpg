@@ -7,7 +7,9 @@
  * ===================================================================*/
 /* ---------- Tộc / hệ ---------- */
 /* TRAITS: xem js/data/traits.js */
-const defaultBonus = () => ({ atk: 1, hp: 1, hpAdd: 0, skill: 1, mana0: 0, ls: 0, aspd: 1, def: 0 });
+/** Hệ số cộng thêm của 1 tướng (đều trung tính). Lớp tộc/hệ: atk, hp, defMul, aspd, skill, omni, manaGain, heal (TraitEngine.computeBonus);
+ *  trang bị nhân / cộng tiếp lên trên (atk, def phẳng, hpAdd phẳng, aspd, skill, mana0, ls). */
+const defaultBonus = () => ({ atk: 1, hp: 1, hpAdd: 0, skill: 1, mana0: 0, ls: 0, aspd: 1, def: 0, defMul: 1, omni: 0, manaGain: 1, heal: 1, traitStats: null });
 
 /* ---------- Trang bị (rơi ở vòng yêu thú; tối đa 3 món mỗi tướng, gắn rồi không tháo – bán tướng thì trả về túi) ---------- */
 const ITEMS = {
@@ -88,7 +90,7 @@ function countCopies(key, star) {
   return game.bench.filter(e => e && e.key === key && e.star === star).length + boardAllies().filter(u => u.key === key && u.star === star).length;
 }
 function placeUnit(key, star, c, r, items = []) {
-  const u = new Unit(key, 'ally', c, r, star); units.push(u); u.items = items.slice();
+  const u = new Unit(key, 'ally', c, r, star); units.push(u); u.items = items.slice(); TraitCounter.invalidate();
   u.rig.setOutline && u.rig.setOutline(Q().outline);
   return u;
 }
@@ -108,7 +110,7 @@ function syncBench() {
   }
   pool.forEach(u => u.dispose());
 }
-function removeUnit(u) { const i = units.indexOf(u); if (i >= 0) units.splice(i, 1); if (battle.selected === u) battle.selected = null; u.dispose(); }
+function removeUnit(u) { const i = units.indexOf(u); if (i >= 0) units.splice(i, 1); if (u.team === 'ally') TraitCounter.invalidate(); if (battle.selected === u) battle.selected = null; u.dispose(); }
 function tileOccupant(c, r) { return boardAllies().find(u => u.homeTile.c === c && u.homeTile.r === r) || null; }
 function freeAllyTile() { for (let r = 3; r >= 0; r--) for (const c of [3, 4, 2, 5, 1, 6, 0, 7]) if (!tileOccupant(c, r)) return { c, r }; return null; }
 
@@ -231,7 +233,7 @@ function showHighlight(t, ok) {
   if (t.type === 'tile') { tileCenter(t.c, t.r, hl.position); hl.scale.setScalar(1); } else { benchSlotPos(t.i, hl.position); hl.scale.set(0.72, 1, 0.68); }
   hl.position.y = 0.08; hl.material.color.set(ok ? 0xe9c46a : 0xe2553f); hl.visible = true;
 }
-function afterRosterChange() { applyTraits(); boardAllies().forEach(u => u.reset(1)); saveGame(); ui.update(); }
+function afterRosterChange() { applyTraits(true); boardAllies().forEach(u => u.reset(1)); saveGame(); ui.update(); }
 
 /* ---------- Túi trang bị ---------- */
 function addItem(key) { if (game.items.length < MAX_INVENTORY) game.items.push(key); else { game.gold += 2; ui.toast('Túi đầy – ' + ITEMS[key].name + ' đổi thành 2 linh thạch'); } }
@@ -251,29 +253,12 @@ function equipItem(idx, target) {
   return true;
 }
 
-/* ---------- Tộc / hệ: đếm tướng khác nhau trên bàn ---------- */
-function traitCounts() {
-  const keys = new Set(boardAllies().map(u => u.key)), counts = {};
-  for (const k of keys) for (const t of UNIT_DEFS[k].traits || []) counts[t] = (counts[t] || 0) + 1;
-  return counts;
-}
-function traitLevel(t, n) { let lv = 0; TRAITS[t].tiers.forEach((m, i) => { if (n >= m) lv = i + 1; }); return lv; }
-function applyTraits() {
-  const counts = traitCounts();
-  for (const u of units) {
-    const b = defaultBonus();
-    if (u.team === 'ally') for (const t of u.def.traits || []) {
-      const lv = traitLevel(t, counts[t] || 0); if (!lv) continue;
-      if (t === 'kiemtu') { b.atk *= lv === 1 ? 1.2 : 1.5; if (lv >= 2) b.aspd *= 1.2; }
-      if (t === 'phaptu') { b.skill *= lv === 1 ? 1.25 : 1.6; b.mana0 += lv === 1 ? 20 : 40; }
-      if (t === 'hophap') { b.hp *= lv === 1 ? 1.3 : 1.6; b.def += lv === 1 ? 20 : 45; }
-      if (t === 'matu') { b.ls += lv === 1 ? 0.2 : 0.4; if (lv >= 2) b.atk *= 1.15; }
-    }
-    if (u.team === 'ally') for (const it of u.items || []) if (ITEMS[it]) ITEMS[it].apply(b);
-    u.bonus = b;
-  }
-  return counts;
-}
+/* ---------- Tộc / hệ: xem js/data/traits.js (dữ liệu) và js/combat/traits-engine.js (TraitCounter, TraitEngine) ---------- */
+/** Số tướng khác nhau trên bàn theo tộc/hệ (bản sao – sửa không ảnh hưởng bộ đếm). */
+function traitCounts() { return Object.assign({}, TraitCounter.counts()); }
+const traitLevel = (t, n) => TraitRegistry.level(t, n);
+/** Áp lớp tộc/hệ + trang bị cho mọi tướng (tính lại từ đầu, không cộng dồn). announce = hiệu ứng khi vừa đạt mốc mới. */
+function applyTraits(announce) { return TraitEngine.apply(announce); }
 
 /* ---------- Đội hình địch theo vòng ---------- */
 /** Vòng yêu thú: 3, 7, 11, 15… – đánh yêu thú để nhận trang bị và linh thạch; thua chỉ mất nửa máu, không tính chuỗi. */
@@ -340,6 +325,7 @@ function newGame() { restoreGame(newGameState()); ui.toast('Ván mới – mua t
 
 /* ---------- Vòng đấu ---------- */
 function setupRound() {
+  TraitEngine.battleEnd();
   timelines.forEach(t => t.cancel()); timelines.length = 0;
   Projectiles.clear(); vfx.clear(); floaters.length = 0;
   for (let i = units.length - 1; i >= 0; i--) if (units[i].team === 'enemy') { units[i].dispose(); units.splice(i, 1); }
@@ -381,10 +367,12 @@ function startBattle() {
   if (!battle.bench) autoFillBoard();
   if (!boardAllies().length) ui.toast('Không có tu sĩ trên bàn – vòng này sẽ thua');
   applyTraits(); boardAllies().forEach(u => u.reset(1));
-  battle.phase = 'fight'; battle.time = 0; battle.loot = { gold: 0, items: [] }; battle.otShown = false; select(null); ui.update();
+  battle.phase = 'fight';
+  TraitEngine.battleStart(); battle.time = 0; battle.loot = { gold: 0, items: [] }; battle.otShown = false; select(null); ui.update();
   combatCam.tDist = combatCam.defaults.dist;
 }
 function onUnitDeath(u) {
+  TraitEvents.emit('onUnitDeath', u);
   vfx.particles.burst(u.chest(new V3()), u.team === 'ally' ? COLORS.allyA : COLORS.enemyA, 24, 5, 0.8, 0.3, { up: 1, drag: 2 });
   // Yêu thú rơi đồ: Yêu Thú Vương chắc chắn 1 trang bị + 3 linh thạch; Yêu Lang 40% trang bị, còn lại 1 linh thạch.
   if (u.def.monster && battle.loot && !battle.bench) {
@@ -429,6 +417,7 @@ function checkBattleEnd() {
   if (allies && enemies && battle.time < FIGHT_LIMIT) return;
   const win = allies && !enemies;
   battle.phase = 'end'; battle.result = win ? 'win' : 'lose';
+  TraitEngine.battleEnd();
   units.forEach(u => { if (u.alive && ((u.team === 'ally') === win)) u.fsm.set('victory'); else if (u.alive) u.fsm.set('idle'); });
   settleRound(win);
   if (game.over) { ui.result('Đạo tâm tan vỡ'); ui.toast('Hết máu – trụ được ' + battle.round + ' vòng'); }

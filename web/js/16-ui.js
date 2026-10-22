@@ -38,7 +38,7 @@ const ui = {
       // Mép trên cửa hàng dịch chuyển (túi trang bị hiện / ẩn…): căn lại khoảng cách camera (không xoay lại góc nhìn) để hàng chờ không bị che.
       if (prepFit.dist && Math.abs($('prep-panel').getBoundingClientRect().top - prepFit.panelTop) > 6) requestAnimationFrame(() => { fitPrepCamera(); combatCam.tDist = prepFit.dist; });
     }
-    renderTraits();
+    renderTraits(); fitTraitsPanel();
   },
   toast(text) { const t = $('toast'); t.textContent = text; t.hidden = false; this.toastTimer = 2.4; },
   result(text) { const r = $('result'); r.hidden = !text; r.textContent = text || ''; },
@@ -104,12 +104,16 @@ function renderUnitInfo() {
   if (enemy) tags.push('<span class="ui-tag foe">Phe địch</span>');
   if (ROLES[d.role]) tags.push(`<span class="ui-tag role">${ROLES[d.role].name}</span>`);
   if (d.cost) tags.push(`<span class="ui-tag cost" style="color:${RARITY_COLOR[d.cost]};border-color:${RARITY_COLOR[d.cost]}">◆ ${d.cost} · ${RARITY[d.cost]}</span>`);
-  if (ORIGINS[d.origin]) tags.push(`<span class="ui-tag">${ORIGINS[d.origin]}</span>`);
-  (d.traits || []).forEach(t => {
+  TraitRegistry.of(d).forEach(t => {
     const T = TRAITS[t], n = enemy ? 0 : counts[t] || 0, lv = !enemy && !onBench && u ? traitLevel(t, n) : 0;
-    tags.push(`<span class="ui-tag${lv && T.active ? ' on' : ''}" style="--c:${T.color}">${T.name}${!enemy ? ` ${n}/${T.tiers.find(m => m > n) || T.tiers[T.tiers.length - 1]}` : ''}${T.active ? '' : ' (tuần 2)'}</span>`);
+    tags.push(`<span class="ui-tag${lv ? ' on' : ''}" style="--c:${T.color}">${T.han} ${T.name}${!enemy ? ` ${n}/${TraitRegistry.next(t, n) || T.tiers[T.tiers.length - 1]}` : ''}</span>`);
   });
+  (d.sub || []).forEach(s => tags.push(`<span class="ui-tag sub" title="Phân loại phụ – chưa có cộng hưởng">${SUBCLASSES[s]}</span>`));
   $('ui-tags').innerHTML = tags.join('');
+  // Phần cộng thêm từ tộc/hệ đang áp lên tướng này (đọc từ bonus thật, không tính lại)
+  const ts = u && u.team === 'ally' && !onBench && u.bonus.traitStats, tl = [];
+  if (ts) for (const k in ts) if (ts[k] > 0) tl.push('+' + Math.round(ts[k] * 100) + '% ' + TRAIT_STATS[k]);
+  const traitLine = tl.length ? 'Tộc/hệ: ' + tl.join(' · ') : '';
   const its = u ? u.items || [] : [];
   $('ui-items').innerHTML = its.map(k => `<span style="--c:${ITEMS[k].color}" title="${ITEMS[k].desc}">${ITEMS[k].name}: ${ITEMS[k].desc}</span>`).join('');
   $('ui-bars').innerHTML = `<div class="ui-bar hp"><i style="width:${(hp / maxHp * 100).toFixed(1)}%"></i><span>Máu ${Math.round(hp)}/${maxHp}${shield > 0 ? ' · khiên ' + Math.round(shield) : ''}</span></div>` +
@@ -130,7 +134,7 @@ function renderUnitInfo() {
   else if (u && !enemy) foot = battle.phase === 'prep' ? `Bán +${sellPrice(u.key, u.star)} linh thạch · kéo để đổi vị trí` : '';
   else if (enemy) foot = `Chỉ số đã nhân theo vòng ${battle.round}`;
   if (u && !enemy && poolTxt) foot += poolTxt;
-  $('ui-foot').textContent = foot;
+  $('ui-foot').textContent = traitLine ? traitLine + (foot ? '\n' + foot : '') : foot;
 }
 $('btn-info-close').addEventListener('click', () => { closeUnitInfo(); if (game.sel) select(null); });
 const TIER_LABEL = ['', 'Phàm', 'Linh', 'Tiên'];
@@ -207,15 +211,69 @@ function renderSelActions() {
   $('btn-reroll').hidden = $('btn-xp').hidden = !!key;
   if (key) sell.textContent = 'Bán ' + (UNIT_DEFS[key].short || UNIT_DEFS[key].name) + ' +' + sellPrice(key, star);
 }
+/* ---------- TraitUI: bảng tộc/hệ bên trái kiểu TFT + tooltip (chỉ vẽ lại khi số liệu đổi) ---------- */
+const traitUI = { sig: '', tip: null };
 function renderTraits() {
-  const counts = traitCounts(), el = $('traits'); el.textContent = '';
-  Object.keys(TRAITS).filter(t => counts[t]).sort((a, b) => traitLevel(b, counts[b]) - traitLevel(a, counts[a]) || counts[b] - counts[a]).forEach(t => {
-    const T = TRAITS[t], n = counts[t], lv = T.active ? traitLevel(t, n) : 0, div = document.createElement('div');
-    div.className = 'trait' + (lv ? ' on' : '') + (T.active ? '' : ' soon'); div.style.setProperty('--c', T.color);
-    div.innerHTML = `<b>${T.name}</b> <span class="cnt">${n}/${T.tiers.find(m => m > n) || T.tiers[T.tiers.length - 1]}</span>${lv ? `<span class="fx">${T.desc[lv - 1]}</span>` : T.active ? '' : '<span class="fx">cộng hưởng mở ở tuần 2</span>'}`;
-    el.appendChild(div);
-  });
+  const counts = traitCounts(), el = $('traits');
+  const ids = Object.keys(TRAITS).filter(t => counts[t])
+    .sort((a, b) => traitLevel(b, counts[b]) - traitLevel(a, counts[a]) || counts[b] - counts[a] || TRAITS[a].kind.localeCompare(TRAITS[b].kind));
+  const sig = ids.map(t => t + counts[t]).join(',');
+  if (sig === traitUI.sig) return;   // không đổi → không đụng DOM
+  traitUI.sig = sig; el.textContent = '';
+  if (!ids.length) { el.innerHTML = '<div class="trait-empty">Đặt tướng lên bàn để kích hoạt tộc/hệ</div>'; return; }
+  for (const t of ids) {
+    const T = TRAITS[t], n = counts[t], lv = traitLevel(t, n), next = TraitRegistry.next(t, n), b = document.createElement('button');
+    const lo = lv ? T.tiers[lv - 1] : 0, hi = next || T.tiers[T.tiers.length - 1];
+    const prog = next ? (n - lo) / (hi - lo) : 1;
+    b.className = 'trait' + (lv ? ' on lv' + lv : '') + (next ? '' : ' max'); b.dataset.id = t; b.style.setProperty('--c', T.color);
+    b.setAttribute('aria-label', `${T.name}: ${n} tướng, ${lv ? 'đang kích hoạt mốc ' + T.tiers[lv - 1] : 'chưa kích hoạt'}${next ? ', mốc kế ' + next : ''}`);
+    b.innerHTML = `<span class="ic">${T.han}</span><span class="tx"><span class="nm">${T.name}</span>` +
+      `<span class="tiers">${T.tiers.map((m, i) => `<i class="${i < lv ? 'hit' : ''}">${m}</i>`).join('<em>›</em>')}</span>` +
+      `<span class="bar"><i style="width:${Math.round(Math.max(0, Math.min(1, prog)) * 100)}%"></i></span></span>` +
+      `<span class="cnt">${n}${next ? `<small>/${next}</small>` : ''}</span>` +
+      (lv ? `<span class="fx">${TraitRegistry.describe(t, lv)}</span>` : '');
+    el.appendChild(b);
+  }
+  if (traitUI.tip) showTraitTip(traitUI.tip);
+  fitTraitsPanel();
 }
+/** Giới hạn chiều cao bảng tộc/hệ để không chui xuống dưới cửa hàng / nút đáy (cuộn được nếu dài). */
+function fitTraitsPanel() {
+  const el = $('traits'); if (!el.childElementCount) return;
+  el.style.maxHeight = '';
+  const r = el.getBoundingClientRect(); let lim = window.innerHeight - 8;
+  for (const o of [$('prep-panel'), $('next-dock')]) {
+    if (!o || o.hidden || o.offsetParent === null) continue;
+    const b = o.getBoundingClientRect(); if (b.left < r.right && b.right > r.left) lim = Math.min(lim, b.top - 6);
+  }
+  el.style.maxHeight = Math.max(64, lim - r.top) + 'px';
+}
+window.addEventListener('resize', () => requestAnimationFrame(fitTraitsPanel));
+/** Tooltip tộc/hệ: mọi mốc (mốc đang đạt nổi bật), tướng thuộc tộc/hệ (tướng đang có trên bàn nổi bật). */
+function showTraitTip(id) {
+  const T = TRAITS[id], row = document.querySelector(`#traits .trait[data-id="${id}"]`), tip = $('trait-tip');
+  if (!T || !row) { hideTraitTip(); return; }
+  const counts = traitCounts(), n = counts[id] || 0, lv = traitLevel(id, n), onBoard = new Set(boardAllies().map(u => u.key));
+  const who = CHAMPIONS.filter(c => TraitRegistry.of(c).includes(id)).sort((a, b) => a.cost - b.cost);
+  tip.style.setProperty('--c', T.color);
+  tip.innerHTML = `<div class="tt-head"><span class="ic">${T.han}</span><b>${T.name}</b><span class="kind">${T.kind === 'origin' ? 'Tộc' : 'Hệ'} · ${n} tướng</span></div>` +
+    `<p class="tt-blurb">${T.blurb}</p><ol class="tt-tiers">${T.tiers.map((m, i) => `<li class="${i === lv - 1 ? 'cur' : i < lv ? 'hit' : ''}"><b>(${m})</b> ${TraitRegistry.describe(id, i + 1)}</li>`).join('')}</ol>` +
+    `<div class="tt-who">${who.map(c => `<span class="${onBoard.has(c.id) ? 'own' : ''}" style="--r:${RARITY_COLOR[c.cost]}">${c.short || c.name}</span>`).join('')}</div>` +
+    (battle.phase === 'fight' ? '<p class="tt-note">Mốc được chốt lúc vào trận – tướng ngã không làm tụt mốc.</p>' : '');
+  tip.hidden = false; traitUI.tip = id;
+  // Đặt cạnh bảng tộc/hệ (phải nếu đủ chỗ, không thì dưới hàng được chạm), không tràn màn hình
+  const r = row.getBoundingClientRect(), W = window.innerWidth, H = window.innerHeight, tw = tip.offsetWidth, th = tip.offsetHeight;
+  let x = r.right + 8, y = r.top;
+  if (x + tw > W - 8) { x = Math.max(8, Math.min(r.left, W - tw - 8)); y = r.bottom + 6; }
+  y = Math.max(8, Math.min(y, H - th - 8));
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  document.querySelectorAll('#traits .trait.sel').forEach(e => e.classList.remove('sel')); row.classList.add('sel');
+}
+function hideTraitTip() { $('trait-tip').hidden = true; traitUI.tip = null; document.querySelectorAll('#traits .trait.sel').forEach(e => e.classList.remove('sel')); }
+$('traits').addEventListener('click', e => { const b = e.target.closest('.trait'); if (!b) return; e.stopPropagation(); if (traitUI.tip === b.dataset.id) hideTraitTip(); else showTraitTip(b.dataset.id); });
+$('traits').addEventListener('pointerover', e => { if (e.pointerType !== 'mouse') return; const b = e.target.closest('.trait'); if (b) showTraitTip(b.dataset.id); });
+$('traits').addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') hideTraitTip(); });
+document.addEventListener('pointerdown', e => { if (traitUI.tip && !e.target.closest('#traits, #trait-tip')) hideTraitTip(); }, true);
 function showBanner(name, team) { const b = $('skill-banner'); b.textContent = name; b.classList.toggle('enemy', team !== 'ally'); b.classList.add('show'); ui.bannerTimer = 1.6; }
 function nextRound() {
   if (game.over) { newGame(); return; }

@@ -11,7 +11,7 @@ const ctx = { THREE: { Color: class { constructor(c) { this.c = c; } } }, SKILLS
 vm.createContext(ctx);
 const load = f => vm.runInContext(fs.readFileSync(path.join(WEB, f), 'utf8').replace(/^(const|let) /gm, 'var ').replace(/^'use strict';/m, ''), ctx, { filename: f });
 ['js/data/champions.js', 'js/data/traits.js', 'js/data/skills.js'].forEach(load);
-const { CHAMPIONS, TRAITS, ORIGINS, ROLES, RARITY, STAR, SKILL_SPECS, SKILL_META, UNIT_DEFS } = ctx;
+const { CHAMPIONS, TRAITS, ORIGINS, ROLES, RARITY, STAR, SKILL_SPECS, SKILL_META, UNIT_DEFS, TraitRegistry, SUBCLASSES } = ctx;
 
 // Tên kỹ năng viết tay (js/13-skills.js) – đọc từ mã nguồn để không phải nạp Three.js
 const src13 = fs.readFileSync(path.join(WEB, 'js/13-skills.js'), 'utf8');
@@ -38,9 +38,9 @@ out += '|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---
 CHAMPIONS.forEach((c, i) => {
   const dps = c.atk * c.aspd * (1 + c.crit * (c.critDmg - 1)), ehp = c.hp * (1 + c.def / 100);
   const sk = SKILL_SPECS[c.skill] ? SKILL_SPECS[c.skill].name : handName(c.skill);
-  out += `| ${i + 1} | \`${c.id}\` | ${c.name} | ${c.cost} | ${RARITY[c.cost]} | ${ORIGINS[c.origin]} | ${c.traits.map(t => TRAITS[t].name + (TRAITS[t].active ? '' : '*')).join(', ')} | ${ROLES[c.role].name} | ${c.hp} | ${c.atk} | ${c.def} | ${num(c.aspd)} | ${num(c.range)} | ${num(c.speed)} | ${c.mana0}/${c.mana} | ${pct(c.crit)} ×${num(c.critDmg)} | ${pct(c.dodge)} | ${Math.round(dps)} | ${Math.round(ehp)} | ${Math.round(c.hp * STAR.hp[2])}/${Math.round(c.hp * STAR.hp[3])} | ${Math.round(c.atk * STAR.atk[2])}/${Math.round(c.atk * STAR.atk[3])} | ${sk} |\n`;
+  out += `| ${i + 1} | \`${c.id}\` | ${c.name} | ${c.cost} | ${RARITY[c.cost]} | ${ORIGINS[c.origin]} | ${c.traits.map(t => TRAITS[t].name).join(', ')}${(c.sub || []).length ? ' (phụ: ' + c.sub.map(s => SUBCLASSES[s]).join(', ') + ')' : ''} | ${ROLES[c.role].name} | ${c.hp} | ${c.atk} | ${c.def} | ${num(c.aspd)} | ${num(c.range)} | ${num(c.speed)} | ${c.mana0}/${c.mana} | ${pct(c.crit)} ×${num(c.critDmg)} | ${pct(c.dodge)} | ${Math.round(dps)} | ${Math.round(ehp)} | ${Math.round(c.hp * STAR.hp[2])}/${Math.round(c.hp * STAR.hp[3])} | ${Math.round(c.atk * STAR.atk[2])}/${Math.round(c.atk * STAR.atk[3])} | ${sk} |\n`;
 });
-out += '\n\\* hệ mới chỉ có dữ liệu, chưa có cộng hưởng (tuần 2).\n\n';
+out += '\n(phụ: …) = phân loại phụ, chỉ hiển thị, chưa có cộng hưởng.\n\n';
 
 // Trung bình theo bậc để kiểm tra đường cong cân bằng
 out += '## Đường cong sức mạnh theo bậc (trung bình ★1)\n\n| Bậc | Số tướng | Máu | Công | DPS | Máu hiệu dụng | DPS × máu hiệu dụng (tương đối bậc 1) |\n|---|---|---|---|---|---|---|\n';
@@ -62,13 +62,13 @@ for (const c of CHAMPIONS) {
   else { const m = SKILL_META[c.skill] || {}; out += `| ${c.name} | ${handName(c.skill)} (\`${c.skill}\`) | ${m.type || ''} | ${m.target || ''} | (viết tay, js/13-skills.js) | ${m.duration ? num(m.duration) + ' s' : '—'} | ${(m.effects || []).join(', ')} · tổng hệ số ≈ ${pct(m.mult || 0)} | ${handDesc(c.skill)} |\n`; }
 }
 
-out += '\n## Tộc / hệ\n\n| id | Tên | Mốc | Hiệu ứng | Trạng thái | Tướng |\n|---|---|---|---|---|---|\n';
+out += '\n## 8 tộc / hệ (V1.5 tuần 2)\n\nMô tả sinh từ dữ liệu `TRAITS` (TraitRegistry.describe) – luôn khớp hệ số thật trong trận.\n\n| Tộc/hệ | Loại | Mốc | Hiệu ứng từng mốc | Tướng (bậc) |\n|---|---|---|---|---|\n';
 for (const id in TRAITS) {
-  const t = TRAITS[id], who = CHAMPIONS.filter(c => c.traits.includes(id)).map(c => c.name);
-  out += `| \`${id}\` | ${t.name} | ${t.tiers.join(' / ')} | ${t.desc.join(' · ')} | ${t.active ? 'đang hoạt động' : 'tuần 2'} | ${who.join(', ')} |\n`;
+  const t = TRAITS[id], who = CHAMPIONS.filter(c => TraitRegistry.of(c).includes(id)).sort((a, b) => a.cost - b.cost).map(c => `${c.name} (${c.cost})`);
+  out += `| ${t.han} ${t.name} (\`${id}\`) | ${t.kind === 'origin' ? 'Tộc' : 'Hệ'} | ${t.tiers.join(' / ')} | ${t.tiers.map((m, i) => `**(${m})** ${TraitRegistry.describe(id, i + 1)}`).join('<br>')} | ${who.join(', ')} |\n`;
 }
-out += '\n## Tộc (nguồn gốc) – dữ liệu cho tuần 2\n\n| id | Tộc | Tướng |\n|---|---|---|\n';
-for (const id in ORIGINS) out += `| \`${id}\` | ${ORIGINS[id]} | ${CHAMPIONS.filter(c => c.origin === id).map(c => c.name).join(', ')} |\n`;
+out += '\n## Phân bổ tộc/hệ cho 24 tướng\n\n| Tướng | Bậc | Tộc | Hệ | Phân loại phụ |\n|---|---|---|---|---|\n';
+for (const c of CHAMPIONS.slice().sort((a, b) => a.cost - b.cost)) out += `| ${c.name} | ${c.cost} | ${TRAITS[c.origin].name} | ${c.traits.map(t => TRAITS[t].name).join(', ')} | ${(c.sub || []).map(s => SUBCLASSES[s]).join(', ') || '—'} |\n`;
 
 out += '\n## Mô hình & animation\n\n| Tướng | Ngoại hình (LOOKS) | Vũ khí | Tỉ lệ | Preset animation | Đòn thường | Clip thi triển |\n|---|---|---|---|---|---|---|\n';
 const looksSrc = fs.readFileSync(path.join(WEB, 'js/data/champions.js'), 'utf8');

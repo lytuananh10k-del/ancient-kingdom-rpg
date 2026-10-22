@@ -45,19 +45,21 @@ function applyStun(u, dur, kind = 'stun') {
 function dealDamage(src, dst, mult, opts = {}) {
   if (!dst || !dst.alive || !src) return 0;
   // Né tránh: chỉ với đòn đánh thường (kỹ năng và sát thương theo thời gian luôn trúng); đang choáng / tung chiêu thì không né được.
-  if (!opts.skill && !opts.dot && dst.def.dodge > 0 && dst.status.stun <= 0 && dst.fsm.name !== 'cast' && Math.random() < dst.def.dodge) {
+  if (!opts.skill && !opts.dot && !opts.proc && dst.def.dodge > 0 && dst.status.stun <= 0 && dst.fsm.name !== 'cast' && Math.random() < dst.def.dodge) {
     combatLog.dodges++;
     floatText(dst.chest(_v2.clone()), 'Né', '#bfe3ff', 0.85);
     dst.anim.hit(src.pos, 0.3);   // nghiêng người tránh
-    if (!src.manaLock && src.alive) src.mana = Math.min(src.maxMana, src.mana + 10);
+    if (!src.manaLock && src.alive) addMana(src, 10);
     return 0;
   }
-  const crit = opts.crit !== undefined ? opts.crit : Math.random() < src.def.crit;
+  const crit = opts.crit !== undefined ? opts.crit : opts.flat === undefined && Math.random() < src.def.crit;
   if (crit && !opts.dot) combatLog.crits++;
   // Giáp sau xuyên giáp (opts.pen = tỉ lệ giáp bị bỏ qua); dst.fx 'dmgTaken' = giảm / tăng sát thương nhận vào.
   const armor = (dst.defNow ? dst.defNow() : dst.def_) * (1 - clamp(opts.pen || 0, 0, 1));
   const mitig = armor / (armor + 100);
-  let dmg = (src.atkNow ? src.atkNow() : src.atk) * mult * (1 - mitig) * (crit ? src.def.critDmg : 1) * rand(0.95, 1.05) * overtimeMul();
+  // opts.flat: sát thương cố định (vd. Pháp Tu nổ % máu tối đa) – không nhân công, không dao động ngẫu nhiên.
+  const raw = opts.flat !== undefined ? opts.flat : (src.atkNow ? src.atkNow() : src.atk) * mult * rand(0.95, 1.05);
+  let dmg = raw * (1 - mitig) * (crit ? src.def.critDmg : 1) * overtimeMul();
   if (dst.fx) dmg *= dst.fx.mul('dmgTaken');
   if (opts.skill && src.bonus) dmg *= src.bonus.skill * (STAR.skill[src.star] || 1);   // sức mạnh kỹ năng: tộc/hệ × sao
   dmg = Math.round(dmg);
@@ -68,9 +70,14 @@ function dealDamage(src, dst, mult, opts = {}) {
   dst.hp = Math.max(0, dst.hp - dmg);
   const ls = (src.bonus ? src.bonus.ls : 0) + (src.fx ? src.fx.sum('ls') : 0);
   if (ls > 0 && src.alive && !opts.dot) src.hp = Math.min(src.maxHp, src.hp + dmg * ls);
+  // Hút máu toàn phần (Ma Tộc): mọi nguồn sát thương – đòn thường, kỹ năng, theo thời gian, phi kiếm / nổ phụ.
+  if (src.bonus && src.bonus.omni > 0 && src.alive && dmg > 0) {
+    const h = Math.min(src.maxHp - src.hp, dmg * src.bonus.omni);
+    if (h > 0) { src.hp += h; combatLog.omniHealed = (combatLog.omniHealed || 0) + h; TraitEvents.emit('onHeal', src, src, h); }
+  }
   combatLog.dealt = (combatLog.dealt || 0) + dmg;
-  if (!dst.manaLock) dst.mana = Math.min(dst.maxMana, dst.mana + Math.min(12, (dmg + absorbed) * 0.04 + 2));
-  if (!opts.dot && !src.manaLock && src.alive) src.mana = Math.min(src.maxMana, src.mana + (opts.skill ? 0 : 10));
+  if (!dst.manaLock) addMana(dst, Math.min(12, (dmg + absorbed) * 0.04 + 2));
+  if (!opts.dot && !opts.proc && !src.manaLock && src.alive && !opts.skill) addMana(src, 10);
   dst.flash = Math.max(dst.flash, opts.dot ? 0.25 : opts.skill ? 0.55 : 1);
   const c = dst.chest(_v2.clone());
   if (absorbed > 0 && dmg === 0) floatText(c, 'Khiên −' + absorbed, '#9ff0d0', 0.9);
@@ -88,8 +95,13 @@ function dealDamage(src, dst, mult, opts = {}) {
   if (opts.stun && dst.hp > 0) applyStun(dst, opts.stun);
   if (opts.burn && dst.hp > 0) { dst.status.burn = 3; dst.status.burnSrc = src; dst.status.burnDmg = opts.burn; }
   if (dst.hp <= 0) { dst.fsm.set('dead'); onUnitDeath(dst); }
+  // Sự kiện cho tộc/hệ – phát SAU khi xử lý chết để hiệu ứng phụ (nổ Pháp Tu) không làm một tướng chết hai lần.
+  TraitEvents.emit('onHit', src, dst, dmg, opts);
+  TraitEvents.emit('onDamageTaken', dst, src, dmg, opts);
   return dmg;
 }
+/** Nhận năng lượng (nhân hệ số năng lượng nhận được của Tiên Tộc). */
+function addMana(u, x) { u.mana = Math.min(u.maxMana, u.mana + x * (u.bonus ? u.bonus.manaGain : 1)); }
 function aoe(src, center, radius, mult, opts = {}) {
   const hit = [];
   for (const u of units) if (u.team !== src.team && u.alive && Math.hypot(u.pos.x - center.x, u.pos.z - center.z) <= radius) { dealDamage(src, u, mult, Object.assign({ skill: true, from: center }, opts)); hit.push(u); }

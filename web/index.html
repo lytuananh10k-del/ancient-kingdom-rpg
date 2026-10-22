@@ -124,12 +124,54 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .xp { height: 4px; border-radius: 2px; background: rgba(255,255,255,0.1); margin-top: 5px; overflow: hidden; }
 .xp i { display: block; height: 100%; background: var(--azure); transform-origin: left; transform: scaleX(0); transition: transform 0.25s ease; }
 .xp-label { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
-#traits { display: flex; flex-direction: column; gap: 4px; pointer-events: none; }
-.trait { background: var(--panel); border: 1px solid var(--panel-line); border-left: 3px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 4px 8px; font-size: 0.74rem; color: var(--muted); }
-.trait.on { border-left-color: var(--c); color: var(--paper); }
-.trait.soon { opacity: 0.6; }
-.trait b { color: var(--c); } .trait .cnt { font-variant-numeric: tabular-nums; }
-.trait .fx { display: block; font-size: 0.7rem; color: var(--muted); }
+/* TraitUI – bảng tộc/hệ kiểu TFT */
+#traits { display: flex; flex-direction: column; gap: 3px; pointer-events: none; max-height: calc(100vh - 230px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
+.trait { pointer-events: auto; display: grid; grid-template-columns: 28px 1fr auto; align-items: center; column-gap: 7px; width: 100%; text-align: left;
+  background: rgba(18, 26, 30, 0.72); border: 1px solid var(--panel-line); border-radius: 8px; padding: 3px 8px 3px 4px; font-size: 0.74rem; color: var(--muted); opacity: 0.78; }
+.trait .ic { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 7px; font-size: 0.95rem; font-weight: 700; color: var(--muted);
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); transform: rotate(0deg); }
+.trait .tx { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.trait .nm { font-weight: 700; color: var(--paper); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.trait .tiers { font-size: 0.64rem; font-variant-numeric: tabular-nums; } .trait .tiers i { font-style: normal; } .trait .tiers em { font-style: normal; opacity: 0.4; margin: 0 2px; }
+.trait .tiers i.hit { color: var(--c); font-weight: 700; }
+.trait .bar { height: 3px; border-radius: 2px; background: rgba(255,255,255,0.1); overflow: hidden; } .trait .bar i { display: block; height: 100%; background: var(--c); opacity: 0.55; }
+.trait .cnt { font-size: 1rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--paper); } .trait .cnt small { font-size: 0.66rem; font-weight: 600; color: var(--muted); }
+.trait .fx { grid-column: 1 / -1; font-size: 0.68rem; line-height: 1.3; color: var(--paper); opacity: 0.85; margin-top: 2px; }
+.trait.on { opacity: 1; border-color: var(--c); background: rgba(18, 26, 30, 0.88); }
+.trait.on .ic { color: #10161a; background: var(--c); border-color: transparent; }
+@supports (color: color-mix(in srgb, red 50%, blue)) {   /* trình duyệt mới: nền ánh màu tộc/hệ; cũ: viền màu là đủ */
+  .trait.on { border-color: color-mix(in srgb, var(--c) 55%, transparent); background: linear-gradient(90deg, color-mix(in srgb, var(--c) 22%, rgba(18,26,30,0.85)), rgba(18,26,30,0.85) 70%); }
+  .trait.on .ic { box-shadow: 0 0 10px color-mix(in srgb, var(--c) 60%, transparent); }
+  #trait-tip .tt-who span { border-color: color-mix(in srgb, var(--r) 50%, transparent); }
+}
+@media (max-width: 560px), (max-height: 700px) { #traits .fx { display: none; } }   /* màn nhỏ: hiệu ứng xem trong tooltip */
+@media (max-width: 560px), (max-height: 520px) {   /* điện thoại: chip gọn (biểu tượng + số lượng/mốc kế) để không che bàn cờ – chạm để xem chi tiết */
+  #traits { flex-direction: row; flex-wrap: wrap; gap: 4px; }
+  .trait { width: auto; grid-template-columns: 22px auto; column-gap: 4px; padding: 2px 7px 2px 2px; border-radius: 7px; }
+  .trait .tx { display: none; }
+  .trait .ic { width: 22px; height: 22px; font-size: 0.8rem; border-radius: 6px; }
+  .trait .cnt { font-size: 0.86rem; }
+}
+.trait.on .bar i { opacity: 1; }
+.trait.on.lv3, .trait.on.max { box-shadow: inset 0 0 0 1px var(--c); }
+.trait.sel { outline: 2px solid var(--c); outline-offset: 1px; }
+.trait-empty { font-size: 0.72rem; color: var(--muted); padding: 2px 4px; }
+#trait-tip { position: fixed; z-index: 9; width: min(300px, calc(100vw - 16px)); background: rgba(14, 20, 24, 0.97); border: 1px solid var(--c); border-radius: 10px; padding: 8px 10px;
+  font-size: 0.74rem; color: var(--paper); box-shadow: 0 10px 30px rgba(0,0,0,0.5); pointer-events: none; }
+#trait-tip[hidden] { display: none; }
+#trait-tip .tt-head { display: flex; align-items: center; gap: 8px; } #trait-tip .tt-head b { color: var(--c); font-size: 0.9rem; }
+#trait-tip .ic { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 6px; background: var(--c); color: #10161a; font-weight: 700; }
+#trait-tip .kind { margin-left: auto; color: var(--muted); font-size: 0.68rem; }
+#trait-tip .tt-blurb { margin: 4px 0; color: var(--muted); }
+#trait-tip .tt-tiers { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 3px; }
+#trait-tip .tt-tiers li { color: var(--muted); line-height: 1.35; } #trait-tip .tt-tiers li.hit { color: var(--paper); } #trait-tip .tt-tiers li.cur { color: var(--paper); font-weight: 600; }
+#trait-tip .tt-tiers li.cur b, #trait-tip .tt-tiers li.hit b { color: var(--c); }
+#trait-tip .tt-who { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 6px; }
+#trait-tip .tt-who span { font-size: 0.66rem; padding: 1px 5px; border-radius: 5px; border: 1px solid var(--r); color: var(--muted); }
+#trait-tip .tt-who span.own { color: #10161a; background: var(--r); font-weight: 700; }
+#trait-tip .tt-note { margin: 5px 0 0; color: var(--muted); font-size: 0.66rem; }
+.ui-tag.sub { opacity: 0.7; border-style: dashed; }
+.ui-foot { white-space: pre-line; }
 
 /* ---------- Hàng chờ & cửa hàng ---------- */
 #prep-panel { position: relative; pointer-events: auto; width: min(560px, 100%); display: flex; flex-direction: column; gap: 6px; background: var(--panel); border: 1px solid var(--panel-line); border-radius: 12px; padding: 8px; }
@@ -303,6 +345,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 </div>
 
 <div id="skill-banner" aria-live="polite"></div>
+<div id="trait-tip" hidden role="tooltip"></div>
 <div id="result" hidden></div>
 <div id="toast" hidden></div>
 <aside id="unit-info" hidden aria-live="polite" aria-label="Thông tin tướng">
@@ -417,6 +460,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 <script src="js/combat/skill-executor.js"></script>
 <script src="js/data/skills.js"></script>
 <script src="js/data/traits.js"></script>
+<script src="js/combat/traits-engine.js"></script>
 <script src="js/14-game.js"></script>
 <script src="js/15-input.js"></script>
 <script src="js/16-ui.js"></script>

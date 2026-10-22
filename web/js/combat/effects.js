@@ -16,9 +16,10 @@ class EffectSet {
     const tick = e.tick || 0.5;
     if (e.tag) {
       const old = this.list.find(x => x.tag === e.tag && x.stat === e.stat);
-      if (old) { old.t = Math.max(old.t, e.dur); if (e.mul !== undefined) old.mul = e.mul; if (e.add !== undefined) old.add = e.add; if (e.dot) old.dot = e.dot; if (e.hot) old.hot = e.hot; old.src = e.src || old.src; return old; }
+      if (old) { old.t = Math.max(old.t, e.dur); if (e.mul !== undefined) old.mul = e.mul; if (e.add !== undefined) old.add = e.add; if (e.dot) old.dot = e.dot; if (e.hot) { old.hot = e.hot; old.left = e.hot * e.dur / tick; } old.src = e.src || old.src; return old; }
     }
-    const x = Object.assign({}, e, { t: e.dur, acc: 0, tick });
+    // hot: left = tổng còn phải hồi → hết hạn mà còn dư (do sai số nhịp) thì hồi nốt, tổng luôn đúng bằng lượng đã định.
+    const x = Object.assign({}, e, { t: e.dur, acc: 0, tick, left: e.hot ? e.hot * e.dur / tick : 0 });
     this.list.push(x);
     return x;
   }
@@ -34,17 +35,22 @@ class EffectSet {
         while (e.acc >= e.tick && this.u.alive) {
           e.acc -= e.tick;
           if (e.dot && e.src) dealDamage(e.src, this.u, e.dot, { dot: true, skill: true });
-          if (e.hot) healUnit(e.src || this.u, this.u, e.hot, true);
+          if (e.hot && e.left > 0) { const h = Math.min(e.hot, e.left); e.left -= h; healUnit(e.src || this.u, this.u, h, true, e.raw); }
         }
       }
-      if (e.t <= 0) this.list.splice(i, 1);
+      if (e.t <= 0) {
+        if (e.hot && e.left > 0.01 && this.u.alive) healUnit(e.src || this.u, this.u, e.left, true, e.raw);
+        this.list.splice(i, 1);
+      }
     }
   }
 }
 
-/** Hồi máu (không vượt máu tối đa). quiet = không hiện số (dùng cho hồi theo nhịp nhỏ). Trả về lượng hồi thực tế. */
-function healUnit(src, dst, amount, quiet) {
+/** Hồi máu (không vượt máu tối đa). quiet = không hiện số (dùng cho hồi theo nhịp nhỏ). raw = không nhân hiệu quả hồi máu (Đan Tu)
+ *  của người hồi – dùng cho lượng hồi cố định theo dữ liệu. Trả về lượng hồi thực tế. */
+function healUnit(src, dst, amount, quiet, raw) {
   if (!dst || !dst.alive || amount <= 0) return 0;
+  if (!raw && src && src.bonus && src.bonus.heal) amount *= src.bonus.heal;
   const before = dst.hp;
   dst.hp = Math.min(dst.maxHp, dst.hp + amount);
   const got = dst.hp - before;
@@ -52,6 +58,7 @@ function healUnit(src, dst, amount, quiet) {
     combatLog.healed = (combatLog.healed || 0) + got;
     if (!quiet || got >= 25) floatText(dst.chest(_v2.clone()), '+' + Math.round(got), '#7fe0a0', quiet ? 0.75 : 1);
     if (!quiet) vfx.particles.burst(dst.chest(_v2.clone()), COLORS.shield, 14, 3, 0.6, 0.25, { up: 2.5, drag: 2 });
+    if (typeof TraitEvents !== 'undefined') TraitEvents.emit('onHeal', src, dst, got);
   }
   return got;
 }

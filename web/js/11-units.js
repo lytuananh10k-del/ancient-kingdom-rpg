@@ -56,14 +56,17 @@ class Unit {
   }
   get alive() { return this.hp > 0; }
   modelScale() { return STAR.scale[this.star] * ((this.def.model && this.def.model.scale) || 1); }
-  /* Chỉ số hiện hành = chỉ số gốc (đã nhân sao, tộc/hệ, trang bị) × hiệu ứng đang có (EffectSet) × nội tại. */
+  /* Chỉ số hiện hành = chỉ số trận (gốc × sao × tộc/hệ → trang bị, tính 1 lần ở reset) × hiệu ứng tạm thời (EffectSet) × nội tại. */
   atkNow() { const p = this.def.passive; return this.atk * this.fx.mul('atk') * (p && p.lowHpAtk ? 1 + p.lowHpAtk * (1 - this.hp / this.maxHp) : 1); }
   defNow() { return Math.max(0, this.def_ * this.fx.mul('def') + this.fx.sum('def')); }
   aspdNow() { return this.def.aspd * this.bonus.aspd * this.fx.mul('aspd'); }
   speedNow() { return this.def.speed * this.fx.mul('speed'); }
   reset(scale) {
     const d = this.def, b = this.bonus, s = this.star;
-    this.maxHp = Math.round((d.hp * scale * STAR.hp[s] + (b.hpAdd || 0)) * b.hp); this.hp = this.maxHp; this.atk = d.atk * scale * STAR.atk[s] * b.atk; this.def_ = d.def * Math.sqrt(scale) + b.def;
+    // Gốc → × sao → × (1 + Σ% tộc/hệ) → trang bị (phẳng). Làm tròn: máu & giáp số nguyên, công 1 chữ số thập phân. Không sửa UNIT_DEFS.
+    this.maxHp = Math.round(d.hp * scale * STAR.hp[s] * b.hp + (b.hpAdd || 0)); this.hp = this.maxHp;
+    this.atk = Math.round(d.atk * scale * STAR.atk[s] * b.atk * 10) / 10;
+    this.def_ = Math.round(d.def * Math.sqrt(scale) * (b.defMul || 1) + b.def);
     this.mana = Math.min(d.mana, d.mana0 + b.mana0); this.maxMana = d.mana; this.shield = 0; this.shieldTime = 0;
     this.status = { stun: 0, frozen: 0, burn: 0, burnTick: 0, burnDmg: 0 };
     this.fx.clear();
@@ -249,6 +252,7 @@ class Unit {
   /** Đòn đánh thường: mini-timeline với ApplyDamage / LaunchProjectile đúng khung va chạm. */
   startAttack() {
     const t = this.findTarget(); if (!t) { this.fsm.set('move'); return; }
+    TraitEvents.emit('onAttack', this, t);
     this.snapFace(t.pos);
     const ranged = !!this.def.ranged;
     const seq = (this.def.animSet && this.def.animSet.attack) || ['Attack01', 'Attack02', 'Attack03', 'HeavyAttack'];
@@ -288,8 +292,10 @@ class Unit {
     if (skill.ready && !skill.ready(this)) combatLog.forcedCasts = (combatLog.forcedCasts || 0) + 1;
     this.mana = 0;
     this.casting = { released: false, tl: null };
+    if (this.tstate) this.tstate.castSeq++;   // Pháp Tu (6): mỗi lần thi triển mới được nổ thêm 1 lần trên mỗi mục tiêu
     showBanner(this.team === 'ally' && skill.allyName ? skill.allyName : skill.name, this.team);
     this.casting.tl = runTimeline(skill.build(this, t, () => { if (this.casting) this.casting.released = true; }));
+    TraitEvents.emit('onSkillCast', this, skill, t);
   }
   simStep(dt) {
     this.retarget -= dt; this.atkCd -= dt; this.dashCd -= dt;

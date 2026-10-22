@@ -28,7 +28,8 @@ và phải nạp đúng thứ tự số. Thêm file mới: đặt số thứ t�
 | `js/13-skills.js` | Kỹ năng viết tay (SkillTimeline): Vạn Kiếm Quy Tông, sét, hỏa phượng, lá chắn, kiếm khí |
 | `js/combat/skill-executor.js` | SkillExecutor: chọn mục tiêu (TARGETING), điều kiện tung (READY), áp hiệu ứng, VFX, dựng timeline cho kỹ năng dữ liệu |
 | `js/data/skills.js` | **Dữ liệu 19 kỹ năng** (`SKILL_SPECS`) + mô tả kỹ năng viết tay (`SKILL_META`) |
-| `js/data/traits.js` | Tộc / hệ: 4 hệ có cộng hưởng + 5 hệ mới (chỉ dữ liệu, tuần 2) |
+| `js/data/traits.js` | **Dữ liệu 8 tộc/hệ** (`TRAITS`: mốc, phạm vi, hệ số), phân loại phụ (`SUBCLASSES`), `TraitRegistry` (tra cứu, mô tả, kiểm tra cấu hình) |
+| `js/combat/traits-engine.js` | Synergy Engine: `TraitCounter`, `TraitEvents`, `TraitEngine` (TraitEffectEngine), `TraitSwords` (phi kiếm phụ), `TraitVFX` |
 | `js/14-game.js` | Kinh tế, cửa hàng, nâng sao, tộc/hệ, vòng đấu, lưu ván |
 | `js/15-input.js` | Xoay/zoom, chọn, kéo thả kiểu TFT |
 | `js/16-ui.js` | Giao diện, áp dụng chất lượng, lớp 2D |
@@ -55,6 +56,7 @@ bảng thông tin (tướng ta, địch, nhấn giữ thẻ cửa hàng) hiện 
 dữ liệu hợp lệ, nâng sao cả 24 tướng (★1→★2→★3, không ★4, máu / công đúng hệ số), từng kỹ năng tung đúng và có đủ cơ chế
 (sát thương, choáng, đóng băng, làm chậm, thiêu, hồi máu, lá chắn, buff, phi kiếm, lướt, trận pháp), giết mục tiêu giữa lúc thi triển,
 không kẹt thi triển, máu / năng lượng hợp lệ, không rò rỉ VFX / object / geometry, bản lưu cũ tải được, không lỗi console.
+`tests/traits.js` (`npm run test:traits`) – 15 hạng mục của tộc/hệ (xem mục V1.5 – Tuần 2).
 `node tools/gen-docs.js` sinh lại `docs/CHAMPIONS.md` (bảng chỉ số 24 tướng, kỹ năng, tộc/hệ, mô hình) từ dữ liệu.
 
 ## Cấu trúc mã (các module)
@@ -96,15 +98,10 @@ Mô phỏng chạy bước cố định 60 Hz; sát thương nằm trên timelin
 | Máu | 100. Thua mất 2 + ⌊vòng/2⌋ + tổng số sao của địch còn sống (vòng yêu thú: một nửa). Hết 60 giây tính là thua. Hết máu = hết ván |
 | Lưu | Tự lưu vào `localStorage` (`vkkt_save`) sau mỗi thao tác; mở lại trang có nút "Tiếp tục" và "Ván mới" |
 
-| Tộc / hệ | Mốc | Hiệu ứng |
-|---|---|---|
-| Kiếm Tu (Kiếm Đồng, Thanh Phong, Ngự Kiếm, Vô Cực, Vạn Kiếm Tiên Đế) | 2 / 4 | +20% công · +50% công, +20% tốc đánh |
-| Pháp Tu (Hỏa Linh, Băng Linh, Cửu Viêm, Huyền Băng, Thiên Lôi, Thần Nữ) | 2 / 4 | Tuyệt kỹ +25%, linh lực đầu +20 · tuyệt kỹ +60%, linh lực đầu +40 |
-| Hộ Pháp (Thiết Vệ, Huyền Giáp, Kim Cang) | 2 / 3 | +30% máu, +20 giáp · +60% máu, +45 giáp |
-| Ma Tu (Ma Binh, Huyết Ma, U Minh Ma Quân, Hỗn Độn Ma Đế) | 2 / 4 | Hút máu 20% · hút máu 40%, +15% công |
-| Đan Tu, Xạ Tu, Thương Tu, Sát Tu, Thể Tu | – | Mới có dữ liệu, cộng hưởng làm ở tuần 2 (hiện mờ trên bảng tộc/hệ) |
+**Tộc / hệ (V1.5 tuần 2)**: 4 tộc (Nhân, Ma, Tiên, Yêu) + 4 hệ (Kiếm Tu, Pháp Tu, Hộ Pháp, Đan Tu). Bảng đầy đủ mốc và hiệu ứng, phân bổ cho 24 tướng:
+[docs/CHAMPIONS.md](docs/CHAMPIONS.md) (sinh từ dữ liệu). Chi tiết cơ chế ở mục "V1.5 – Tuần 2" bên dưới.
 
-Tộc/hệ đếm số **tướng khác nhau** trên bàn (2 bản cùng tướng chỉ tính 1). Địch: 2 quân ở vòng 1, cứ 2 vòng thêm 1 (tối đa 8); máu và công ×1.07 mỗi vòng; ★2 từ vòng 5 (thêm quân ★2 ở vòng 8, 11), ★3 từ vòng 15. Vòng yêu thú: Yêu Lang (40% rơi trang bị, còn lại 1 linh thạch), Yêu Thú Vương (chắc chắn 1 trang bị + 3 linh thạch); thắng vòng yêu thú luôn được ít nhất 1 trang bị.
+Tộc/hệ đếm số **tướng khác nhau** trên bàn (2 bản cùng tướng chỉ tính 1, hàng chờ không tính; chỉ phe ta có tộc/hệ). Địch: 2 quân ở vòng 1, cứ 2 vòng thêm 1 (tối đa 8); máu và công ×1.07 mỗi vòng; ★2 từ vòng 5 (thêm quân ★2 ở vòng 8, 11), ★3 từ vòng 15. Vòng yêu thú: Yêu Lang (40% rơi trang bị, còn lại 1 linh thạch), Yêu Thú Vương (chắc chắn 1 trang bị + 3 linh thạch); thắng vòng yêu thú luôn được ít nhất 1 trang bị.
 
 `tests/economy.js` (`npm run test:economy`): thống kê tỉ lệ ra tướng ở 9 cấp, bảo toàn số bản trong bể, tướng cạn bể không xuất hiện, đồng hồ chuẩn bị / giới hạn trận, trang bị qua tải lại trang, và cho 3 bot (tiết kiệm / lên cấp nhanh / làm mới liên tục) tự chơi để so đội hình.
 Benchmark chụp lại ván đang chơi, chạy đội hình cố định rồi khôi phục nguyên trạng.
@@ -227,6 +224,54 @@ Hiệu ứng cùng loại từ cùng kỹ năng làm mới thời gian, không c
 | Mô hình: dùng chung CharacterRig, phân biệt trang phục / vũ khí (thêm cung) / màu / kích thước; cache geometry dùng chung | Xong |
 | Gắn GLB riêng cho từng tướng (Cài đặt) | Xong (chưa có file GLB nào kèm theo – không dùng mô hình có bản quyền) |
 | Bản lưu cũ tương thích | Xong |
-| Hệ mới Đan Tu / Xạ Tu / Thương Tu / Sát Tu / Thể Tu, tộc Nhân / Tiên / Ma / Linh / Yêu | Chỉ dữ liệu – cộng hưởng làm ở tuần 2 |
+| Hệ mới Đan Tu / Xạ Tu / Thương Tu / Sát Tu / Thể Tu, tộc Nhân / Tiên / Ma / Linh / Yêu | Tuần 2 đã làm: 8 tộc/hệ có cộng hưởng (xem dưới); Xạ / Thương / Sát / Thể Tu và Linh thành phân loại phụ |
 | Cân bằng | Mới cân theo đường cong DPS × máu hiệu dụng mỗi bậc (docs/CHAMPIONS.md) và bot tự chơi; chưa có số liệu người chơi thật |
 | Animation dựng tay riêng từng tướng, mô hình Ultra, cinematic, nhiều người chơi, lõi nâng cấp, ghép trang bị đầy đủ, sảnh 8 người | Không làm (ngoài phạm vi tuần 1) |
+
+## V1.5 – Tuần 2: hệ thống 8 tộc/hệ
+Nâng cấp trực tiếp, không đổi kinh tế. Dữ liệu ở `js/data/traits.js`, logic ở `js/combat/traits-engine.js`; mã chiến đấu không chứa hệ số tộc/hệ nào.
+
+**Thành phần**
+| Thành phần | Vai trò |
+|---|---|
+| `TraitRegistry` | Tra cứu (`of(def)` = [tộc, ...hệ]), mốc (`level`, `next`), mô tả sinh từ dữ liệu (`describe`), kiểm tra cấu hình (`validate`: mốc tăng dần, mốc cao nhất đạt được, có tướng bậc 1–2 mở mốc đầu, mỗi tướng 1 tộc + ≥ 1 hệ) – chạy lúc khởi động, lỗi in ra console |
+| `TraitCounter` | Đếm tướng **khác nhau** trên bàn (không tính hàng chờ, bản trùng, sao). Chỉ đếm lại khi `placeUnit` / `removeUnit` đánh dấu `invalidate()` – không đếm mỗi frame hay mỗi lần vẽ giao diện |
+| `TraitEngine` | `apply()` (chuẩn bị & vào trận): dựng lại `bonus` của mọi tướng từ đầu; `battleStart()`: chốt mốc, lá chắn đầu trận, đăng ký hiệu ứng theo sự kiện, VFX; `battleEnd()`: gỡ mọi sự kiện, phi kiếm, hào quang, hiệu ứng tạm `trait:*` |
+| `TraitEvents` | onBattleStart, onAttack, onHit, onDamageTaken, onSkillCast, onHeal, onUnitDeath, onBattleEnd. Phát không cấp phát bộ nhớ; lỗi trong 1 hiệu ứng được bắt, không làm hỏng trận |
+| `TraitSwords` | Phi kiếm phụ Kiếm Tu: 1 InstancedMesh (48 kiếm) tạo một lần lúc nạp, đối tượng kiếm lấy từ pool; bay vòng 0,35 s rồi lao vào địch, trúng đúng 1 lần, mục tiêu chết thì đổi mục tiêu, không còn ai thì tự huỷ |
+| `TraitVFX` | LOW: chỉ chớp hạt · MEDIUM: 1 pháp trận / tướng · HIGH: pháp trận theo từng tộc/hệ + hào quang liên tục (Ma khí, Yêu khí, vòng Tiên) · ULTRA: thêm lớp, hạt dày hơn. Dùng lại pool pháp trận / hạt có sẵn, không tạo material mới |
+| TraitUI (`js/16-ui.js`) | Bảng bên trái: biểu tượng chữ Hán, tên, số lượng / mốc kế, các mốc (mốc đạt sáng màu), thanh tiến độ, hiệu ứng đang bật; tộc/hệ đang kích hoạt nổi bật, chưa đủ mốc thì mờ. Chạm (hoặc rê chuột) để xem tooltip: mọi mốc, tướng thuộc tộc/hệ (tướng đang có trên bàn tô đậm). Điện thoại / màn thấp: chip gọn (biểu tượng + số), tự giới hạn chiều cao để không chui dưới cửa hàng; thu gọn cùng bảng thông tin. Chỉ vẽ lại khi số liệu đổi |
+
+**Công thức chỉ số** (Unit.reset, tính 1 lần mỗi khi đội hình đổi / vào trận – không tính lại mỗi frame):
+```
+máu  = round(gốc × hệ số vòng (địch) × STAR.hp[sao]  × (1 + Σ% máu tộc/hệ)  + máu trang bị)
+công = round1(gốc × hệ số vòng × STAR.atk[sao] × (1 + Σ% công tộc/hệ) × hệ số trang bị)
+giáp = round(gốc × √hệ số vòng × (1 + Σ% giáp tộc/hệ) + giáp trang bị)
+tốc đánh  = gốc × (1 + Σ% tốc đánh tộc/hệ) × trang bị × hiệu ứng tạm thời (EffectSet)
+kỹ năng   = sát thương / hồi / lá chắn kỹ năng × STAR.skill[sao] × (1 + Σ% sức mạnh kỹ năng) × trang bị
+năng lượng nhận được × (1 + % Tiên Tộc) · hồi máu do Đan Tu thực hiện × (1 + % Đan Tu)
+hút máu toàn phần (Ma Tộc): mọi sát thương gây ra (đòn thường, kỹ năng, theo thời gian, phi kiếm, nổ phụ)
+```
+- Cùng một chỉ số từ nhiều tộc/hệ khác nhau thì **cộng phần trăm** (Nhân 4 +12% tốc đánh + Yêu 4 +8% = +20%); mỗi tộc/hệ chỉ lấy **mốc cao nhất** (mốc không cộng dồn).
+  Lớp tộc/hệ nhân trước, trang bị sau, hiệu ứng tạm thời (buff kỹ năng) cuối cùng. Máu / giáp làm tròn số nguyên, công 1 chữ số thập phân.
+- Phạm vi: Nhân Tộc tác dụng **toàn đội**; các tộc/hệ khác chỉ lên tướng thuộc tộc/hệ đó. Chỉ phe ta có tộc/hệ (địch đã được nhân theo vòng).
+- Lá chắn không cộng dồn: nhận nhiều lá chắn lúc vào trận (Tiên Tộc + Hộ Pháp) thì giữ lá chắn lớn nhất, kéo dài 15 giây.
+  Hộ Pháp (4/6): mọi đồng minh đứng ở 8 ô quanh **bất kỳ** Hộ Pháp nào (kể cả Hộ Pháp khác) nhận lá chắn theo máu tối đa của chính người nhận.
+- Pháp Tu (6): mỗi lần thi triển có số thứ tự; mục tiêu đã nổ trong lần đó thì không nổ nữa (hỏa trận 8 nhịp vẫn chỉ nổ 1 lần / mục tiêu). Sát thương nổ = 5% máu tối đa mục tiêu, bỏ qua giáp, không chí mạng.
+- Đan Tu (4): mỗi đồng minh 1 lần / trận, khi máu xuống dưới 30% → hồi 12% máu tối đa trong 3 giây (tổng luôn đủ 12%, không nhân hiệu quả hồi máu).
+- Mốc được chốt lúc vào trận: tướng ngã không làm tụt mốc. Lúc chuẩn bị, mua / bán / kéo lên bàn / về hàng chờ cập nhật mốc và chỉ số ngay.
+
+**Phân bổ & thay đổi dữ liệu so với tuần 1** (24 tướng, mỗi tộc 6 tướng, Kiếm Tu 7, Pháp Tu 8, Hộ Pháp 7, Đan Tu 5; bảng: docs/CHAMPIONS.md)
+- Tộc "Linh" bỏ (chỉ còn 4 tộc): Hỏa Linh, Băng Linh Sư, Cửu Viêm → Yêu Tộc; Thanh Mộc → Tiên Tộc; giữ dấu ở phân loại phụ "Linh thể".
+- Để mỗi tộc đủ 6 tướng (mốc 6 đạt được) và có tướng bậc 1–2: Huyền Giáp Vệ, Linh Cung, Bất Diệt (Nhân → Yêu), Linh Y (Nhân → Tiên), Vô Cực Kiếm Tôn (Tiên → Ma), Kim Cang Hộ Pháp và Thiên Lôi Đạo Nhân (Tiên → Nhân).
+- Ma Tu (hệ tuần 1) trở thành Ma Tộc (tộc). Hệ mới cho tướng trước đây không có hệ chính: Ma Binh, Ảnh Sát → Kiếm Tu; Linh Cung, U Minh Ma Quân → Pháp Tu; Huyết Ma, Lôi Thương, Bất Diệt, Hỗn Độn Ma Đế → Hộ Pháp.
+- Nhiều hệ: Hỏa Linh (Pháp Tu + Đan Tu), Bất Diệt (Hộ Pháp + Đan Tu), Cửu Thiên Thần Nữ (Pháp Tu + Đan Tu).
+- Xạ Tu, Thương Tu, Sát Tu, Thể Tu không bị xoá: thành **phân loại phụ** (`sub`) hiện trên bảng thông tin tướng, chưa có cộng hưởng – có thể nâng thành hệ thật ở mùa sau bằng cách thêm vào `TRAITS`.
+- Hệ số tộc/hệ tuần 1 (Kiếm Tu 2: +20% công, Hộ Pháp: +30% máu…) thay bằng bảng mới theo đặc tả tuần 2. Kỹ năng không đổi. Bản lưu cũ không cần chuyển đổi (tộc/hệ tính từ dữ liệu).
+
+**Kiểm thử** `npm run test:traits`: TraitRegistry hợp lệ; trùng tên / ★2 ★3 chỉ tính 1; hàng chờ không tính; bán / lên bàn / về hàng chờ cập nhật số và giao diện;
+mọi mốc của 8 tộc/hệ (m−1 chưa bật, m bật); 50 đội hình ngẫu nhiên so chỉ số với công thức tính độc lập trong bài kiểm thử; không cộng dồn sau 60 lần vẽ lại và 3 vòng;
+không đếm lại khi vẽ giao diện / trong trận; lá chắn Tiên Tộc 10% / 20%, Hộ Pháp chỉ đồng minh đứng cạnh; hút máu toàn phần Ma Tộc (cả kỹ năng, theo thời gian);
+năng lượng Tiên Tộc; hồi máu Đan Tu ×1,15 / ×1,5 và cứu mệnh 12% chỉ 1 lần; Nhân Tộc toàn đội, Yêu Tộc máu; phi kiếm phụ 1 / 3 kiếm trúng đúng 1 lần, đổi mục tiêu khi mục tiêu chết;
+Pháp Tu (6) nổ 1 lần / mục tiêu / lần thi triển, đúng 5% máu; dọn sạch sự kiện / phi kiếm / hào quang / VFX sau trận; 4 đội hình kích hoạt nhiều mốc 6, giết mục tiêu giữa chiêu;
+tốc độ ×1 và ×2 (vòng lặp thời gian thực) cho cùng kết quả; bản lưu tuần 1 tải được; không lỗi console.

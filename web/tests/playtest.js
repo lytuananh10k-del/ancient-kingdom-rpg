@@ -121,7 +121,7 @@ async function main() {
       }
       // Tộc/hệ = số tướng khác nhau trên bàn.
       const want = {};
-      new Set(allies.map(u => u.key)).forEach(k => K.UNIT_DEFS[k].traits.forEach(t => { want[t] = (want[t] || 0) + 1; }));
+      new Set(allies.map(u => u.key)).forEach(k => K.TraitRegistry.of(K.UNIT_DEFS[k]).forEach(t => { want[t] = (want[t] || 0) + 1; }));
       if (JSON.stringify(Object.entries(want).sort()) !== JSON.stringify(Object.entries(K.traitCounts()).sort())) out.push('đếm tộc/hệ sai');
       // Bản lưu khớp trạng thái (trừ lúc đang đánh – lưu lúc đó là của vòng chuẩn bị).
       if (K.battle.phase === 'prep') {

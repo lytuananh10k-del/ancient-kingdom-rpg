@@ -8,32 +8,32 @@ DPS ★1 = công × tốc đánh × (1 + chí mạng × (ST chí mạng − 1)).
 
 | # | id | Tên | Bậc | Phẩm | Tộc | Hệ | Vai trò | Máu | Công | Giáp | Tốc đánh | Tầm | Tốc chạy | Năng lượng | Chí mạng | Né | DPS ★1 | Máu hiệu dụng ★1 | Máu ★2/★3 | Công ★2/★3 | Kỹ năng |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | `kiemdong` | Kiếm Đồng | 1 | Phàm phẩm | Nhân tộc | Kiếm Tu | Đấu sĩ | 600 | 48 | 20 | 0,95 | 2,2 | 4,4 | 20/60 | 10% ×1,5 | 8% | 48 | 720 | 1080/1920 | 72/120 | Nhất Kiếm Đoạn Thủy |
-| 2 | `thietve` | Thiết Vệ | 1 | Phàm phẩm | Nhân tộc | Hộ Pháp | Đỡ đòn | 920 | 40 | 40 | 0,8 | 2,6 | 3,8 | 30/80 | 5% ×1,5 | 0% | 33 | 1288 | 1656/2944 | 60/100 | Thiết Bích |
-| 3 | `hoa` | Hỏa Linh | 1 | Phàm phẩm | Linh tộc | Pháp Tu | Pháp sư | 500 | 46 | 14 | 0,75 | 7,5 | 3,6 | 30/80 | 8% ×1,5 | 3% | 36 | 570 | 900/1600 | 69/115 | Hỏa Cầu Thuật |
-| 4 | `thanhmoc` | Thanh Mộc | 1 | Phàm phẩm | Linh tộc | Đan Tu* | Hỗ trợ | 560 | 32 | 18 | 0,75 | 6,5 | 3,6 | 20/70 | 5% ×1,5 | 3% | 25 | 661 | 1008/1792 | 48/80 | Mộc Linh Hồi Xuân |
-| 5 | `mabinh` | Ma Binh | 1 | Phàm phẩm | Ma tộc | Ma Tu | Đấu sĩ | 640 | 50 | 18 | 1 | 2,2 | 4,4 | 10/60 | 12% ×1,5 | 5% | 53 | 755 | 1152/2048 | 75/125 | Huyết Chiến |
-| 6 | `linhcung` | Linh Cung | 1 | Phàm phẩm | Nhân tộc | Xạ Tu* | Xạ thủ | 520 | 52 | 14 | 0,95 | 9 | 3,8 | 0/70 | 15% ×1,6 | 5% | 54 | 593 | 936/1664 | 78/130 | Liên Châu Tiễn |
-| 7 | `thanhphong` | Thanh Phong Kiếm Khách | 2 | Linh phẩm | Nhân tộc | Kiếm Tu | Đấu sĩ | 700 | 56 | 22 | 1,05 | 2,2 | 4,6 | 20/70 | 15% ×1,6 | 10% | 64 | 854 | 1260/2240 | 84/140 | Thanh Phong Liên Trảm |
-| 8 | `huyengiap` | Huyền Giáp Vệ | 2 | Linh phẩm | Nhân tộc | Hộ Pháp | Đỡ đòn | 1050 | 42 | 45 | 0,8 | 2,6 | 3,8 | 30/70 | 5% ×1,5 | 0% | 34 | 1523 | 1890/3360 | 63/105 | Hộ Thể Chân Khí |
-| 9 | `bangling` | Băng Linh Sư | 2 | Linh phẩm | Linh tộc | Pháp Tu | Pháp sư | 540 | 48 | 15 | 0,8 | 7,5 | 3,6 | 20/80 | 8% ×1,5 | 3% | 40 | 621 | 972/1728 | 72/120 | Hàn Băng Tiễn |
-| 10 | `huyetma` | Huyết Ma | 2 | Linh phẩm | Ma tộc | Ma Tu | Đấu sĩ | 760 | 52 | 22 | 0,9 | 2,2 | 4,2 | 20/70 | 10% ×1,5 | 5% | 49 | 927 | 1368/2432 | 78/130 | Huyết Phệ |
-| 11 | `loithuong` | Lôi Thương | 2 | Linh phẩm | Nhân tộc | Thương Tu* | Đấu sĩ | 720 | 54 | 26 | 0,85 | 2,8 | 4,2 | 20/70 | 10% ×1,5 | 5% | 48 | 907 | 1296/2304 | 81/135 | Lôi Thương Xuyên Vân |
-| 12 | `linhy` | Linh Y | 2 | Linh phẩm | Nhân tộc | Đan Tu* | Hỗ trợ | 600 | 36 | 18 | 0,75 | 6,5 | 3,6 | 30/80 | 5% ×1,5 | 3% | 28 | 708 | 1080/1920 | 54/90 | Diệu Thủ Hồi Xuân |
-| 13 | `ngukiem` | Ngự Kiếm Chân Nhân | 3 | Huyền phẩm | Tiên tộc | Kiếm Tu | Pháp sư | 760 | 58 | 22 | 0,85 | 5,5 | 3,8 | 30/90 | 12% ×1,6 | 5% | 53 | 927 | 1368/2432 | 87/145 | Ngự Kiếm Thuật |
-| 14 | `cuuviem` | Cửu Viêm Pháp Sư | 3 | Huyền phẩm | Linh tộc | Pháp Tu | Pháp sư | 700 | 60 | 18 | 0,8 | 7,5 | 3,6 | 30/90 | 10% ×1,5 | 3% | 50 | 826 | 1260/2240 | 90/150 | Cửu Viêm Hỏa Trận |
-| 15 | `kimcuong` | Kim Cang Hộ Pháp | 3 | Huyền phẩm | Tiên tộc | Hộ Pháp | Đỡ đòn | 1300 | 50 | 50 | 0,8 | 2,6 | 3,8 | 40/90 | 5% ×1,5 | 0% | 41 | 1950 | 2340/4160 | 75/125 | Kim Cang Bất Hoại |
-| 16 | `anhsat` | Ảnh Sát | 3 | Huyền phẩm | Ma tộc | Sát Tu* | Sát thủ | 680 | 64 | 20 | 1,1 | 2,2 | 5 | 10/70 | 25% ×1,7 | 20% | 83 | 816 | 1224/2176 | 96/160 | Ảnh Tập |
-| 17 | `huyenbang` | Huyền Băng Tiên Tử | 3 | Huyền phẩm | Tiên tộc | Pháp Tu | Pháp sư | 680 | 56 | 18 | 0,8 | 7,5 | 3,6 | 30/100 | 8% ×1,5 | 3% | 47 | 802 | 1224/2176 | 84/140 | Huyền Băng Phong Ấn |
-| 18 | `vocuc` | Vô Cực Kiếm Tôn | 4 | Địa phẩm | Tiên tộc | Kiếm Tu | Đấu sĩ | 1000 | 74 | 30 | 1 | 2,4 | 4,6 | 30/80 | 20% ×1,7 | 10% | 84 | 1300 | 1800/3200 | 111/185 | Vô Cực Kiếm Khí |
-| 19 | `loiton` | Thiên Lôi Đạo Nhân | 4 | Địa phẩm | Tiên tộc | Pháp Tu | Pháp sư | 820 | 66 | 22 | 0,8 | 8 | 3,6 | 30/100 | 10% ×1,5 | 3% | 55 | 1000 | 1476/2624 | 99/165 | Cửu Thiên Lôi Kiếp |
-| 20 | `batdiet` | Bất Diệt Chiến Thần | 4 | Địa phẩm | Nhân tộc | Thể Tu* | Đỡ đòn | 1500 | 62 | 45 | 0,85 | 2,4 | 4 | 40/100 | 8% ×1,5 | 0% | 55 | 2175 | 2700/4800 | 93/155 | Bất Diệt Kim Thân |
-| 21 | `umaquan` | U Minh Ma Quân | 4 | Địa phẩm | Ma tộc | Ma Tu | Pháp sư | 860 | 64 | 24 | 0,8 | 7 | 3,6 | 30/90 | 10% ×1,5 | 3% | 54 | 1066 | 1548/2752 | 96/160 | U Minh Phệ Hồn |
-| 22 | `kiemtien` | Vạn Kiếm Tiên Đế | 5 | Thiên phẩm | Tiên tộc | Kiếm Tu | Đấu sĩ | 1000 | 76 | 28 | 1 | 2,2 | 4,6 | 45/100 | 15% ×1,7 | 10% | 84 | 1280 | 1800/3200 | 114/190 | Vạn Kiếm Quy Tông |
-| 23 | `thannu` | Cửu Thiên Thần Nữ | 5 | Thiên phẩm | Tiên tộc | Pháp Tu, Đan Tu* | Hỗ trợ | 950 | 70 | 26 | 0,8 | 7,5 | 3,6 | 40/110 | 10% ×1,5 | 3% | 59 | 1197 | 1710/3040 | 105/175 | Cửu Thiên Thánh Trận |
-| 24 | `hondon` | Hỗn Độn Ma Đế | 5 | Thiên phẩm | Ma tộc | Ma Tu | Đấu sĩ | 1400 | 82 | 34 | 0,9 | 2,6 | 4,4 | 30/100 | 15% ×1,7 | 5% | 82 | 1876 | 2520/4480 | 123/205 | Hỗn Độn Diệt Thế |
+| 1 | `kiemdong` | Kiếm Đồng | 1 | Phàm phẩm | Nhân Tộc | Kiếm Tu | Đấu sĩ | 600 | 48 | 20 | 0,95 | 2,2 | 4,4 | 20/60 | 10% ×1,5 | 8% | 48 | 720 | 1080/1920 | 72/120 | Nhất Kiếm Đoạn Thủy |
+| 2 | `thietve` | Thiết Vệ | 1 | Phàm phẩm | Nhân Tộc | Hộ Pháp | Đỡ đòn | 920 | 40 | 40 | 0,8 | 2,6 | 3,8 | 30/80 | 5% ×1,5 | 0% | 33 | 1288 | 1656/2944 | 60/100 | Thiết Bích |
+| 3 | `hoa` | Hỏa Linh | 1 | Phàm phẩm | Yêu Tộc | Pháp Tu, Đan Tu (phụ: Linh thể) | Pháp sư | 500 | 46 | 14 | 0,75 | 7,5 | 3,6 | 30/80 | 8% ×1,5 | 3% | 36 | 570 | 900/1600 | 69/115 | Hỏa Cầu Thuật |
+| 4 | `thanhmoc` | Thanh Mộc | 1 | Phàm phẩm | Tiên Tộc | Đan Tu (phụ: Linh thể) | Hỗ trợ | 560 | 32 | 18 | 0,75 | 6,5 | 3,6 | 20/70 | 5% ×1,5 | 3% | 25 | 661 | 1008/1792 | 48/80 | Mộc Linh Hồi Xuân |
+| 5 | `mabinh` | Ma Binh | 1 | Phàm phẩm | Ma Tộc | Kiếm Tu | Đấu sĩ | 640 | 50 | 18 | 1 | 2,2 | 4,4 | 10/60 | 12% ×1,5 | 5% | 53 | 755 | 1152/2048 | 75/125 | Huyết Chiến |
+| 6 | `linhcung` | Linh Cung | 1 | Phàm phẩm | Yêu Tộc | Pháp Tu (phụ: Xạ Tu) | Xạ thủ | 520 | 52 | 14 | 0,95 | 9 | 3,8 | 0/70 | 15% ×1,6 | 5% | 54 | 593 | 936/1664 | 78/130 | Liên Châu Tiễn |
+| 7 | `thanhphong` | Thanh Phong Kiếm Khách | 2 | Linh phẩm | Nhân Tộc | Kiếm Tu | Đấu sĩ | 700 | 56 | 22 | 1,05 | 2,2 | 4,6 | 20/70 | 15% ×1,6 | 10% | 64 | 854 | 1260/2240 | 84/140 | Thanh Phong Liên Trảm |
+| 8 | `huyengiap` | Huyền Giáp Vệ | 2 | Linh phẩm | Yêu Tộc | Hộ Pháp | Đỡ đòn | 1050 | 42 | 45 | 0,8 | 2,6 | 3,8 | 30/70 | 5% ×1,5 | 0% | 34 | 1523 | 1890/3360 | 63/105 | Hộ Thể Chân Khí |
+| 9 | `bangling` | Băng Linh Sư | 2 | Linh phẩm | Yêu Tộc | Pháp Tu (phụ: Linh thể) | Pháp sư | 540 | 48 | 15 | 0,8 | 7,5 | 3,6 | 20/80 | 8% ×1,5 | 3% | 40 | 621 | 972/1728 | 72/120 | Hàn Băng Tiễn |
+| 10 | `huyetma` | Huyết Ma | 2 | Linh phẩm | Ma Tộc | Hộ Pháp | Đấu sĩ | 760 | 52 | 22 | 0,9 | 2,2 | 4,2 | 20/70 | 10% ×1,5 | 5% | 49 | 927 | 1368/2432 | 78/130 | Huyết Phệ |
+| 11 | `loithuong` | Lôi Thương | 2 | Linh phẩm | Nhân Tộc | Hộ Pháp (phụ: Thương Tu) | Đấu sĩ | 720 | 54 | 26 | 0,85 | 2,8 | 4,2 | 20/70 | 10% ×1,5 | 5% | 48 | 907 | 1296/2304 | 81/135 | Lôi Thương Xuyên Vân |
+| 12 | `linhy` | Linh Y | 2 | Linh phẩm | Tiên Tộc | Đan Tu | Hỗ trợ | 600 | 36 | 18 | 0,75 | 6,5 | 3,6 | 30/80 | 5% ×1,5 | 3% | 28 | 708 | 1080/1920 | 54/90 | Diệu Thủ Hồi Xuân |
+| 13 | `ngukiem` | Ngự Kiếm Chân Nhân | 3 | Huyền phẩm | Tiên Tộc | Kiếm Tu | Pháp sư | 760 | 58 | 22 | 0,85 | 5,5 | 3,8 | 30/90 | 12% ×1,6 | 5% | 53 | 927 | 1368/2432 | 87/145 | Ngự Kiếm Thuật |
+| 14 | `cuuviem` | Cửu Viêm Pháp Sư | 3 | Huyền phẩm | Yêu Tộc | Pháp Tu (phụ: Linh thể) | Pháp sư | 700 | 60 | 18 | 0,8 | 7,5 | 3,6 | 30/90 | 10% ×1,5 | 3% | 50 | 826 | 1260/2240 | 90/150 | Cửu Viêm Hỏa Trận |
+| 15 | `kimcuong` | Kim Cang Hộ Pháp | 3 | Huyền phẩm | Nhân Tộc | Hộ Pháp | Đỡ đòn | 1300 | 50 | 50 | 0,8 | 2,6 | 3,8 | 40/90 | 5% ×1,5 | 0% | 41 | 1950 | 2340/4160 | 75/125 | Kim Cang Bất Hoại |
+| 16 | `anhsat` | Ảnh Sát | 3 | Huyền phẩm | Ma Tộc | Kiếm Tu (phụ: Sát Tu) | Sát thủ | 680 | 64 | 20 | 1,1 | 2,2 | 5 | 10/70 | 25% ×1,7 | 20% | 83 | 816 | 1224/2176 | 96/160 | Ảnh Tập |
+| 17 | `huyenbang` | Huyền Băng Tiên Tử | 3 | Huyền phẩm | Tiên Tộc | Pháp Tu | Pháp sư | 680 | 56 | 18 | 0,8 | 7,5 | 3,6 | 30/100 | 8% ×1,5 | 3% | 47 | 802 | 1224/2176 | 84/140 | Huyền Băng Phong Ấn |
+| 18 | `vocuc` | Vô Cực Kiếm Tôn | 4 | Địa phẩm | Ma Tộc | Kiếm Tu | Đấu sĩ | 1000 | 74 | 30 | 1 | 2,4 | 4,6 | 30/80 | 20% ×1,7 | 10% | 84 | 1300 | 1800/3200 | 111/185 | Vô Cực Kiếm Khí |
+| 19 | `loiton` | Thiên Lôi Đạo Nhân | 4 | Địa phẩm | Nhân Tộc | Pháp Tu | Pháp sư | 820 | 66 | 22 | 0,8 | 8 | 3,6 | 30/100 | 10% ×1,5 | 3% | 55 | 1000 | 1476/2624 | 99/165 | Cửu Thiên Lôi Kiếp |
+| 20 | `batdiet` | Bất Diệt Chiến Thần | 4 | Địa phẩm | Yêu Tộc | Hộ Pháp, Đan Tu (phụ: Thể Tu) | Đỡ đòn | 1500 | 62 | 45 | 0,85 | 2,4 | 4 | 40/100 | 8% ×1,5 | 0% | 55 | 2175 | 2700/4800 | 93/155 | Bất Diệt Kim Thân |
+| 21 | `umaquan` | U Minh Ma Quân | 4 | Địa phẩm | Ma Tộc | Pháp Tu | Pháp sư | 860 | 64 | 24 | 0,8 | 7 | 3,6 | 30/90 | 10% ×1,5 | 3% | 54 | 1066 | 1548/2752 | 96/160 | U Minh Phệ Hồn |
+| 22 | `kiemtien` | Vạn Kiếm Tiên Đế | 5 | Thiên phẩm | Tiên Tộc | Kiếm Tu | Đấu sĩ | 1000 | 76 | 28 | 1 | 2,2 | 4,6 | 45/100 | 15% ×1,7 | 10% | 84 | 1280 | 1800/3200 | 114/190 | Vạn Kiếm Quy Tông |
+| 23 | `thannu` | Cửu Thiên Thần Nữ | 5 | Thiên phẩm | Tiên Tộc | Pháp Tu, Đan Tu | Hỗ trợ | 950 | 70 | 26 | 0,8 | 7,5 | 3,6 | 40/110 | 10% ×1,5 | 3% | 59 | 1197 | 1710/3040 | 105/175 | Cửu Thiên Thánh Trận |
+| 24 | `hondon` | Hỗn Độn Ma Đế | 5 | Thiên phẩm | Ma Tộc | Hộ Pháp | Đấu sĩ | 1400 | 82 | 34 | 0,9 | 2,6 | 4,4 | 30/100 | 15% ×1,7 | 5% | 82 | 1876 | 2520/4480 | 123/205 | Hỗn Độn Diệt Thế |
 
-\* hệ mới chỉ có dữ liệu, chưa có cộng hưởng (tuần 2).
+(phụ: …) = phân loại phụ, chỉ hiển thị, chưa có cộng hưởng.
 
 ## Đường cong sức mạnh theo bậc (trung bình ★1)
 
@@ -74,29 +74,49 @@ DPS ★1 = công × tốc đánh × (1 + chí mạng × (ST chí mạng − 1)).
 | Cửu Thiên Thần Nữ | Cửu Thiên Thánh Trận (`cuuThien`) | Diện rộng r=4 | Vùng địch đông nhất | đầy năng lượng | 0,5 / 0,8 / 1,4 s | damage 220% · slow 3s 30% · ally:heal 20% máu · ally:buff atk ×1,2 4s | Giáng thánh trận bán kính 4 m vào vùng địch đông nhất: 220% công, làm chậm 30% trong 3 giây; mọi đồng minh hồi 20% máu tối đa của Thần Nữ và +20% công trong 4 giây. |
 | Hỗn Độn Ma Đế | Hỗn Độn Diệt Thế (`honDon`) | Đột kích r=4,5 | Vùng địch đông nhất | đầy năng lượng | 0,4 / 0,75 / 1,3 s | damage 340% xuyên 50% hút 25% · debuff 4s · stun 1s | Lao vào giữa vùng địch đông nhất rồi nổ hỗn độn bán kính 4,5 m: 340% công, bỏ qua 50% giáp, giảm 40% giáp trong 4 giây, choáng 1 giây; hồi 25% sát thương gây ra. |
 
-## Tộc / hệ
+## 8 tộc / hệ (V1.5 tuần 2)
 
-| id | Tên | Mốc | Hiệu ứng | Trạng thái | Tướng |
-|---|---|---|---|---|---|
-| `kiemtu` | Kiếm Tu | 2 / 4 | +20% công · +50% công, +20% tốc đánh | đang hoạt động | Kiếm Đồng, Thanh Phong Kiếm Khách, Ngự Kiếm Chân Nhân, Vô Cực Kiếm Tôn, Vạn Kiếm Tiên Đế |
-| `phaptu` | Pháp Tu | 2 / 4 | Tuyệt kỹ +25%, linh lực đầu +20 · Tuyệt kỹ +60%, linh lực đầu +40 | đang hoạt động | Hỏa Linh, Băng Linh Sư, Cửu Viêm Pháp Sư, Huyền Băng Tiên Tử, Thiên Lôi Đạo Nhân, Cửu Thiên Thần Nữ |
-| `hophap` | Hộ Pháp | 2 / 3 | +30% máu, +20 giáp · +60% máu, +45 giáp | đang hoạt động | Thiết Vệ, Huyền Giáp Vệ, Kim Cang Hộ Pháp |
-| `matu` | Ma Tu | 2 / 4 | Hút máu 20% sát thương gây ra · Hút máu 40%, +15% công | đang hoạt động | Ma Binh, Huyết Ma, U Minh Ma Quân, Hỗn Độn Ma Đế |
-| `dantu` | Đan Tu | 2 / 3 | (tuần 2) Hồi máu + · (tuần 2) Hồi máu ++ | tuần 2 | Thanh Mộc, Linh Y, Cửu Thiên Thần Nữ |
-| `xatu` | Xạ Tu | 2 | (tuần 2) Tầm đánh + | tuần 2 | Linh Cung |
-| `thuongtu` | Thương Tu | 2 | (tuần 2) Xuyên giáp + | tuần 2 | Lôi Thương |
-| `sattu` | Sát Tu | 2 | (tuần 2) Chí mạng + | tuần 2 | Ảnh Sát |
-| `thetu` | Thể Tu | 2 | (tuần 2) Máu & hồi phục + | tuần 2 | Bất Diệt Chiến Thần |
+Mô tả sinh từ dữ liệu `TRAITS` (TraitRegistry.describe) – luôn khớp hệ số thật trong trận.
 
-## Tộc (nguồn gốc) – dữ liệu cho tuần 2
+| Tộc/hệ | Loại | Mốc | Hiệu ứng từng mốc | Tướng (bậc) |
+|---|---|---|---|---|
+| 人 Nhân Tộc (`nhan`) | Tộc | 2 / 4 / 6 | **(2)** Toàn đội +5% tốc đánh<br>**(4)** Toàn đội +12% tốc đánh<br>**(6)** Toàn đội +20% tốc đánh, +10% công | Kiếm Đồng (1), Thiết Vệ (1), Thanh Phong Kiếm Khách (2), Lôi Thương (2), Kim Cang Hộ Pháp (3), Thiên Lôi Đạo Nhân (4) |
+| 魔 Ma Tộc (`ma`) | Tộc | 2 / 4 / 6 | **(2)** Ma Tộc +8% hút máu toàn phần<br>**(4)** Ma Tộc +15% hút máu toàn phần, +10% công<br>**(6)** Ma Tộc +22% hút máu toàn phần, +20% công | Ma Binh (1), Huyết Ma (2), Ảnh Sát (3), Vô Cực Kiếm Tôn (4), U Minh Ma Quân (4), Hỗn Độn Ma Đế (5) |
+| 仙 Tiên Tộc (`tien`) | Tộc | 2 / 4 / 6 | **(2)** Tiên Tộc +10% năng lượng nhận được<br>**(4)** Tiên Tộc +20% năng lượng nhận được; lá chắn 10% máu tối đa khi vào trận<br>**(6)** Tiên Tộc +30% năng lượng nhận được; lá chắn 20% máu tối đa khi vào trận | Thanh Mộc (1), Linh Y (2), Ngự Kiếm Chân Nhân (3), Huyền Băng Tiên Tử (3), Vạn Kiếm Tiên Đế (5), Cửu Thiên Thần Nữ (5) |
+| 妖 Yêu Tộc (`yeu`) | Tộc | 2 / 4 / 6 | **(2)** Yêu Tộc +8% máu tối đa<br>**(4)** Yêu Tộc +18% máu tối đa, +8% tốc đánh<br>**(6)** Yêu Tộc +30% máu tối đa, +15% tốc đánh | Hỏa Linh (1), Linh Cung (1), Huyền Giáp Vệ (2), Băng Linh Sư (2), Cửu Viêm Pháp Sư (3), Bất Diệt Chiến Thần (4) |
+| 劍 Kiếm Tu (`kiemtu`) | Hệ | 2 / 4 / 6 | **(2)** Kiếm Tu +15% công<br>**(4)** Kiếm Tu +30% công; mỗi lần tung kỹ năng phóng 1 phi kiếm phụ, mỗi kiếm 35% công<br>**(6)** Kiếm Tu +50% công; mỗi lần tung kỹ năng phóng 3 phi kiếm phụ, mỗi kiếm 35% công | Kiếm Đồng (1), Ma Binh (1), Thanh Phong Kiếm Khách (2), Ngự Kiếm Chân Nhân (3), Ảnh Sát (3), Vô Cực Kiếm Tôn (4), Vạn Kiếm Tiên Đế (5) |
+| 法 Pháp Tu (`phaptu`) | Hệ | 2 / 4 / 6 | **(2)** Pháp Tu +15% sức mạnh kỹ năng<br>**(4)** Pháp Tu +35% sức mạnh kỹ năng<br>**(6)** Pháp Tu +60% sức mạnh kỹ năng; kỹ năng trúng địch gây thêm 5% máu tối đa của mục tiêu (1 lần / mục tiêu / lần thi triển) | Hỏa Linh (1), Linh Cung (1), Băng Linh Sư (2), Cửu Viêm Pháp Sư (3), Huyền Băng Tiên Tử (3), Thiên Lôi Đạo Nhân (4), U Minh Ma Quân (4), Cửu Thiên Thần Nữ (5) |
+| 護 Hộ Pháp (`hophap`) | Hệ | 2 / 4 / 6 | **(2)** Hộ Pháp +15% giáp<br>**(4)** Hộ Pháp +30% giáp; đồng minh đứng cạnh nhận lá chắn 8% máu tối đa khi vào trận<br>**(6)** Hộ Pháp +50% giáp; đồng minh đứng cạnh nhận lá chắn 15% máu tối đa khi vào trận | Thiết Vệ (1), Huyền Giáp Vệ (2), Huyết Ma (2), Lôi Thương (2), Kim Cang Hộ Pháp (3), Bất Diệt Chiến Thần (4), Hỗn Độn Ma Đế (5) |
+| 丹 Đan Tu (`dantu`) | Hệ | 2 / 3 / 4 | **(2)** Đan Tu +15% hiệu quả hồi máu<br>**(3)** Đan Tu +30% hiệu quả hồi máu<br>**(4)** Đan Tu +50% hiệu quả hồi máu; lần đầu mỗi đồng minh xuống dưới 30% máu: hồi 12% máu tối đa trong 3 giây | Hỏa Linh (1), Thanh Mộc (1), Linh Y (2), Bất Diệt Chiến Thần (4), Cửu Thiên Thần Nữ (5) |
 
-| id | Tộc | Tướng |
-|---|---|---|
-| `nhan` | Nhân tộc | Kiếm Đồng, Thiết Vệ, Linh Cung, Thanh Phong Kiếm Khách, Huyền Giáp Vệ, Lôi Thương, Linh Y, Bất Diệt Chiến Thần |
-| `tien` | Tiên tộc | Ngự Kiếm Chân Nhân, Kim Cang Hộ Pháp, Huyền Băng Tiên Tử, Vô Cực Kiếm Tôn, Thiên Lôi Đạo Nhân, Vạn Kiếm Tiên Đế, Cửu Thiên Thần Nữ |
-| `ma` | Ma tộc | Ma Binh, Huyết Ma, Ảnh Sát, U Minh Ma Quân, Hỗn Độn Ma Đế |
-| `linh` | Linh tộc | Hỏa Linh, Thanh Mộc, Băng Linh Sư, Cửu Viêm Pháp Sư |
-| `yeu` | Yêu tộc |  |
+## Phân bổ tộc/hệ cho 24 tướng
+
+| Tướng | Bậc | Tộc | Hệ | Phân loại phụ |
+|---|---|---|---|---|
+| Kiếm Đồng | 1 | Nhân Tộc | Kiếm Tu | — |
+| Thiết Vệ | 1 | Nhân Tộc | Hộ Pháp | — |
+| Hỏa Linh | 1 | Yêu Tộc | Pháp Tu, Đan Tu | Linh thể |
+| Thanh Mộc | 1 | Tiên Tộc | Đan Tu | Linh thể |
+| Ma Binh | 1 | Ma Tộc | Kiếm Tu | — |
+| Linh Cung | 1 | Yêu Tộc | Pháp Tu | Xạ Tu |
+| Thanh Phong Kiếm Khách | 2 | Nhân Tộc | Kiếm Tu | — |
+| Huyền Giáp Vệ | 2 | Yêu Tộc | Hộ Pháp | — |
+| Băng Linh Sư | 2 | Yêu Tộc | Pháp Tu | Linh thể |
+| Huyết Ma | 2 | Ma Tộc | Hộ Pháp | — |
+| Lôi Thương | 2 | Nhân Tộc | Hộ Pháp | Thương Tu |
+| Linh Y | 2 | Tiên Tộc | Đan Tu | — |
+| Ngự Kiếm Chân Nhân | 3 | Tiên Tộc | Kiếm Tu | — |
+| Cửu Viêm Pháp Sư | 3 | Yêu Tộc | Pháp Tu | Linh thể |
+| Kim Cang Hộ Pháp | 3 | Nhân Tộc | Hộ Pháp | — |
+| Ảnh Sát | 3 | Ma Tộc | Kiếm Tu | Sát Tu |
+| Huyền Băng Tiên Tử | 3 | Tiên Tộc | Pháp Tu | — |
+| Vô Cực Kiếm Tôn | 4 | Ma Tộc | Kiếm Tu | — |
+| Thiên Lôi Đạo Nhân | 4 | Nhân Tộc | Pháp Tu | — |
+| Bất Diệt Chiến Thần | 4 | Yêu Tộc | Hộ Pháp, Đan Tu | Thể Tu |
+| U Minh Ma Quân | 4 | Ma Tộc | Pháp Tu | — |
+| Vạn Kiếm Tiên Đế | 5 | Tiên Tộc | Kiếm Tu | — |
+| Cửu Thiên Thần Nữ | 5 | Tiên Tộc | Pháp Tu, Đan Tu | — |
+| Hỗn Độn Ma Đế | 5 | Ma Tộc | Hộ Pháp | — |
 
 ## Mô hình & animation
 
