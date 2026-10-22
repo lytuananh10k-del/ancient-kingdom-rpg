@@ -13,10 +13,10 @@ DPS ★1 = công × tốc đánh × (1 + chí mạng × (ST chí mạng − 1)).
 | 3 | `hoa` | Hỏa Linh | 1 | Phàm phẩm | Yêu Tộc | Pháp Tu, Đan Tu (phụ: Linh thể) | Pháp sư | 560 | 46 | 14 | 100 | 20 | 0,75 | 7,5 | 3,6 | 30/70 | 8% ×1,5 | 3% | 36 | 638 | 1008/1792 | 69/115 | Hỏa Cầu Thuật | Phép |
 | 4 | `thanhmoc` | Thanh Mộc | 1 | Phàm phẩm | Tiên Tộc | Đan Tu (phụ: Linh thể) | Hỗ trợ | 560 | 32 | 18 | 100 | 25 | 0,75 | 6,5 | 3,6 | 20/70 | 5% ×1,5 | 3% | 25 | 661 | 1008/1792 | 48/80 | Mộc Linh Hồi Xuân | Phép |
 | 5 | `mabinh` | Ma Binh | 1 | Phàm phẩm | Ma Tộc | Kiếm Tu | Đấu sĩ | 640 | 50 | 18 | 100 | 20 | 1 | 2,2 | 4,4 | 10/60 | 12% ×1,5 | 5% | 53 | 755 | 1152/2048 | 75/125 | Huyết Chiến | Vật lý |
-| 6 | `linhcung` | Linh Cung | 1 | Phàm phẩm | Yêu Tộc | Pháp Tu (phụ: Xạ Tu) | Xạ thủ | 520 | 56 | 14 | 100 | 15 | 0,95 | 9 | 3,8 | 0/70 | 15% ×1,6 | 5% | 58 | 593 | 936/1664 | 84/140 | Liên Châu Tiễn | Vật lý |
+| 6 | `linhcung` | Linh Cung | 1 | Phàm phẩm | Yêu Tộc | Pháp Tu (phụ: Xạ Tu) | Xạ thủ | 520 | 52 | 14 | 100 | 15 | 0,88 | 9 | 3,8 | 0/70 | 15% ×1,6 | 5% | 50 | 593 | 936/1664 | 78/130 | Liên Châu Tiễn | Vật lý |
 | 7 | `thanhphong` | Thanh Phong Kiếm Khách | 2 | Linh phẩm | Nhân Tộc | Kiếm Tu | Đấu sĩ | 700 | 60 | 22 | 100 | 22 | 1,05 | 2,2 | 4,6 | 20/70 | 15% ×1,6 | 10% | 69 | 854 | 1260/2240 | 90/150 | Thanh Phong Liên Trảm | Vật lý |
 | 8 | `huyengiap` | Huyền Giáp Vệ | 2 | Linh phẩm | Yêu Tộc | Hộ Pháp | Đỡ đòn | 1050 | 42 | 45 | 100 | 35 | 0,8 | 2,6 | 3,8 | 40/100 | 5% ×1,5 | 0% | 34 | 1523 | 1890/3360 | 63/105 | Hộ Thể Chân Khí | Vật lý |
-| 9 | `bangling` | Băng Linh Sư | 2 | Linh phẩm | Yêu Tộc | Pháp Tu (phụ: Linh thể) | Pháp sư | 600 | 48 | 15 | 100 | 22 | 0,8 | 7,5 | 3,6 | 30/70 | 8% ×1,5 | 3% | 40 | 690 | 1080/1920 | 72/120 | Hàn Băng Tiễn | Phép |
+| 9 | `bangling` | Băng Linh Sư | 2 | Linh phẩm | Yêu Tộc | Pháp Tu (phụ: Linh thể) | Pháp sư | 640 | 48 | 15 | 100 | 22 | 0,8 | 7,5 | 3,6 | 30/70 | 8% ×1,5 | 3% | 40 | 736 | 1152/2048 | 72/120 | Hàn Băng Tiễn | Phép |
 | 10 | `huyetma` | Huyết Ma | 2 | Linh phẩm | Ma Tộc | Hộ Pháp | Đấu sĩ | 800 | 52 | 22 | 100 | 25 | 0,9 | 2,2 | 4,2 | 20/70 | 10% ×1,5 | 5% | 49 | 976 | 1440/2560 | 78/130 | Huyết Phệ | Vật lý |
 | 11 | `loithuong` | Lôi Thương | 2 | Linh phẩm | Nhân Tộc | Hộ Pháp (phụ: Thương Tu) | Đấu sĩ | 780 | 58 | 32 | 100 | 25 | 0,85 | 2,8 | 4,2 | 20/70 | 10% ×1,5 | 5% | 52 | 1030 | 1404/2496 | 87/145 | Lôi Thương Xuyên Vân | Vật lý |
 | 12 | `linhy` | Linh Y | 2 | Linh phẩm | Tiên Tộc | Đan Tu | Hỗ trợ | 660 | 36 | 18 | 100 | 28 | 0,75 | 6,5 | 3,6 | 30/80 | 5% ×1,5 | 3% | 28 | 779 | 1188/2112 | 54/90 | Diệu Thủ Hồi Xuân | Phép |
@@ -39,11 +39,11 @@ DPS ★1 = công × tốc đánh × (1 + chí mạng × (ST chí mạng − 1)).
 
 | Bậc | Số tướng | Máu | Công | DPS | Máu hiệu dụng | DPS × máu hiệu dụng (tương đối bậc 1) |
 |---|---|---|---|---|---|---|
-| 1 | 6 | 633 | 46 | 43 | 776 | ×1 |
-| 2 | 6 | 765 | 49 | 45 | 975 | ×1,33 |
-| 3 | 5 | 844 | 58 | 55 | 1088 | ×1,8 |
-| 4 | 4 | 1035 | 65 | 60 | 1368 | ×2,49 |
-| 5 | 3 | 1100 | 74 | 73 | 1426 | ×3,13 |
+| 1 | 6 | 633 | 45 | 41 | 776 | ×1 |
+| 2 | 6 | 772 | 49 | 45 | 983 | ×1,39 |
+| 3 | 5 | 844 | 58 | 55 | 1088 | ×1,86 |
+| 4 | 4 | 1035 | 65 | 60 | 1368 | ×2,57 |
+| 5 | 3 | 1100 | 74 | 73 | 1426 | ×3,24 |
 
 ## Kỹ năng
 
@@ -56,8 +56,8 @@ DPS ★1 = công × tốc đánh × (1 + chí mạng × (ST chí mạng − 1)).
 | Ma Binh | Huyết Chiến (`huyetChien`) | Hỗ trợ | Bản thân / đồng minh | đầy năng lượng | 0,2 / 0,3 / 0,6 s | ally:selfDamage 12% máu · ally:buff atk ×1,4 5s · ally:buff aspd ×1,3 5s · ally:buff ls +0.2 5s | Đốt 12% máu hiện tại để nhận +40% công, +30% tốc đánh, +20% hút máu trong 5 giây. Nội tại: máu càng thấp công càng cao (tới +60%). |
 | Linh Cung | Liên Châu Tiễn (`lienChau`) | Phóng đạn | Gần nhất | đầy năng lượng | 0,25 / 0,35 / 0,8 s | damage 110% xuyên 25% | Bắn liền 3 mũi tên vào mục tiêu, mỗi mũi 110% công và bỏ qua 25% giáp. |
 | Thanh Phong Kiếm Khách | Thanh Phong Liên Trảm (`lienTram`) | Liên kích | Gần nhất | đầy năng lượng | 0,2 / 0,28 / 0,95 s | damage 70% xuyên 20% | Chém liên hoàn 4 nhát vào mục tiêu (đổi sang kẻ gần nhất nếu mục tiêu ngã): 3 nhát 70% công, nhát cuối tăng cường 112% công; bỏ qua 20% giáp. |
-| Huyền Giáp Vệ | Hộ Thể Chân Khí (`hoThe`) | Hỗ trợ – lá chắn | 3 đồng minh yếu nhất | (viết tay, js/13-skills.js) | 6 s | shield · tổng hệ số ≈ 0% | Tạo khiên bằng 15% máu tối đa của bản thân (× sức mạnh phép thuật) cho 3 đồng minh đang yếu nhất (luôn gồm bản thân), giữ 6 giây. |
-| Băng Linh Sư | Hàn Băng Tiễn (`hanBang`) | Phóng đạn r=2,2 | Vùng địch đông nhất | đầy năng lượng | 0,35 / 0,45 / 0,9 s | damage 210% · slow 3s 40% | Phóng băng tiễn vào vùng địch đông nhất: 210% công (phép) trong bán kính 2,2 m, làm chậm 40% trong 3 giây. |
+| Huyền Giáp Vệ | Hộ Thể Chân Khí (`hoThe`) | Hỗ trợ – lá chắn | 3 đồng minh yếu nhất | (viết tay, js/13-skills.js) | 6 s | shield · tổng hệ số ≈ 0% | Tạo khiên bằng 15% máu tối đa của bản thân (× sức mạnh phép thuật) cho bản thân và 1 đồng minh đang yếu nhất, giữ 6 giây. |
+| Băng Linh Sư | Hàn Băng Tiễn (`hanBang`) | Phóng đạn r=2,2 | Vùng địch đông nhất | đầy năng lượng | 0,35 / 0,45 / 0,9 s | damage 240% · slow 3s 40% | Phóng băng tiễn vào vùng địch đông nhất: 240% công (phép) trong bán kính 2,2 m, làm chậm 40% trong 3 giây. |
 | Huyết Ma | Huyết Phệ (`huyetPhe`) | Đơn mục tiêu | Gần nhất | đầy năng lượng | 0,25 / 0,35 / 0,75 s | damage 220% hút 70% | Huyết ảnh cắn xé mục tiêu: 220% công (vật lý), hồi máu bằng 70% sát thương THỰC gây ra (sau giáp, lá chắn). |
 | Lôi Thương | Lôi Thương Xuyên Vân (`loiThuong`) | Xuyên tuyến | Hướng trúng nhiều nhất | đầy năng lượng | 0,3 / 0,38 / 0,85 s | damage 180% xuyên 20% · stun 0,5s | Đâm lôi thương xuyên hàng địch dài 9 m: 180% công, bỏ qua 20% giáp, choáng 0,5 giây. |
 | Linh Y | Diệu Thủ Hồi Xuân (`dieuThu`) | Hỗ trợ | Bản thân / đồng minh | undefined | 0,3 / 0,45 / 0,9 s | ally:cleanse · ally:heal 15% máu · ally:buff dmgTaken ×0,85 3s | Linh đan diệu thủ: gỡ 1 hiệu ứng bất lợi thanh tẩy được (choáng, đóng băng, chậm, thiêu, giảm giáp…) cho 2 đồng minh cần nhất, hồi cho 2 đồng minh yếu nhất 15% máu tối đa của Linh Y + 80% công và giảm 15% sát thương họ nhận trong 3 giây. |
@@ -68,7 +68,7 @@ DPS ★1 = công × tốc đánh × (1 + chí mạng × (ST chí mạng − 1)).
 | Huyền Băng Tiên Tử | Huyền Băng Phong Ấn (`huyenBang`) | Diện rộng r=2,8 | Vùng địch đông nhất | đầy năng lượng | 0,4 / 0,55 / 1 s | damage 180% · freeze 1,6s | Đóng băng vùng địch đông nhất bán kính 2,8 m: 180% công (phép) và đóng băng 1,6 giây (đỡ đòn kháng 40%). |
 | Vô Cực Kiếm Tôn | Vô Cực Kiếm Khí (`voCucKiem`) | Xuyên tuyến (2 đạo, giảm 15% mỗi mục tiêu xuyên qua, tối thiểu 55%) | Hướng trúng nhiều nhất | (viết tay, js/13-skills.js) | — | damage, pen · tổng hệ số ≈ 480% | Chém 2 đạo kiếm khí bán nguyệt liên tiếp theo hướng trúng nhiều địch nhất: mỗi đạo 240% công (vật lý), xuyên mọi kẻ địch, bỏ qua 50% giáp; mỗi mục tiêu xuyên qua giảm 15% (tối thiểu 55%). |
 | Thiên Lôi Đạo Nhân | Cửu Thiên Lôi Kiếp (`cuuThienLoi`) | undefined r=2,6 | Vùng địch đông nhất | đầy năng lượng | 0,35 / 0,55 / 1 s | damage 240% · stun 0,6s | Giáng sét vào vùng địch đông nhất rồi nhảy liên hoàn tới tối đa 6 kẻ địch khác (mỗi kẻ trúng 1 lần, tầm nhảy 5,5 m): 240% công (phép), giảm 10% mỗi lần nhảy, choáng 0,6 giây. |
-| Bất Diệt Chiến Thần | Bất Diệt Kim Thân (`batDiet`) | Diện rộng quanh mình r=3,2 | Gần nhất | bản thân < 50% máu hoặc địch trong tầm nổ | 0,3 / 0,42 / 0,85 s | damage 120% · ally:heal 10% máu · ally:hot 6% máu 3s · ally:buff dmgTaken ×0,8 4s | Chấn 120% công và hất lùi địch trong 3,2 m; hồi ngay 10% máu tối đa, thêm 6% trong 3 giây và giảm 20% sát thương nhận trong 4 giây. Nội tại: hồi 0,6% máu mỗi giây. |
+| Bất Diệt Chiến Thần | Bất Diệt Kim Thân (`batDiet`) | Diện rộng quanh mình r=3,2 | Gần nhất | bản thân < 50% máu hoặc địch trong tầm nổ | 0,3 / 0,42 / 0,85 s | damage 120% · ally:heal 8% máu · ally:hot 6% máu 3s · ally:buff dmgTaken ×0,8 4s | Chấn 120% công và hất lùi địch trong 3,2 m; hồi ngay 8% máu tối đa, thêm 6% trong 3 giây và giảm 20% sát thương nhận trong 4 giây. Nội tại: hồi 0,4% máu mỗi giây. |
 | U Minh Ma Quân | U Minh Phệ Hồn (`uMinhPhe`) | Phóng nhiều mục tiêu | Yếu nhất | đầy năng lượng | 0,35 / 0,5 / 1 s | damage 140% hút 35% | Phóng 4 u hồn hút sinh lực vào các kẻ địch yếu nhất: mỗi hồn 140% công (phép), hồi cho bản thân 35% sát thương thực gây ra. |
 | Vạn Kiếm Tiên Đế | Vạn Kiếm Quy Tông (`vanKiem`) | Triệu hồi phi kiếm + diện rộng | Vùng địch đông nhất | (viết tay, js/13-skills.js) | 5,1 s | damage, knock, stun · tổng hệ số ≈ 620% | Triệu hồi phi kiếm vây quanh vùng địch đông nhất: 10 nhát chém liên tiếp (32% công mỗi nhát, bán kính 3,4 m), rồi cự kiếm giáng xuống gây 300% công trong bán kính 5 m, hất lùi và choáng 1,2 giây. |
 | Cửu Thiên Thần Nữ | Cửu Thiên Thánh Trận (`cuuThien`) | Diện rộng r=4 | Vùng địch đông nhất | đầy năng lượng | 0,5 / 0,8 / 1,4 s | damage 220% · slow 3s 30% · ally:heal 10% máu · ally:buff atk ×1,2 4s | Giáng thánh trận bán kính 4 m vào vùng địch đông nhất: 220% công (phép), làm chậm 30% trong 3 giây; mọi đồng minh hồi 10% máu tối đa của Thần Nữ và +20% công trong 4 giây. |

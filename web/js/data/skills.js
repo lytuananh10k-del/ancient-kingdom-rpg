@@ -31,8 +31,8 @@ const SKILL_SPECS = {
     effects: [{ kind: 'damage', mult: 0.7, pen: 0.2 }],
     desc: 'Chém liên hoàn 4 nhát vào mục tiêu (đổi sang kẻ gần nhất nếu mục tiêu ngã): 3 nhát 70% công, nhát cuối tăng cường 112% công; bỏ qua 20% giáp.' },
   hanBang: { name: 'Hàn Băng Tiễn', type: 'projectile', count: 1, radius: 2.2, speed: 16, size: 0.6, target: 'densest', color: 'ice', timing: { windup: 0.35, impact: 0.45, end: 0.9 },
-    effects: [{ kind: 'damage', mult: 2.1 }, { kind: 'slow', amount: 0.4, dur: 3 }],
-    desc: 'Phóng băng tiễn vào vùng địch đông nhất: 210% công (phép) trong bán kính 2,2 m, làm chậm 40% trong 3 giây.' },
+    effects: [{ kind: 'damage', mult: 2.4 }, { kind: 'slow', amount: 0.4, dur: 3 }],   // V1.5 FINAL: 2,1 → 2,4 (thí nghiệm thay thế: ngang tướng 1 vàng)
+    desc: 'Phóng băng tiễn vào vùng địch đông nhất: 240% công (phép) trong bán kính 2,2 m, làm chậm 40% trong 3 giây.' },
   huyetPhe: { name: 'Huyết Phệ', type: 'strike', target: 'nearest', color: 'blood', anim: 'Attack03', timing: { windup: 0.25, impact: 0.35, end: 0.75 },
     effects: [{ kind: 'damage', mult: 2.2, lifesteal: 0.7 }],
     desc: 'Huyết ảnh cắn xé mục tiêu: 220% công (vật lý), hồi máu bằng 70% sát thương THỰC gây ra (sau giáp, lá chắn).' },
@@ -61,9 +61,10 @@ const SKILL_SPECS = {
   // ---- Bậc 4
   batDiet: { name: 'Bất Diệt Kim Thân', type: 'area', center: 'self', radius: 3.2, target: 'nearest', ready: 'hurtOrNear', color: 'earth', anim: 'HeavyAttack', timing: { windup: 0.3, impact: 0.42, end: 0.85 },
     effects: [{ kind: 'damage', mult: 1.2, knock: 2 }],
-    // V1.5 FINAL: hồi theo thời gian 12% → 6%, giảm sát thương nhận 30% → 20% (mô phỏng 1200 trận: thắng 74,0%, KTC 69,4–78,2%)
-    ally: [{ kind: 'heal', pct: 0.1 }, { kind: 'hot', pct: 0.06, dur: 3 }, { kind: 'buff', stat: 'dmgTaken', mul: 0.8, dur: 4, label: '−20% sát thương nhận' }],
-    desc: 'Chấn 120% công và hất lùi địch trong 3,2 m; hồi ngay 10% máu tối đa, thêm 6% trong 3 giây và giảm 20% sát thương nhận trong 4 giây. Nội tại: hồi 0,6% máu mỗi giây.' },
+    // V1.5 FINAL (mô phỏng 1200 trận, seed 2024): gốc → thắng 74,0% (KTC 69,4–78,2%); hồi theo thời gian 12→6%, giảm sát thương nhận 30→20% → 69,0% (64,1–73,4%);
+    // tiếp: hồi ngay 10 → 8%, nội tại 0,6 → 0,4% / giây (champions.js)
+    ally: [{ kind: 'heal', pct: 0.08 }, { kind: 'hot', pct: 0.06, dur: 3 }, { kind: 'buff', stat: 'dmgTaken', mul: 0.8, dur: 4, label: '−20% sát thương nhận' }],
+    desc: 'Chấn 120% công và hất lùi địch trong 3,2 m; hồi ngay 8% máu tối đa, thêm 6% trong 3 giây và giảm 20% sát thương nhận trong 4 giây. Nội tại: hồi 0,4% máu mỗi giây.' },
   uMinhPhe: { name: 'U Minh Phệ Hồn', type: 'volley', count: 4, gap: 0.1, speed: 12, size: 0.55, target: 'weakest', color: 'nether', timing: { windup: 0.35, impact: 0.5, end: 1.0 },
     effects: [{ kind: 'damage', mult: 1.4, lifesteal: 0.35 }],
     desc: 'Phóng 4 u hồn hút sinh lực vào các kẻ địch yếu nhất: mỗi hồn 140% công (phép), hồi cho bản thân 35% sát thương thực gây ra.' },

@@ -1,23 +1,23 @@
 {
- "date": "2026-10-22T19:45:47.515Z",
+ "date": "2026-10-22T20:25:43.851Z",
  "fights": 80,
  "stats": {
   "fights": 80,
-  "searchesPerUnitSec": 0.172,
+  "searchesPerUnitSec": 0.171,
   "maxSearch1s": 4,
-  "sharedStillRate": 0.009,
+  "sharedStillRate": 0.0088,
   "closePairRate": 0,
-  "reversalsPerMoveSec": 0.038,
-  "maxStuck": 0.05,
+  "reversalsPerMoveSec": 0.032,
+  "maxStuck": 0.03,
   "rangedAtkDist": {
-   "avg": 5.84,
+   "avg": 5.82,
    "p05": 2.5
   },
   "meleeAtkDist": {
-   "avg": 2.63,
+   "avg": 2.64,
    "p95": 3.12
   },
-  "heals": 1716,
+  "heals": 1774,
   "badHeals": 0,
   "deadHeals": 0,
   "deadDmg": 0,
@@ -68,7 +68,7 @@
  },
  "results": [
   {
-   "name": "Dẫn đường: không chạy A* mỗi khung (TB 0.172 lần / tướng / giây, tối đa 4 lần trong 1 s; mỗi khung = 60)",
+   "name": "Dẫn đường: không chạy A* mỗi khung (TB 0.171 lần / tướng / giây, tối đa 4 lần trong 1 s; mỗi khung = 60)",
    "ok": true
   },
   {
@@ -76,23 +76,23 @@
    "ok": true
   },
   {
-   "name": "Dẫn đường: hai tướng đứng yên không chung một ô (0.90% mẫu)",
+   "name": "Dẫn đường: hai tướng đứng yên không chung một ô (0.88% mẫu)",
    "ok": true
   },
   {
-   "name": "Dẫn đường: không giật qua lại (0.038 lần đảo chiều gắt / giây di chuyển)",
+   "name": "Dẫn đường: không giật qua lại (0.032 lần đảo chiều gắt / giây di chuyển)",
    "ok": true
   },
   {
-   "name": "Dẫn đường: không kẹt (đứng yên lâu nhất khi cần đi: 0.05 s)",
+   "name": "Dẫn đường: không kẹt (đứng yên lâu nhất khi cần đi: 0.03 s)",
    "ok": true
   },
   {
-   "name": "Mục tiêu: đánh xa giữ khoảng cách (TB 5.84 m, 5% gần nhất 2.5 m), cận chiến đánh ở tầm gần (TB 2.63 m)",
+   "name": "Mục tiêu: đánh xa giữ khoảng cách (TB 5.82 m, 5% gần nhất 2.5 m), cận chiến đánh ở tầm gần (TB 2.64 m)",
    "ok": true
   },
   {
-   "name": "Mục tiêu: hỗ trợ chỉ hồi đồng minh còn sống (1716 lần hồi, sai phe 0, lên xác 0)",
+   "name": "Mục tiêu: hỗ trợ chỉ hồi đồng minh còn sống (1774 lần hồi, sai phe 0, lên xác 0)",
    "ok": true
   },
   {

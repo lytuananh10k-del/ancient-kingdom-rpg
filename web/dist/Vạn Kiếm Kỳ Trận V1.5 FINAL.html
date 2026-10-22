@@ -5642,7 +5642,7 @@ class CharacterRig {
   stopAction() { this.action = null; }
   hold(name, on) { this.holds[name] = on; if (!(name in this.holdW)) this.holdW[name] = 0; }
   hitReact(dirLocalX, dirLocalZ, strength) { this.hitVel.x += dirLocalX * strength * 9; this.hitVel.y += dirLocalZ * strength * 9; }
-  setTrail(on) { if (on && !this.trailOn) this.trail.length = 0; this.trailOn = on; }
+  setTrail(on) { if (on && !this.trailOn) { if (this.trailSpare) this.trailSpare.push(...this.trail); this.trail.length = 0; } this.trailOn = on; }
 
   locomotionPose(out, dt) {
     const sp = this.speed, k = clamp(sp / 4.5, 0, 1), m = clamp(sp / 0.6, 0, 1);
@@ -5797,22 +5797,26 @@ class CharacterRig {
     this.sashAnchors.forEach((o, i) => { o.getWorldPosition(_v1); this.sashes[i].update(_v1, vdt, 9, wind, push); });
     this.pushHairJobs(hc, tc);
   }
+  /** Job vẽ tóc / dải lụa: tạo MỘT lần cho mỗi rig rồi dùng lại mỗi khung (trước đây mỗi khung tạo 3 đối tượng + 6 hàm mới / tướng). */
   pushHairJobs(hc, tc) {
     if (!this.hair.init) return;
-    vfx.hairJobs.push({ points: this.hair.p, n: this.hair.n, width: t => lerp(0.13, 0.03, t), color: (t, c) => { c.copy(hc); c.a = 1; } });
-    this.sashes.forEach(s => vfx.hairJobs.push({ points: s.p, n: s.n, width: t => lerp(0.06, 0.035, t), color: (t, c) => { c.copy(tc); c.a = 1; } }));
+    if (!this.hairJobsCache) {
+      const hw = t => lerp(0.13, 0.03, t), sw = t => lerp(0.06, 0.035, t), hcol = (t, c) => { c.copy(this.hairColor); c.a = 1; }, scol = (t, c) => { c.copy(this.trimColor); c.a = 1; };
+      this.hairJobsCache = [{ points: this.hair.p, n: this.hair.n, width: hw, color: hcol }].concat(this.sashes.map(s => ({ points: s.p, n: s.n, width: sw, color: scol })));
+    }
+    for (const j of this.hairJobsCache) vfx.hairJobs.push(j);
   }
   updateTrail() {
     if (!this.trailOn && this.trail.length === 0) return;
     const max = Q().trail;
-    if (this.trailOn) {
-      const tip = this.tip.getWorldPosition(new V3());
-      this.trail.unshift(tip);
-    } else this.trail.pop();
-    while (this.trail.length > max) this.trail.pop();
+    const spare = this.trailSpare || (this.trailSpare = []);   // điểm vệt bỏ đi được dùng lại – không cấp phát mỗi khung
+    if (this.trailOn) this.trail.unshift(this.tip.getWorldPosition(spare.pop() || new V3()));
+    else if (this.trail.length) spare.push(this.trail.pop());
+    while (this.trail.length > max) spare.push(this.trail.pop());
     if (this.trail.length > 1) {
       const col = this.look.trailColor;
-      vfx.trailJobs.push({ points: this.trail, n: this.trail.length, width: t => lerp(0.42, 0.02, t), color: (t, c) => { c.copy(col); c.a = (1 - t) * 0.9; } });
+      const job = this.trailJob || (this.trailJob = { points: this.trail, n: 0, width: t => lerp(0.42, 0.02, t), color: (t, c) => { c.copy(col); c.a = (1 - t) * 0.9; } });
+      job.n = this.trail.length; vfx.trailJobs.push(job);
     }
   }
   dispose() {
@@ -6462,11 +6466,11 @@ const CHAMPIONS = [
   { id: 'hoa', name: 'Hỏa Linh', cost: 1, origin: 'yeu', traits: ['phaptu', 'dantu'], sub: ['linh'], role: 'mage', hp: 560, atk: 46, def: 14, ap: 100, mr: 20, aspd: 0.75, range: 7.5, speed: 3.6, mana0: 30, mana: 70, crit: 0.08, critDmg: 1.5, dodge: 0.03, skill: 'hoaCau', ranged: 'fire', poise: 30, color: '#ffb347', model: { look: 'hoa', scale: 0.95 }, anim: 'caster' },
   { id: 'thanhmoc', name: 'Thanh Mộc', cost: 1, origin: 'tien', traits: ['dantu'], sub: ['linh'], role: 'support', hp: 560, atk: 32, def: 18, ap: 100, mr: 25, aspd: 0.75, range: 6.5, speed: 3.6, mana0: 20, mana: 70, crit: 0.05, critDmg: 1.5, dodge: 0.03, skill: 'mocLinh', ranged: 'wood', poise: 30, color: '#a8e07a', model: { look: 'thanhmoc', scale: 0.95 }, anim: 'caster' },
   { id: 'mabinh', name: 'Ma Binh', cost: 1, origin: 'ma', traits: ['kiemtu'], role: 'fighter', hp: 640, atk: 50, def: 18, ap: 100, mr: 20, aspd: 1.0, range: 2.2, speed: 4.4, mana0: 10, mana: 60, crit: 0.12, critDmg: 1.5, dodge: 0.05, skill: 'huyetChien', poise: 40, passive: { lowHpAtk: 0.6 }, color: '#c04a3a', model: { look: 'mabinh', scale: 0.98 }, anim: 'melee' },
-  { id: 'linhcung', name: 'Linh Cung', cost: 1, origin: 'yeu', traits: ['phaptu'], sub: ['xatu'], role: 'marksman', hp: 520, atk: 56, def: 14, ap: 100, mr: 15, aspd: 0.95, range: 9, speed: 3.8, mana0: 0, mana: 70, crit: 0.15, critDmg: 1.6, dodge: 0.05, skill: 'lienChau', ranged: 'arrow', poise: 30, color: '#f0d890', model: { look: 'linhcung', scale: 0.95 }, anim: 'archer' },
+  { id: 'linhcung', name: 'Linh Cung', cost: 1, origin: 'yeu', traits: ['phaptu'], sub: ['xatu'], role: 'marksman', hp: 520, atk: 52, def: 14, ap: 100, mr: 15, aspd: 0.88, range: 9, speed: 3.8, mana0: 0, mana: 70, crit: 0.15, critDmg: 1.6, dodge: 0.05, skill: 'lienChau', ranged: 'arrow', poise: 30, color: '#f0d890', model: { look: 'linhcung', scale: 0.95 }, anim: 'archer' },
   // ---- Bậc 2 – Linh phẩm
   { id: 'thanhphong', name: 'Thanh Phong Kiếm Khách', short: 'Thanh Phong', cost: 2, origin: 'nhan', traits: ['kiemtu'], role: 'fighter', hp: 700, atk: 60, def: 22, ap: 100, mr: 22, aspd: 1.05, range: 2.2, speed: 4.6, mana0: 20, mana: 70, crit: 0.15, critDmg: 1.6, dodge: 0.1, skill: 'lienTram', poise: 45, color: '#7fe0c0', model: { look: 'thanhphong', scale: 1 }, anim: 'melee' },
   { id: 'huyengiap', name: 'Huyền Giáp Vệ', short: 'Huyền Giáp', cost: 2, origin: 'yeu', traits: ['hophap'], role: 'tank', hp: 1050, atk: 42, def: 45, ap: 100, mr: 35, aspd: 0.8, range: 2.6, speed: 3.8, mana0: 40, mana: 100, crit: 0.05, critDmg: 1.5, dodge: 0, skill: 'hoThe', poise: 85, color: '#b8d0e8', model: { look: 'huyengiap', scale: 1.02 }, anim: 'heavy' },
-  { id: 'bangling', name: 'Băng Linh Sư', short: 'Băng Linh', cost: 2, origin: 'yeu', traits: ['phaptu'], sub: ['linh'], role: 'mage', hp: 600, atk: 48, def: 15, ap: 100, mr: 22, aspd: 0.8, range: 7.5, speed: 3.6, mana0: 30, mana: 70, crit: 0.08, critDmg: 1.5, dodge: 0.03, skill: 'hanBang', ranged: 'ice', poise: 30, color: '#a8dcff', model: { look: 'bangling', scale: 1 }, anim: 'caster' },
+  { id: 'bangling', name: 'Băng Linh Sư', short: 'Băng Linh', cost: 2, origin: 'yeu', traits: ['phaptu'], sub: ['linh'], role: 'mage', hp: 640, atk: 48, def: 15, ap: 100, mr: 22, aspd: 0.8, range: 7.5, speed: 3.6, mana0: 30, mana: 70, crit: 0.08, critDmg: 1.5, dodge: 0.03, skill: 'hanBang', ranged: 'ice', poise: 30, color: '#a8dcff', model: { look: 'bangling', scale: 1 }, anim: 'caster' },
   { id: 'huyetma', name: 'Huyết Ma', cost: 2, origin: 'ma', traits: ['hophap'], role: 'fighter', hp: 800, atk: 52, def: 22, ap: 100, mr: 25, aspd: 0.9, range: 2.2, speed: 4.2, mana0: 20, mana: 70, crit: 0.1, critDmg: 1.5, dodge: 0.05, skill: 'huyetPhe', poise: 50, color: '#ff4a4a', model: { look: 'huyetma', scale: 1.02 }, anim: 'melee' },
   { id: 'loithuong', name: 'Lôi Thương', cost: 2, origin: 'nhan', traits: ['hophap'], sub: ['thuongtu'], role: 'fighter', hp: 780, atk: 58, def: 32, ap: 100, mr: 25, aspd: 0.85, range: 2.8, speed: 4.2, mana0: 20, mana: 70, crit: 0.1, critDmg: 1.5, dodge: 0.05, skill: 'loiThuong', poise: 55, color: '#bfe0ff', model: { look: 'loithuong', scale: 1 }, anim: 'heavy' },
   { id: 'linhy', name: 'Linh Y', cost: 2, origin: 'tien', traits: ['dantu'], role: 'support', hp: 660, atk: 36, def: 18, ap: 100, mr: 28, aspd: 0.75, range: 6.5, speed: 3.6, mana0: 30, mana: 80, crit: 0.05, critDmg: 1.5, dodge: 0.03, skill: 'dieuThu', ranged: 'light', poise: 30, color: '#ffb0c8', model: { look: 'linhy', scale: 0.97 }, anim: 'caster' },
@@ -6479,7 +6483,7 @@ const CHAMPIONS = [
   // ---- Bậc 4 – Địa phẩm
   { id: 'vocuc', name: 'Vô Cực Kiếm Tôn', short: 'Vô Cực', cost: 4, origin: 'ma', traits: ['kiemtu'], role: 'fighter', hp: 1000, atk: 68, def: 30, ap: 100, mr: 30, aspd: 1.0, range: 2.4, speed: 4.6, mana0: 30, mana: 80, crit: 0.2, critDmg: 1.7, dodge: 0.1, skill: 'voCucKiem', dash: true, poise: 55, color: '#e8e8ff', model: { look: 'vocuc', scale: 1.06 }, anim: 'melee' },
   { id: 'loiton', name: 'Thiên Lôi Đạo Nhân', short: 'Thiên Lôi', cost: 4, origin: 'nhan', traits: ['phaptu'], role: 'mage', hp: 880, atk: 66, def: 22, ap: 100, mr: 30, aspd: 0.8, range: 8, speed: 3.6, mana0: 40, mana: 90, crit: 0.1, critDmg: 1.5, dodge: 0.03, skill: 'cuuThienLoi', ranged: 'thunder', poise: 40, color: '#ffe08a', model: { look: 'loiton', scale: 1.06 }, anim: 'caster' },
-  { id: 'batdiet', name: 'Bất Diệt Chiến Thần', short: 'Bất Diệt', cost: 4, origin: 'yeu', traits: ['hophap', 'dantu'], sub: ['thetu'], role: 'tank', hp: 1400, atk: 62, def: 45, ap: 100, mr: 40, aspd: 0.85, range: 2.4, speed: 4.0, mana0: 40, mana: 100, crit: 0.08, critDmg: 1.5, dodge: 0, skill: 'batDiet', poise: 95, passive: { regen: 0.006 }, color: '#ffc070', model: { look: 'batdiet', scale: 1.08 }, anim: 'heavy' },
+  { id: 'batdiet', name: 'Bất Diệt Chiến Thần', short: 'Bất Diệt', cost: 4, origin: 'yeu', traits: ['hophap', 'dantu'], sub: ['thetu'], role: 'tank', hp: 1400, atk: 62, def: 45, ap: 100, mr: 40, aspd: 0.85, range: 2.4, speed: 4.0, mana0: 40, mana: 100, crit: 0.08, critDmg: 1.5, dodge: 0, skill: 'batDiet', poise: 95, passive: { regen: 0.004 }, color: '#ffc070', model: { look: 'batdiet', scale: 1.08 }, anim: 'heavy' },
   { id: 'umaquan', name: 'U Minh Ma Quân', short: 'U Minh Quân', cost: 4, origin: 'ma', traits: ['phaptu'], role: 'mage', hp: 860, atk: 64, def: 24, ap: 100, mr: 30, aspd: 0.8, range: 7, speed: 3.6, mana0: 30, mana: 90, crit: 0.1, critDmg: 1.5, dodge: 0.03, skill: 'uMinhPhe', ranged: 'nether', poise: 45, color: '#c080ff', model: { look: 'umaquan', scale: 1.06 }, anim: 'caster' },
   // ---- Bậc 5 – Thiên phẩm (huyền thoại)
   { id: 'kiemtien', name: 'Vạn Kiếm Tiên Đế', short: 'Kiếm Đế', cost: 5, origin: 'tien', traits: ['kiemtu'], role: 'fighter', hp: 1000, atk: 76, def: 28, ap: 100, mr: 30, aspd: 1.0, range: 2.2, speed: 4.6, mana0: 45, mana: 100, crit: 0.15, critDmg: 1.7, dodge: 0.1, skill: 'vanKiem', dash: true, poise: 50, color: '#9fd8ff', model: { look: 'kiemtien', scale: 1.1 }, anim: 'ultimate' },
@@ -6840,6 +6844,9 @@ function navSteer(u, t, reach, dt, out) {
   const wp = g.center(nav.path[nav.k], _v3);
   let dx = wp.x - u.pos.x, dz = wp.z - u.pos.z, d = Math.hypot(dx, dz);
   if (d < NAV.arrive && nav.k < nav.path.length - 1) { nav.k++; g.center(nav.path[nav.k], wp); dx = wp.x - u.pos.x; dz = wp.z - u.pos.z; d = Math.hypot(dx, dz); }
+  // Tới ô đích mà vẫn đang MOVE (mục tiêu đã chạy khỏi tầm): coi như hết đường → bước sau chọn lại ô đích theo vị trí mới.
+  // (V1.5 FINAL – trước đây tướng lắc qua lại quanh tâm ô mỗi bước tới lần tính lại 0,6 s; tests/ai.js đo 1,3 lần đảo chiều / giây.)
+  if (d < NAV.arrive && nav.k >= nav.path.length - 1) { nav.k = nav.path.length; return null; }
   if (d < 1e-3) return null;
   return out.set(dx / d, 0, dz / d);
 }
@@ -7849,8 +7856,9 @@ const SKILLS = {
     desc: 'Phóng 2 hỏa phượng vào 2 cụm địch khác nhau, mỗi con nổ gây 260% công trong bán kính 3 m và thiêu đốt mạnh.' }),
 
   /* -------- HỘ THỂ CHÂN KHÍ: khiên Fresnel cho đồng đội yếu nhất -------- */
-  hoThe: shieldSkill({ name: 'Hộ Thể Chân Khí', count: 3, pct: 0.15,   // V1.5 FINAL: 0,2 → 0,15 (mô phỏng 1200 trận: thắng 72,4%, KTC 68,5–76,0%)
-    desc: 'Tạo khiên bằng 15% máu tối đa của bản thân (× sức mạnh phép thuật) cho 3 đồng minh đang yếu nhất (luôn gồm bản thân), giữ 6 giây.' }),
+  // V1.5 FINAL (mô phỏng 1200 trận, seed 2024): 3 mục tiêu × 20% → thắng 72,4% (KTC 68,5–76,0%); × 15% → 70,4% (66,4–74,1%); → 2 mục tiêu × 15%
+  hoThe: shieldSkill({ name: 'Hộ Thể Chân Khí', count: 2, pct: 0.15,
+    desc: 'Tạo khiên bằng 15% máu tối đa của bản thân (× sức mạnh phép thuật) cho bản thân và 1 đồng minh đang yếu nhất, giữ 6 giây.' }),
   kimCuong: shieldSkill({ name: 'Kim Cương Bất Hoại', count: 5, pct: 0.4,
     desc: 'Tạo khiên bằng 40% máu tối đa của bản thân cho 5 đồng minh đang yếu nhất (luôn gồm bản thân), giữ 6 giây.' }),
 
@@ -8392,8 +8400,8 @@ const SKILL_SPECS = {
     effects: [{ kind: 'damage', mult: 0.7, pen: 0.2 }],
     desc: 'Chém liên hoàn 4 nhát vào mục tiêu (đổi sang kẻ gần nhất nếu mục tiêu ngã): 3 nhát 70% công, nhát cuối tăng cường 112% công; bỏ qua 20% giáp.' },
   hanBang: { name: 'Hàn Băng Tiễn', type: 'projectile', count: 1, radius: 2.2, speed: 16, size: 0.6, target: 'densest', color: 'ice', timing: { windup: 0.35, impact: 0.45, end: 0.9 },
-    effects: [{ kind: 'damage', mult: 2.1 }, { kind: 'slow', amount: 0.4, dur: 3 }],
-    desc: 'Phóng băng tiễn vào vùng địch đông nhất: 210% công (phép) trong bán kính 2,2 m, làm chậm 40% trong 3 giây.' },
+    effects: [{ kind: 'damage', mult: 2.4 }, { kind: 'slow', amount: 0.4, dur: 3 }],   // V1.5 FINAL: 2,1 → 2,4 (thí nghiệm thay thế: ngang tướng 1 vàng)
+    desc: 'Phóng băng tiễn vào vùng địch đông nhất: 240% công (phép) trong bán kính 2,2 m, làm chậm 40% trong 3 giây.' },
   huyetPhe: { name: 'Huyết Phệ', type: 'strike', target: 'nearest', color: 'blood', anim: 'Attack03', timing: { windup: 0.25, impact: 0.35, end: 0.75 },
     effects: [{ kind: 'damage', mult: 2.2, lifesteal: 0.7 }],
     desc: 'Huyết ảnh cắn xé mục tiêu: 220% công (vật lý), hồi máu bằng 70% sát thương THỰC gây ra (sau giáp, lá chắn).' },
@@ -8422,9 +8430,10 @@ const SKILL_SPECS = {
   // ---- Bậc 4
   batDiet: { name: 'Bất Diệt Kim Thân', type: 'area', center: 'self', radius: 3.2, target: 'nearest', ready: 'hurtOrNear', color: 'earth', anim: 'HeavyAttack', timing: { windup: 0.3, impact: 0.42, end: 0.85 },
     effects: [{ kind: 'damage', mult: 1.2, knock: 2 }],
-    // V1.5 FINAL: hồi theo thời gian 12% → 6%, giảm sát thương nhận 30% → 20% (mô phỏng 1200 trận: thắng 74,0%, KTC 69,4–78,2%)
-    ally: [{ kind: 'heal', pct: 0.1 }, { kind: 'hot', pct: 0.06, dur: 3 }, { kind: 'buff', stat: 'dmgTaken', mul: 0.8, dur: 4, label: '−20% sát thương nhận' }],
-    desc: 'Chấn 120% công và hất lùi địch trong 3,2 m; hồi ngay 10% máu tối đa, thêm 6% trong 3 giây và giảm 20% sát thương nhận trong 4 giây. Nội tại: hồi 0,6% máu mỗi giây.' },
+    // V1.5 FINAL (mô phỏng 1200 trận, seed 2024): gốc → thắng 74,0% (KTC 69,4–78,2%); hồi theo thời gian 12→6%, giảm sát thương nhận 30→20% → 69,0% (64,1–73,4%);
+    // tiếp: hồi ngay 10 → 8%, nội tại 0,6 → 0,4% / giây (champions.js)
+    ally: [{ kind: 'heal', pct: 0.08 }, { kind: 'hot', pct: 0.06, dur: 3 }, { kind: 'buff', stat: 'dmgTaken', mul: 0.8, dur: 4, label: '−20% sát thương nhận' }],
+    desc: 'Chấn 120% công và hất lùi địch trong 3,2 m; hồi ngay 8% máu tối đa, thêm 6% trong 3 giây và giảm 20% sát thương nhận trong 4 giây. Nội tại: hồi 0,4% máu mỗi giây.' },
   uMinhPhe: { name: 'U Minh Phệ Hồn', type: 'volley', count: 4, gap: 0.1, speed: 12, size: 0.55, target: 'weakest', color: 'nether', timing: { windup: 0.35, impact: 0.5, end: 1.0 },
     effects: [{ kind: 'damage', mult: 1.4, lifesteal: 0.35 }],
     desc: 'Phóng 4 u hồn hút sinh lực vào các kẻ địch yếu nhất: mỗi hồn 140% công (phép), hồi cho bản thân 35% sát thương thực gây ra.' },
@@ -9502,6 +9511,7 @@ function onTap(x, y) {
 }
 window.addEventListener('keydown', e => {
   if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT')) return;
+  if (e.ctrlKey || e.metaKey || e.altKey) return;   // tổ hợp phím (Ctrl+Shift+D = bảng Debug, Ctrl+R…) không được kích hoạt phím tắt game
   if (e.code === 'Space') { e.preventDefault(); if (game.over) newGame(); else if (battle.phase === 'prep') startBattle(); else if (battle.phase === 'end') nextRound(); }
   if (battle.phase === 'prep' && (e.key === 'd' || e.key === 'D')) reroll();
   if (battle.phase === 'prep' && (e.key === 'f' || e.key === 'F')) buyXP();
@@ -10401,6 +10411,30 @@ const BalanceSimulator = {
     if (draws / n > T.drawRate) flags.push({ kind: 'hoà nhiều', rate: draws / n });
     return { meta: { n, seed: opts.seed || 2024, thresholds: T, ms: Math.round(performance.now() - t0), draws, avgTime: +(totalTime / n).toFixed(2), maxTime: +maxTime.toFixed(2) },
       champions, roles: fin(role), costs: fin(cost), stars: fin(star), traits: fin(trait), flags, anomalies, fights };
+  },
+  /** Thí nghiệm THAY THẾ (đối chứng): cùng 4 tướng ngẫu nhiên + 1 ô cố định (tuyến đầu 3,3 hoặc tuyến sau 3,1) lần lượt là từng tướng trong keys,
+   *  cùng đối thủ, cùng seed → chênh lệch tỉ lệ thắng = giá trị biên của tướng ở vai đó. Loại bỏ nhiễu "đội có tuyến đầu thì thắng" của tỉ lệ khi có mặt.
+   *  opts: { slot: 'front' | 'back', keys, n (số cặp trận), seed }. */
+  substitution(opts = {}) {
+    const front = opts.slot !== 'back', keys = opts.keys, n = opts.n || 160, cell = front ? [3, 3] : [3, 1];
+    let s = (opts.seed || 777) >>> 0; const rnd = () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; };
+    const snap = snapshotGame(), sb0 = !!battle.sandbox; battle.sandbox = true;
+    const res = Object.fromEntries(keys.map(k => [k, { w: 0, n: 0, dealt: 0, taken: 0, survival: 0 }])), t0 = performance.now();
+    for (let i = 0; i < n; i++) {
+      const level = 5 + Math.floor(rnd() * 3), budget = level * 2.4;
+      // đội ta yếu hơn một bậc ngân sách để tỉ lệ thắng không chạm trần / sàn; tuyến đầu: bỏ đỡ đòn khác (ô thử là đỡ đòn duy nhất)
+      const A = this.makeTeam(rnd, level - 1, budget - 2, false).units.filter(u => !(u[2] === cell[0] && u[3] === cell[1]) && (!front || UNIT_DEFS[u[0]].role !== 'tank'));
+      const B = this.makeTeam(rnd, level, budget, true).units;
+      for (const k of keys) {
+        const r = CombatTestRunner.run({ allies: A.concat([[k, 1, cell[0], cell[1]]]), enemies: B, seed: (opts.seed || 777) * 31 + i, keepState: true });
+        const a = res[k], u = r.allies.find(x => x.key === k);
+        a.n++; a.w += r.result === 'win' ? 1 : r.result === 'draw' ? 0.5 : 0; a.dealt += u.dealt; a.taken += u.taken; a.survival += u.survival;
+        nextRound();
+      }
+    }
+    restoreGame(snap, sb0);
+    return { slot: front ? 'front' : 'back', n, seed: opts.seed || 777, ms: Math.round(performance.now() - t0),
+      results: Object.fromEntries(Object.entries(res).map(([k, a]) => [k, { cost: UNIT_DEFS[k].cost, role: UNIT_DEFS[k].role, winRate: +(a.w / a.n).toFixed(3), dealt: Math.round(a.dealt / a.n), taken: Math.round(a.taken / a.n), survival: +(a.survival / a.n).toFixed(1) }])) };
   },
   /** CSV: một dòng mỗi tướng (tổng hợp) và một dòng mỗi trận. */
   toCSV(rep) {

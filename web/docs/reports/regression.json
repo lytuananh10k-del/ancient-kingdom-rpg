@@ -1,0 +1,123 @@
+{
+ "date": "2026-10-22T20:28:18.543Z",
+ "note": "Chromium headless + SwiftShader",
+ "suites": [
+  {
+   "name": "playtest20",
+   "exit": 0,
+   "secs": 233,
+   "pass": 1,
+   "fail": 0,
+   "total": null,
+   "failed": []
+  },
+  {
+   "name": "portrait",
+   "exit": 0,
+   "secs": 143,
+   "pass": 1,
+   "fail": 0,
+   "total": null,
+   "failed": []
+  },
+  {
+   "name": "combat",
+   "exit": 0,
+   "secs": 16,
+   "pass": 1,
+   "fail": 0,
+   "total": null,
+   "failed": []
+  },
+  {
+   "name": "economy",
+   "exit": 0,
+   "secs": 77,
+   "pass": 16,
+   "fail": 0,
+   "total": null,
+   "failed": []
+  },
+  {
+   "name": "champions",
+   "exit": 0,
+   "secs": 61,
+   "pass": 119,
+   "fail": 0,
+   "total": null,
+   "failed": []
+  },
+  {
+   "name": "traits",
+   "exit": 0,
+   "secs": 42,
+   "pass": 41,
+   "fail": 0,
+   "total": null,
+   "failed": []
+  },
+  {
+   "name": "combat3",
+   "exit": 0,
+   "secs": 90,
+   "pass": 32,
+   "fail": 0,
+   "total": null,
+   "failed": []
+  },
+  {
+   "name": "audit",
+   "exit": 0,
+   "secs": 25,
+   "pass": 24,
+   "fail": 0,
+   "total": null,
+   "failed": []
+  },
+  {
+   "name": "save",
+   "exit": 0,
+   "secs": 32,
+   "pass": 17,
+   "fail": 0,
+   "total": "17/17 PASS",
+   "failed": []
+  },
+  {
+   "name": "memory",
+   "exit": 0,
+   "secs": 34,
+   "pass": 12,
+   "fail": 0,
+   "total": "12/12 PASS",
+   "failed": []
+  },
+  {
+   "name": "ai",
+   "exit": 0,
+   "secs": 14,
+   "pass": 16,
+   "fail": 0,
+   "total": "16/16 PASS",
+   "failed": []
+  },
+  {
+   "name": "dist",
+   "exit": 0,
+   "secs": 7,
+   "pass": 1,
+   "fail": 0,
+   "total": null,
+   "failed": []
+  },
+  {
+   "name": "balance",
+   "exit": 0,
+   "secs": 56,
+   "pass": 0,
+   "fail": 0,
+   "total": null,
+   "failed": []
+  }
+ ]
+}

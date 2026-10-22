@@ -97,6 +97,30 @@ const BalanceSimulator = {
     return { meta: { n, seed: opts.seed || 2024, thresholds: T, ms: Math.round(performance.now() - t0), draws, avgTime: +(totalTime / n).toFixed(2), maxTime: +maxTime.toFixed(2) },
       champions, roles: fin(role), costs: fin(cost), stars: fin(star), traits: fin(trait), flags, anomalies, fights };
   },
+  /** Thí nghiệm THAY THẾ (đối chứng): cùng 4 tướng ngẫu nhiên + 1 ô cố định (tuyến đầu 3,3 hoặc tuyến sau 3,1) lần lượt là từng tướng trong keys,
+   *  cùng đối thủ, cùng seed → chênh lệch tỉ lệ thắng = giá trị biên của tướng ở vai đó. Loại bỏ nhiễu "đội có tuyến đầu thì thắng" của tỉ lệ khi có mặt.
+   *  opts: { slot: 'front' | 'back', keys, n (số cặp trận), seed }. */
+  substitution(opts = {}) {
+    const front = opts.slot !== 'back', keys = opts.keys, n = opts.n || 160, cell = front ? [3, 3] : [3, 1];
+    let s = (opts.seed || 777) >>> 0; const rnd = () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; };
+    const snap = snapshotGame(), sb0 = !!battle.sandbox; battle.sandbox = true;
+    const res = Object.fromEntries(keys.map(k => [k, { w: 0, n: 0, dealt: 0, taken: 0, survival: 0 }])), t0 = performance.now();
+    for (let i = 0; i < n; i++) {
+      const level = 5 + Math.floor(rnd() * 3), budget = level * 2.4;
+      // đội ta yếu hơn một bậc ngân sách để tỉ lệ thắng không chạm trần / sàn; tuyến đầu: bỏ đỡ đòn khác (ô thử là đỡ đòn duy nhất)
+      const A = this.makeTeam(rnd, level - 1, budget - 2, false).units.filter(u => !(u[2] === cell[0] && u[3] === cell[1]) && (!front || UNIT_DEFS[u[0]].role !== 'tank'));
+      const B = this.makeTeam(rnd, level, budget, true).units;
+      for (const k of keys) {
+        const r = CombatTestRunner.run({ allies: A.concat([[k, 1, cell[0], cell[1]]]), enemies: B, seed: (opts.seed || 777) * 31 + i, keepState: true });
+        const a = res[k], u = r.allies.find(x => x.key === k);
+        a.n++; a.w += r.result === 'win' ? 1 : r.result === 'draw' ? 0.5 : 0; a.dealt += u.dealt; a.taken += u.taken; a.survival += u.survival;
+        nextRound();
+      }
+    }
+    restoreGame(snap, sb0);
+    return { slot: front ? 'front' : 'back', n, seed: opts.seed || 777, ms: Math.round(performance.now() - t0),
+      results: Object.fromEntries(Object.entries(res).map(([k, a]) => [k, { cost: UNIT_DEFS[k].cost, role: UNIT_DEFS[k].role, winRate: +(a.w / a.n).toFixed(3), dealt: Math.round(a.dealt / a.n), taken: Math.round(a.taken / a.n), survival: +(a.survival / a.n).toFixed(1) }])) };
+  },
   /** CSV: một dòng mỗi tướng (tổng hợp) và một dòng mỗi trận. */
   toCSV(rep) {
     const head = ['id', 'n', 'winRate', 'ci_lo', 'ci_hi', 'dealt', 'physical', 'magic', 'true', 'dps', 'taken', 'ehp', 'healed', 'shielded', 'cc', 'casts', 'survival'];

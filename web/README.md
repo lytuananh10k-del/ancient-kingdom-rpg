@@ -40,6 +40,9 @@ và phải nạp đúng thứ tự số. Thêm file mới: đặt số thứ t�
 | `js/18-glb-import.js` | Nhập GLB cho từng tướng |
 | `js/19-main.js` | Vòng lặp chính, khởi động, móc kiểm thử `window.__vkkt` |
 | `js/combat/test-runner.js` | **CombatTestRunner** – mô phỏng trận không render, seed cố định, báo cáo & bất thường |
+| `js/combat/balance-sim.js` | **BalanceSimulator** – hàng nghìn trận có seed, thống kê theo tướng / vai trò / bậc / sao / tộc-hệ (KTC Wilson), thí nghiệm thay thế, ngưỡng cảnh báo chỉnh được, xuất JSON / CSV |
+| `js/20-debug.js` | **Bảng Debug** cho nhà phát triển (ẩn mặc định: `?debug=1`, Ctrl+Shift+D, chạm 5 lần ô FPS) – FPS, draw call, tài nguyên, trận thử / đội hình thử trong sandbox, mô phỏng, nhật ký kỹ năng, xuất báo cáo |
+| `tools/build-single.js` | Đóng gói **1 tệp HTML chạy không cần mạng** → `dist/Vạn Kiếm Kỳ Trận V1.5 FINAL.html` (`npm run build`) |
 
 ## Kiểm thử tự động
 ```bash
@@ -299,3 +302,15 @@ Chi tiết: [docs/COMBAT.md](docs/COMBAT.md) (công thức, trạng thái, AI, �
 **Lỗi đã sửa trong tuần 3**: vùng lửa / phi kiếm triệu hồi tính sát thương theo FPS; điểm phóng đạn phụ thuộc tư thế animation; DoT của kỹ năng dữ liệu bị nhân sao 2 lần;
 Thiết Vệ không tung chiêu khi đứng ở rìa tầm đánh; bộ đếm "chờ 4 s" của kỹ năng có điều kiện chỉ chạy trong trạng thái di chuyển; Huyền Giáp tạo ~13.000 khiên / trận;
 mọi đòn nặng đều hất lùi (đấu sĩ mất 10–15% thời gian); trận "bế tắc" giữa các đỡ đòn hồi máu ★3 (20% trận ngẫu nhiên hoà → còn ~2–5%).
+
+## V1.5 FINAL – Tuần 4: kiểm thử toàn diện · cân bằng · hiệu năng · hoàn thiện
+Báo cáo tổng hợp: **[docs/V1.5-FINAL.md](docs/V1.5-FINAL.md)** (tình trạng hệ thống, 24 tướng, cân bằng, 8 tộc/hệ, AI & kỹ năng, hiệu năng, bộ nhớ, lưu, hồi quy, lỗi đã sửa / còn lại, sẵn sàng trang bị) ·
+[docs/QA-CHAMPIONS.md](docs/QA-CHAMPIONS.md) (15 kiểm tra × 24 tướng) · [docs/BALANCE-SIM.md](docs/BALANCE-SIM.md) (1200 trận + thí nghiệm thay thế) ·
+[docs/PERF-DATA.md](docs/PERF-DATA.md) (7 kịch bản trước / sau) · [docs/RUN-GUIDE.md](docs/RUN-GUIDE.md) (Android / Windows, kiểm thử thủ công trên thiết bị thật).
+
+- **Hiệu năng**: mỗi tướng thủ tục gộp thành 1 SkinnedMesh thân + 1 viền, xương là các khớp sẵn có (animation không đổi) → draw call −84…−93% (đo SwiftShader; FPS trên GPU thật chưa đo). Bỏ cấp phát mỗi khung ở tóc / dải lụa / vệt vũ khí. `PerfStats` đo thời gian cập nhật / render, FPS TB, 1% thấp.
+- **Ổn định**: sửa đổi mục tiêu chậm khi mục tiêu chết giữa đòn, lỗi StatusEffectManager khi chết giữa vòng cập nhật, tướng lắc quanh ô đích, phím tắt bắt nhầm tổ hợp Ctrl.
+- **Android / Windows**: tự tạm dừng khi rời ứng dụng; xử lý mất / khôi phục ngữ cảnh WebGL; DPR giới hạn theo mức đồ hoạ.
+- **Lưu**: phiên bản v2 + chuyển đổi từ v1, làm sạch trường hỏng, bản hỏng / của bản mới hơn được chép sang `vkkt_save_backup` (không bao giờ xoá), công cụ thử không ghi bản lưu thật.
+- **Cân bằng có bằng chứng**: Huyền Giáp, Bất Diệt (giảm khiên / hồi), Linh Cung (giảm), Băng Linh (tăng) – lý do và số liệu ở V1.5-FINAL.md §3.
+- **Kiểm thử mới**: `npm run test:audit` · `simulate` · `test:ai` · `test:memory` · `test:save` · `perf` · `test:dist`; tổng hợp `node tools/collect-regression.js <log>` → `node tools/final-report.js`.

@@ -321,7 +321,7 @@ async function main() {
       while (K.battle.phase === 'fight' && t < 60) {
         K.simulate(0.1); t += 0.1;
         // giết mục tiêu của mọi tướng đang thi triển (tối đa 4 lần)
-        if (killed < 4) for (const u of K.boardAllies()) if (u.fsm.name === 'cast' && u.target && u.target.alive && u.target.team === 'enemy') { u.target.hp = 0; u.target.fsm.set('dead'); onUnitDeath(u.target); killed++; break; }
+        if (killed < 4) for (const u of K.boardAllies()) if (u.fsm.name === 'cast' && u.target && u.target.alive && u.target.team === 'enemy') { const tg = u.target; tg.hp = 0; tg.fsm.set('dead'); onUnitDeath(tg); killed++; break; }   // giữ tham chiếu: chết thì mọi tướng bỏ mục tiêu này (u.target = null)
         for (const u of K.units) if (Number.isNaN(u.hp) || u.hp > u.maxHp + 1e-6 || u.mana > u.maxMana + 1e-6) errs.push(u.key + ' chỉ số lỗi');
         if (errs.length) break;
       }
