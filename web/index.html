@@ -41,7 +41,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .round-card .count { display: flex; gap: 10px; margin-top: 4px; font-size: 0.82rem; font-variant-numeric: tabular-nums; }
 .count .ally { color: var(--jade); } .count .enemy { color: var(--cinnabar); }
 .top-actions > * { pointer-events: auto; }   /* chỉ các nút nhận chạm; khoảng trống giữa chúng để lọt xuống bàn cờ */
-.top-actions { pointer-events: none; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.top-actions { position: relative; pointer-events: none; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
 .chip { min-height: 36px; box-sizing: border-box; background: var(--panel); border: 1px solid var(--panel-line); border-radius: 999px; padding: 7px 12px; font-size: 0.8rem; font-weight: 600; }
 .chip[aria-pressed="true"] { border-color: var(--gold); color: var(--gold); }
 #fps { font-variant-numeric: tabular-nums; min-width: 4.6em; text-align: center; color: var(--muted); }
@@ -175,22 +175,34 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .sbtn { min-height: 40px; flex: 1 1 auto; background: rgba(255,255,255,0.06); border: 1px solid var(--panel-line); border-radius: 8px; padding: 8px 10px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; }
 .sbtn:disabled { opacity: 0.45; cursor: default; }
 .sbtn.sell { border-color: rgba(226,85,63,0.6); color: #ffb3a6; }
-.main-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.sbtn.go { flex: 1.6 1 auto; background: linear-gradient(180deg, #f1d58e, #c99a3c); color: #20160a; border-color: transparent; font-weight: 700; box-shadow: 0 4px 14px rgba(233, 196, 106, 0.25); }
+#next-dock { pointer-events: auto; }
+#next-dock .sbtn.go { min-width: 220px; min-height: 46px; font-size: 1rem; }
+/* ---------- Menu ☰ (góc trên phải) ---------- */
+#btn-menu[aria-expanded="true"] { border-color: var(--gold); color: var(--gold); }
+#game-menu { position: absolute; right: 0; top: calc(100% + 6px); z-index: 8; pointer-events: auto;
+  display: flex; flex-direction: column; gap: 2px; min-width: 210px; max-width: min(280px, calc(100vw - 24px)); padding: 6px; border-radius: 12px;
+  background: rgba(14, 20, 24, 0.97); border: 1px solid var(--panel-line); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  max-height: calc(100vh - 70px - env(safe-area-inset-top, 0px)); overflow-y: auto; overscroll-behavior: contain; }
+.hud-top.menu-open { z-index: 9; }   /* menu nổi trên cửa hàng / bảng thông tin */
+#game-menu[hidden] { display: none; }
+.mi { display: flex; align-items: center; gap: 10px; min-height: 42px; padding: 8px 10px; border-radius: 8px; text-align: left; font-size: 0.88rem; font-weight: 600; }
+.mi i { font-style: normal; width: 1.4em; text-align: center; opacity: 0.85; }
+.mi:hover:not(:disabled), .mi:focus-visible { background: rgba(255,255,255,0.07); }
+.mi[aria-pressed="true"] { color: var(--gold); }
+.mi:disabled { opacity: 0.4; cursor: default; }
+.menu-hint { margin: 4px 6px 2px; padding-top: 6px; border-top: 1px solid var(--panel-line); font-size: 0.72rem; color: var(--muted); line-height: 1.35; }
 @media (max-height: 340px) and (orientation: landscape) {
   .card { min-height: 0; padding: 4px 5px; } .card .tr { display: none; }
   .card .ft { margin-top: 2px; }
   .sbtn { padding: 5px 8px; min-height: 36px; }
-  .main-actions .cta { padding: 7px 12px !important; font-size: 0.82rem !important; }
 }
 @media (max-height: 520px) and (orientation: landscape) {
-  .hud-bottom { justify-content: space-between; align-items: flex-end; flex-wrap: nowrap; }
+  .mi { min-height: 36px; padding: 6px 10px; } .menu-hint { display: none; }
   #prep-panel { width: min(520px, 62vw); padding: 6px; gap: 4px; }
   .card { height: 52px; }
-  .main-actions { flex-direction: column; gap: 6px; margin-left: auto; } .main-actions .cta { padding: 9px 14px; font-size: 0.88rem; }
-  .hint { display: none; }
   .xp-label, #traits .fx { display: none; }
 }
-.hint { pointer-events: none; width: 100%; text-align: center; font-size: 0.78rem; color: var(--muted); text-shadow: 0 1px 2px #000; }
 
 /* ---------- Banner chiêu thức ---------- */
 #skill-banner {
@@ -278,9 +290,15 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
   </div>
   <div class="top-actions">
     <span class="chip" id="fps">— fps</span>
-    <button class="chip" id="btn-speed" aria-pressed="false">Tốc độ ×1</button>
-    <button class="chip" id="btn-pause" aria-pressed="false">Tạm dừng</button>
-    <button class="chip" id="btn-settings" aria-expanded="false" aria-controls="settings">Cài đặt</button>
+    <button class="chip" id="btn-menu" aria-expanded="false" aria-controls="game-menu" aria-label="Mở menu">☰ Menu</button>
+    <nav id="game-menu" hidden aria-label="Menu">
+      <button class="mi" id="btn-pause" aria-pressed="false"><i>⏸</i><span>Tạm dừng</span></button>
+      <button class="mi" id="btn-speed" aria-pressed="false"><i>⏩</i><span>Tốc độ ×1</span></button>
+      <button class="mi" id="btn-ult"><i>⚔</i><span>Thi triển Vạn Kiếm</span></button>
+      <button class="mi" id="btn-cam"><i>◎</i><span>Góc nhìn mặc định</span></button>
+      <button class="mi" id="btn-settings" aria-expanded="false" aria-controls="settings"><i>⚙</i><span>Cài đặt</span></button>
+      <p class="menu-hint" id="hint"></p>
+    </nav>
   </div>
 </div>
 
@@ -310,14 +328,11 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
       <button class="sbtn" id="btn-xp">Mua kinh nghiệm <span class="cost">4</span></button>
       <button class="sbtn sell" id="btn-sell" hidden>Bán</button>
       <button class="sbtn" id="btn-tobench" hidden>Về hàng chờ</button>
+      <button class="sbtn go" id="btn-start">⚔ Giao chiến</button>
     </div>
   </div>
-  <div class="main-actions">
-    <button class="cta" id="btn-start">Bắt đầu giao chiến</button>
-    <button class="cta alt" id="btn-ult">Thi triển Vạn Kiếm</button>
-    <button class="cta alt" id="btn-cam">Góc nhìn</button>
-  </div>
-  <div class="hint" id="hint">Kéo để xoay bàn cờ · Chụm hai ngón / lăn chuột để phóng to</div>
+  <!-- Ngoài lúc chuẩn bị, nút chính (Vòng tiếp theo / Ván mới) được chuyển xuống đây; lúc giao chiến thì ẩn để màn hình thoáng -->
+  <div id="next-dock" hidden></div>
 </div>
 
 <section class="sheet" id="settings" hidden aria-label="Cài đặt">

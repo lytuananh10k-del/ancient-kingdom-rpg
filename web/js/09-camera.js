@@ -64,7 +64,7 @@ function fitPrepCamera() {
   const rectTop = el => (el && !el.hidden && el.offsetParent !== null ? el.getBoundingClientRect().top : H);
   const ta = (document.querySelector('.top-actions').getBoundingClientRect().bottom || 0) + 6;
   const lc = document.querySelector('.left-col').getBoundingClientRect();
-  const bottom = Math.min(rectTop(document.getElementById('prep-panel')), rectTop(document.querySelector('.main-actions'))) - 6;
+  const bottom = Math.min(rectTop(document.getElementById('prep-panel')), rectTop(document.getElementById('next-dock'))) - 6;
   prepFit.panelTop = rectTop(document.getElementById('prep-panel'));
   const cam = new THREE.PerspectiveCamera(camera.fov, W / H, 0.1, 400), p = combatCam.defaults.pitch, v = new V3();
   // Khung tối thiểu: hàng chờ + nửa bàn phe ta. Thêm các hàng địch đứng nếu hình không nhỏ đi quá 20%.

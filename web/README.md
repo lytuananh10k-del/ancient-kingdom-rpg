@@ -161,6 +161,8 @@ Nhân vật và animation là placeholder thủ tục, không phải animation d
 ## Cài đặt liên quan
 - **Số phi kiếm** (Vạn Kiếm Quy Tông): theo mức đồ hoạ (14 / 24 / 36 / 56) hoặc tự chọn 8–96.
 - **Âm thanh**: bật/tắt (lưu trên máy).
+- **Menu ☰** (góc trên phải): Tạm dừng / Tiếp tục, Tốc độ ×1 / ×2 / ×½, Thi triển Vạn Kiếm (khi Vạn Kiếm Tiên Đế đang đánh), Góc nhìn mặc định, Cài đặt, kèm hướng dẫn thao tác. Khi đang tạm dừng nút hiện "⏸ Đang dừng". Đóng bằng chạm ra ngoài hoặc Esc. Phím tắt vẫn dùng được: Space (giao chiến / vòng tiếp), P (dừng), U (Vạn Kiếm), D (làm mới), F (mua KN).
+- Nút **⚔ Giao chiến** nằm trong hàng nút cửa hàng; hết trận thì nút "Vòng tiếp theo" / "Ván mới" nổi ở đáy màn hình; lúc đang đánh không còn cụm nút nào ở đáy.
 - Bảng Cài đặt đóng bằng nút ✕, phím Esc hoặc chạm ra bàn cờ.
 - Bảng thông tin bên trái (vòng, máu, linh thạch, tộc/hệ) có nút thu gọn / mở rộng; khi thu gọn chỉ còn một dòng ♥ máu · ◆ linh thạch · cấp. Trạng thái được nhớ.
 - **IK chân**: bật/tắt để so sánh. Hàm `groundHeight(x, z)` là điểm nối khi có địa hình gồ ghề.

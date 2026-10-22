@@ -370,7 +370,7 @@ async function main() {
       const after = await state();
       const pick = o => JSON.stringify({ hp: o.hp, gold: o.gold, level: o.level, xp: o.xp, round: o.round, bench: o.bench, board: o.board, shop: o.shop, streak: o.streak, items: o.items, rivals: o.rivals, unitItems: o.unitItems });
       check(pick(before) === pick(after), 'tải lại trang phải khôi phục đúng ván', { before: pick(before), after: pick(after) });
-      check(await page.textContent('#btn-start') === 'Bắt đầu giao chiến', 'nút sau khi tải lại');
+      check(await page.textContent('#btn-start') === '⚔ Giao chiến', 'nút sau khi tải lại');
       await waitCamera();
     }
 

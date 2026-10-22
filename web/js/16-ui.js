@@ -15,9 +15,13 @@ const ui = {
     $('ally-count').textContent = 'Đồng minh ' + a; $('enemy-count').textContent = 'Địch ' + e;
     const st = $('btn-start'), prep = battle.phase === 'prep' && !game.over;
     if (game.over && battle.phase !== 'fight') { $('phase-label').textContent = 'Kết thúc ván – trụ được ' + battle.round + ' vòng'; st.textContent = 'Ván mới'; st.disabled = false; }
-    else if (prep) { $('phase-label').textContent = 'Chuẩn bị – mua tu sĩ rồi kéo lên ô xanh'; st.textContent = 'Bắt đầu giao chiến'; st.disabled = false; }
+    else if (prep) { $('phase-label').textContent = 'Chuẩn bị – mua tu sĩ rồi kéo lên ô xanh'; st.textContent = '⚔ Giao chiến'; st.disabled = false; }
     else if (battle.phase === 'fight') { $('phase-label').textContent = battle.bench ? 'Đang kiểm tra hiệu năng…' : 'Giao chiến – các tu sĩ tự chiến đấu'; st.textContent = 'Đang giao chiến'; st.disabled = true; }
-    else { $('phase-label').textContent = game.lastSummary || (battle.result === 'win' ? 'Thắng' : 'Thua'); st.textContent = 'Vòng tiếp theo'; st.disabled = false; }
+    else { $('phase-label').textContent = game.lastSummary || (battle.result === 'win' ? 'Thắng' : 'Thua'); st.textContent = 'Vòng tiếp theo ▸'; st.disabled = false; }
+    // Nút chính: lúc chuẩn bị nằm trong hàng nút cửa hàng; hết trận / hết ván thì nổi giữa đáy màn hình; đang đánh thì ẩn.
+    const home = prep ? document.querySelector('.shop-actions') : $('next-dock');
+    if (st.parentElement !== home) home.appendChild(st);
+    $('next-dock').hidden = prep || battle.phase === 'fight';
     $('btn-ult').disabled = !(battle.phase === 'fight' && units.some(u => u.key === 'kiemtien' && u.team === 'ally' && u.alive));
     // Kinh tế
     $('hud-mini').innerHTML = `<b class="h">♥ ${game.hp}</b> · <b class="g">◆ ${game.gold}</b> · <b class="l">Cấp ${game.level}</b>`;
@@ -28,7 +32,7 @@ const ui = {
     $('xp-fill').style.transform = 'scaleX(' + (game.level >= MAX_LEVEL ? 1 : game.xp / XP_NEED[game.level]) + ')';
     $('xp-val').textContent = game.level >= MAX_LEVEL ? 'tối đa' : game.xp + '/' + XP_NEED[game.level];
     $('prep-panel').hidden = !prep;
-    $('hint').textContent = prep ? 'Kéo tu sĩ giữa bàn cờ và hàng chờ · kéo vào cửa hàng để bán' : 'Kéo để xoay bàn cờ · Chụm hai ngón / lăn chuột để phóng to';
+    $('hint').textContent = prep ? 'Kéo tu sĩ giữa bàn cờ và hàng chờ, kéo vào cửa hàng để bán. Kéo nền để xoay, chụm hai ngón để phóng to.' : 'Kéo để xoay bàn cờ · chụm hai ngón / lăn chuột để phóng to.';
     if (prep) {
       renderShop(); renderSelActions(); renderItems(); renderOdds();
       // Mép trên cửa hàng dịch chuyển (túi trang bị hiện / ẩn…): căn lại khoảng cách camera (không xoay lại góc nhìn) để hàng chờ không bị che.
@@ -68,7 +72,7 @@ function placeUnitInfo(u) {
   const top = W < H || H < 520 ? 8 : document.querySelector('.top-actions').getBoundingClientRect().bottom + 6;
   let sx = -1, sy = -1;
   if (u) { const v = _v1.set(u.pos.x, 1, u.pos.z).project(camera); sx = (v.x * 0.5 + 0.5) * W; sy = (-v.y * 0.5 + 0.5) * H; }
-  const obstacles = [$('prep-panel'), document.querySelector('.main-actions')]
+  const obstacles = [$('prep-panel'), $('next-dock')]
     .filter(e => e && !e.hidden && e.offsetParent !== null).map(e => e.getBoundingClientRect());
   /** Mép dưới dùng được nếu bảng chiếm dải ngang [x0, x1]. */
   const floor = (x0, x1) => obstacles.reduce((lim, r) => (r.right > x0 && r.left < x1 ? Math.min(lim, r.top - 8) : lim), H - 10);
@@ -224,7 +228,17 @@ function forceUltimate() {
   if (k.fsm.name === 'cast') { ui.toast('Kiếm Đế đang thi triển'); return; }
   k.mana = k.maxMana; if (k.fsm.name !== 'dead' && k.fsm.name !== 'stun') k.fsm.set('move');
 }
-function togglePause() { battle.paused = !battle.paused; $('btn-pause').setAttribute('aria-pressed', battle.paused); $('btn-pause').textContent = battle.paused ? 'Tiếp tục' : 'Tạm dừng'; timelines.forEach(t => (battle.paused ? t.pause() : t.resume())); }
+function togglePause() {
+  battle.paused = !battle.paused; timelines.forEach(t => (battle.paused ? t.pause() : t.resume()));
+  const b = $('btn-pause'); b.setAttribute('aria-pressed', battle.paused); b.querySelector('i').textContent = battle.paused ? '▶' : '⏸'; b.querySelector('span').textContent = battle.paused ? 'Tiếp tục' : 'Tạm dừng';
+  $('btn-menu').textContent = battle.paused ? '⏸ Đang dừng' : '☰ Menu';   // nhìn là biết game đang dừng dù menu đã đóng
+}
+/* ---------- Menu ☰: tạm dừng, tốc độ, Vạn Kiếm, góc nhìn, cài đặt ---------- */
+function setMenu(open) { $('game-menu').hidden = !open; $('btn-menu').setAttribute('aria-expanded', String(open)); document.querySelector('.hud-top').classList.toggle('menu-open', open); }
+$('btn-menu').addEventListener('click', e => { e.stopPropagation(); closeSettings(); setMenu($('game-menu').hidden); });
+// Chọn một mục thì đóng menu (trừ Tốc độ – bấm nhiều lần để đổi); chạm ra ngoài cũng đóng.
+$('game-menu').addEventListener('click', e => { const b = e.target.closest('button'); if (b && b.id !== 'btn-speed') setMenu(false); });
+document.addEventListener('pointerdown', e => { if (!$('game-menu').hidden && !e.target.closest('#game-menu, #btn-menu')) setMenu(false); }, true);
 $('btn-start').addEventListener('click', () => { Sfx.init(); if (game.over) newGame(); else if (battle.phase === 'prep') startBattle(); else if (battle.phase === 'end') nextRound(); });
 $('btn-reroll').addEventListener('click', reroll);
 $('btn-xp').addEventListener('click', buyXP);
@@ -233,7 +247,7 @@ $('btn-tobench').addEventListener('click', () => { const s = game.sel; if (s && 
 $('btn-ult').addEventListener('click', forceUltimate);
 $('btn-cam').addEventListener('click', () => combatCam.reset());
 $('btn-pause').addEventListener('click', togglePause);
-$('btn-speed').addEventListener('click', () => { battle.speed = battle.speed === 1 ? 2 : battle.speed === 2 ? 0.5 : 1; $('btn-speed').textContent = 'Tốc độ ×' + (battle.speed === 0.5 ? '½' : battle.speed); $('btn-speed').setAttribute('aria-pressed', battle.speed !== 1); });
+$('btn-speed').addEventListener('click', () => { battle.speed = battle.speed === 1 ? 2 : battle.speed === 2 ? 0.5 : 1; $('btn-speed').querySelector('span').textContent = 'Tốc độ ×' + (battle.speed === 0.5 ? '½' : battle.speed); $('btn-speed').setAttribute('aria-pressed', battle.speed !== 1); });
 $('btn-settings').addEventListener('click', () => {
   const s = $('settings'); s.hidden = !s.hidden; $('btn-settings').setAttribute('aria-expanded', !s.hidden);
   if (!s.hidden) {   // đặt bảng ngay dưới hàng nút trên cùng (màn dọc hàng nút xuống 2 dòng) để nút Cài đặt không bị che
@@ -252,7 +266,7 @@ function setHudCollapsed(on) {
 $('btn-hud-toggle').addEventListener('click', () => setHudCollapsed(!$('left-col').classList.contains('collapsed')));
 setHudCollapsed(store.get('hudCollapsed', false));
 $('btn-close-settings').addEventListener('click', () => { closeSettings(); $('btn-settings').focus(); });
-window.addEventListener('keydown', e => { if (e.key === 'Escape') closeSettings(); });
+window.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSettings(); setMenu(false); } });
 $('opt-preptimer').checked = options.prepTimer; $('opt-preptimer').addEventListener('change', e => { options.prepTimer = e.target.checked; store.set('prepTimer', e.target.checked); ui.timer(); });
 $('opt-haptics').checked = options.haptics; $('opt-haptics').addEventListener('change', e => { options.haptics = e.target.checked; store.set('haptics', e.target.checked); if (e.target.checked) haptic(15); });
 $('opt-sound').checked = !Sfx.muted; $('opt-sound').addEventListener('change', e => { Sfx.muted = !e.target.checked; store.set('mute', Sfx.muted); });
