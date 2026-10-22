@@ -64,7 +64,7 @@ async function main() {
   };
   const press = sel => (TOUCH ? page.tap(sel) : page.click(sel));
   await page.goto(ORIGIN + '/');
-  await page.evaluate(() => localStorage.clear());
+  await page.evaluate(() => { localStorage.clear(); localStorage.setItem('vkkt_prepTimer', 'false'); });   // đồng hồ chuẩn bị kiểm thử riêng
   await page.reload();
   await boot(false);
 
@@ -75,7 +75,8 @@ async function main() {
       hp: g.hp, gold: g.gold, level: g.level, xp: g.xp, streak: g.streak, over: g.over, round: K.battle.round, phase: K.battle.phase,
       bench: g.bench.map(e => (e ? e.key + '*' + e.star : null)), shop: g.shop.slice(),
       board: K.boardAllies().map(u => u.key + '*' + u.star + '@' + u.homeTile.c + ',' + u.homeTile.r).sort(),
-      cap: K.boardCap()
+      cap: K.boardCap(), items: g.items.join(','), rivals: JSON.stringify(Object.entries(g.rivals).sort()),
+      unitItems: K.boardAllies().map(u => u.key + ':' + (u.items || []).join('+')).sort().join(' ') + ' | ' + g.bench.map(e => (e ? (e.items || []).join('+') : '')).join(',')
     };
   });
   /** Bất biến chung – gọi sau mỗi thao tác. */
@@ -97,6 +98,9 @@ async function main() {
       g.bench.forEach(e => { if (e && e.star < 3) groups[e.key + e.star] = (groups[e.key + e.star] || 0) + 1; });
       allies.forEach(u => { if (u.star < 3) groups[u.key + u.star] = (groups[u.key + u.star] || 0) + 1; });
       for (const k in groups) if (groups[k] >= 3) out.push('chưa gộp sao: ' + k + ' ×' + groups[k]);
+      // Bể tướng dùng chung: không tướng nào bị giữ / bày quá số bản trong bể.
+      for (const k in K.UNIT_DEFS) if (K.UNIT_DEFS[k].cost && K.poolLeft(k) < 0) out.push('bể tướng âm: ' + k + ' ' + K.poolLeft(k));
+      if (g.shop.some(k => k && !K.UNIT_DEFS[k].cost)) out.push('cửa hàng bày tướng không bán được');
       // Hàng chờ 3D khớp dữ liệu.
       for (let i = 0; i < K.BENCH_SIZE; i++) {
         const e = g.bench[i], u = K.benchUnits[i];
@@ -148,7 +152,7 @@ async function main() {
   const waitCamera = () => page.waitForTimeout(1300); // camera chuẩn bị damp về khung mới
   const onScreen = p => p && p.x > 4 && p.x < VW - 4 && p.y > 4 && p.y < VH - 4 - (TOUCH ? LIFT : 0);
   const value = s => s.bench.filter(Boolean).concat(s.board).reduce((a, x) => a + Math.pow(3, +x.split('*')[1][0] - 1), 0);
-  const stats = { autoFill: 0, infoChecks: 0, apiPlacements: 0, buys: 0, sells: 0, rerolls: 0, xpBuys: 0, merges: 0, mouseDrags: 0, swaps: 0, wins: 0, losses: 0, reloads: 0, gameOvers: 0 };
+  const stats = { monsterRounds: 0, itemsEquipped: 0, autoFill: 0, infoChecks: 0, apiPlacements: 0, buys: 0, sells: 0, rerolls: 0, xpBuys: 0, merges: 0, mouseDrags: 0, swaps: 0, wins: 0, losses: 0, reloads: 0, gameOvers: 0 };
   let baseChildren = null;
 
   for (let played = 1; played <= ROUNDS; played++) {
@@ -285,7 +289,7 @@ async function main() {
         if (onScreen(from)) {
           await mouseDrag(from, { x: box.x + box.width / 2, y: box.y + box.height / 2 }); stats.mouseDrags++;
           const s2 = await state(); stats.sells++;
-          check(s2.gold === s.gold + price && !s2.bench[bi], `kéo vào cửa hàng để bán ${key}★${star} +${price}`, [s.gold, s2.gold]);
+          if (!check(s2.gold === s.gold + price && !s2.bench[bi], `kéo vào cửa hàng để bán ${key}★${star} +${price}`, { gold: [s.gold, s2.gold], from, box, bench: s2.bench, board: s2.board, el: await V(([x, y]) => { const e = document.elementFromPoint(x, y); return e && (e.id || e.className); }, [from.x, from.y]) }) && SHOTS) await page.screenshot({ path: path.join(SHOTS, `fail_sell_${played}.png`) });
           await invariants('sau khi bán');
         }
       }
@@ -304,6 +308,22 @@ async function main() {
     }
     if (SHOTS) await page.screenshot({ path: path.join(SHOTS, `round${String(played).padStart(2, '0')}_prep.png`) });
 
+    // --- Gắn trang bị trong túi: chạm món đồ rồi chạm tướng trên bàn
+    for (let guard = 0; guard < 3; guard++) {
+      s = await state(); if (!s.items || !s.board.length) break;
+      const target = await V(() => { const K = window.__vkkt; const u = K.boardAllies().filter(x => (x.items || []).length < 3).sort((a, b) => b.star * 10 + K.UNIT_DEFS[b.key].cost - (a.star * 10 + K.UNIT_DEFS[a.key].cost))[0]; return u ? { c: u.homeTile.c, r: u.homeTile.r, n: u.items.length, bonus: JSON.stringify(u.bonus) } : null; });
+      if (!target) break;
+      const p = await unitScreen({ c: target.c, r: target.r }); if (!onScreen(p)) break;
+      const nInv = s.items.split(',').length;
+      await press('#items .item:first-child'); await page.waitForTimeout(60);
+      await tapAt(p);
+      const after = await V(([c, r]) => { const K = window.__vkkt, u = K.boardAllies().find(x => x.homeTile.c === c && x.homeTile.r === r); return { n: u.items.length, inv: K.game.items.length, bonus: JSON.stringify(u.bonus) }; }, [target.c, target.r]);
+      if (check(after.n === target.n + 1 && after.inv === nInv - 1, 'chạm trang bị rồi chạm tướng để gắn', { target, after, nInv })) {
+        stats.itemsEquipped++;
+        check(after.bonus !== target.bonus, 'trang bị thay đổi chỉ số cộng thêm của tướng', { before: target.bonus, after: after.bonus });
+      }
+      await invariants('sau khi gắn trang bị');
+    }
     // --- Bảng thông tin: chạm tướng phe ta, chạm địch, chạm chỗ trống
     s = await state();
     if (s.board.length) {
@@ -317,8 +337,10 @@ async function main() {
         { const r1 = await page.locator('#unit-info').boundingBox(), r2 = await page.locator('#prep-panel').boundingBox();
           check(!(r1.x < r2.x + r2.width && r1.x + r1.width > r2.x && r1.y < r2.y + r2.height && r1.y + r1.height > r2.y), 'bảng thông tin (tướng) không che cửa hàng', { info: r1, shop: r2 }); }
         await V(() => document.getElementById('btn-info-close').click());   // đóng trước rồi mới chạm địch
-        const ep = await V(() => { const K = window.__vkkt, u = K.units.find(x => x.team === 'enemy'); const v = u.pos.clone(); v.y = 0.8; v.project(K.camera); return { x: (v.x * 0.5 + 0.5) * innerWidth, y: (-v.y * 0.5 + 0.5) * innerHeight, name: K.UNIT_DEFS[u.key].name }; });
-        if (onScreen(ep)) {
+        const ep = await V(() => { const K = window.__vkkt, c = document.getElementById('game');   // chọn địch không bị nút HUD che (người chơi thật cũng phải chạm được)
+          for (const u of K.units.filter(x => x.team === 'enemy')) { const v = u.pos.clone(); v.y = 0.8; v.project(K.camera); const x = (v.x * 0.5 + 0.5) * innerWidth, y = (-v.y * 0.5 + 0.5) * innerHeight; if (document.elementFromPoint(x, y) === c) return { x, y, name: K.UNIT_DEFS[u.key].name }; }
+          return null; });
+        if (ep && onScreen(ep)) {
           await tapAt(ep);
           const g2 = await V(() => ({ hidden: document.getElementById('unit-info').hidden, name: document.getElementById('ui-name').textContent, enemy: document.getElementById('unit-info').classList.contains('enemy') }));
           check(!g2.hidden && g2.enemy, 'chạm địch hiện thông tin địch', { got: g2, want: ep.name, at: ep, el: await V(([x, y]) => { const e = document.elementFromPoint(x, y); return e && (e.id || e.className || e.tagName); }, [ep.x, ep.y]) });
@@ -335,7 +357,7 @@ async function main() {
       const before = await state();
       await page.reload(); await boot(false); stats.reloads++;
       const after = await state();
-      const pick = o => JSON.stringify({ hp: o.hp, gold: o.gold, level: o.level, xp: o.xp, round: o.round, bench: o.bench, board: o.board, shop: o.shop, streak: o.streak });
+      const pick = o => JSON.stringify({ hp: o.hp, gold: o.gold, level: o.level, xp: o.xp, round: o.round, bench: o.bench, board: o.board, shop: o.shop, streak: o.streak, items: o.items, rivals: o.rivals, unitItems: o.unitItems });
       check(pick(before) === pick(after), 'tải lại trang phải khôi phục đúng ván', { before: pick(before), after: pick(after) });
       check(await page.textContent('#btn-start') === 'Bắt đầu giao chiến', 'nút sau khi tải lại');
       await waitCamera();
@@ -372,16 +394,23 @@ async function main() {
       const K = window.__vkkt;
       return { result: K.battle.result, time: K.battle.time, enemyStars: K.units.filter(u => u.team === 'enemy' && u.alive).reduce((a, u) => a + u.star, 0), alliesAlive: K.units.filter(u => u.team === 'ally' && u.alive).length };
     });
-    check(res.time <= 90.2, 'trận kết thúc trong 90 giây', res.time);
+    check(res.time <= 60.2, 'trận kết thúc trong 60 giây', res.time);
     check(damageSeen, 'phải có sát thương trong trận');
     const end = await state();
     const win = res.result === 'win';
     win ? stats.wins++ : stats.losses++;
     // Thu nhập & máu theo công thức
+    const monster = await V(r => window.__vkkt.isMonsterRound(r), s.round);
+    const loot = monster ? await V(() => window.__vkkt.game.lastRewards) : null;
     const interest = Math.min(5, Math.floor(s.gold / 10));
-    const streak = win ? Math.max(1, s.streak + 1) : Math.min(-1, s.streak - 1), sa = Math.abs(streak);
-    const income = 5 + interest + (sa >= 5 ? 3 : sa >= 4 ? 2 : sa >= 2 ? 1 : 0) + (win ? 1 : 0);
-    const dmg = win ? 0 : 2 + Math.floor(s.round / 2) + res.enemyStars;
+    const streak = monster ? s.streak : win ? Math.max(1, s.streak + 1) : Math.min(-1, s.streak - 1), sa = Math.abs(streak);
+    const income = 5 + interest + (monster ? loot.gold : (sa >= 5 ? 3 : sa >= 4 ? 2 : sa >= 2 ? 1 : 0) + (win ? 1 : 0));
+    let dmg = win ? 0 : 2 + Math.floor(s.round / 2) + res.enemyStars; if (monster) dmg = Math.ceil(dmg / 2);
+    if (monster) {
+      stats.monsterRounds++;
+      const inv = await V(() => window.__vkkt.game.items.length);
+      if (win) check(loot.items.length >= 1 && inv >= loot.items.length, 'thắng vòng yêu thú nhận ≥ 1 trang bị vào túi', { loot, inv });
+    }
     check(end.gold === s.gold + income, 'thu nhập cuối vòng', { expected: s.gold + income, got: end.gold });
     check(end.hp === Math.max(0, s.hp - dmg), 'mất máu khi thua', { expected: s.hp - dmg, got: end.hp });
     check(end.streak === streak, 'chuỗi thắng/thua', [streak, end.streak]);

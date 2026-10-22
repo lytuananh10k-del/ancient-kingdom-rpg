@@ -16,10 +16,16 @@ const LOOKS = {
   kiemdong: { robe: 0xd6e4f0, trim: 0x5b9bd5, inner: 0x3b5f86, hair: 0x2a1d14, skin: 0xf2d6c2, accent: 0xc0c8d0, weapon: 'sword', hairLen: 6, trailColor: new THREE.Color(0x9fd8ff) },
   thietve: { robe: 0x4f5560, trim: 0xb0b8c0, inner: 0x2c3038, hair: 0x141414, skin: 0xe2c0a2, accent: 0xb0b8c0, weapon: 'spear', bulk: 1.15, hairLen: 4, crown: true, trailColor: new THREE.Color(0xd8e0e8) },
   anhkiem: { robe: 0x1d2433, trim: 0x6fb7ff, inner: 0x101522, hair: 0x0c0c10, skin: 0xe8cdb8, accent: 0x6fb7ff, weapon: 'blade', hairLen: 8, mask: 0x2a3550, trailColor: new THREE.Color(0x8fc8ff) },
-  uhon: { robe: 0x2c2448, trim: 0x9fa8ff, inner: 0x1a1630, hair: 0xe8e8f0, skin: 0xe6d6e6, accent: 0x9fa8ff, weapon: 'staff', orb: 0x9fa8ff, hairLen: 8, trailColor: new THREE.Color(0xa8b0ff) }
+  uhon: { robe: 0x2c2448, trim: 0x9fa8ff, inner: 0x1a1630, hair: 0xe8e8f0, skin: 0xe6d6e6, accent: 0x9fa8ff, weapon: 'staff', orb: 0x9fa8ff, hairLen: 8, trailColor: new THREE.Color(0xa8b0ff) },
+  loiton: { robe: 0x1b2350, trim: 0xffe08a, inner: 0x101633, hair: 0xf0f0f8, skin: 0xf0d6c4, accent: 0xffe08a, weapon: 'staff', orb: 0xfff2a8, hairLen: 9, crown: true, trailColor: new THREE.Color(0xfff0a0) },
+  kimcuong: { robe: 0x8a6a2a, trim: 0xfff0c0, inner: 0x4a3818, hair: 0x101010, skin: 0xd8b090, accent: 0xffe08a, weapon: 'spear', bulk: 1.25, hairLen: 3, crown: true, trailColor: new THREE.Color(0xffe8a0) },
+  hoaton: { robe: 0xb8321e, trim: 0xffd27a, inner: 0x5a120c, hair: 0xf8f0e8, skin: 0xf3d2bc, accent: 0xffd27a, weapon: 'staff', orb: 0xffc04a, hairLen: 9, crown: true, trailColor: new THREE.Color(0xffc060) },
+  // Yêu thú (chỉ xuất hiện ở vòng yêu thú)
+  yeulang: { robe: 0x3c4048, trim: 0x8fb8d8, inner: 0x24272e, hair: 0x9aa4b0, skin: 0x8a8f98, accent: 0x8fb8d8, weapon: 'claws', bulk: 1.05, hairLen: 3, mask: 0x1c1f26, trailColor: new THREE.Color(0xa8c8e8) },
+  yeuvuong: { robe: 0x24382a, trim: 0x7fe08a, inner: 0x16241a, hair: 0x3a5a3a, skin: 0x7a8a6a, accent: 0x7fe08a, weapon: 'claws', bulk: 1.45, hairLen: 4, crown: true, mask: 0x101810, trailColor: new THREE.Color(0x9fffa0) }
 };
 
-/* cost: giá ở cửa hàng (bậc hiếm 1–3); traits: tộc/hệ. Đơn vị phe địch không có cost. */
+/* cost: giá ở cửa hàng (bậc hiếm 1–5); traits: tộc/hệ. Yêu thú không có cost (không bán ở cửa hàng). */
 /** Vai trò quyết định cách chọn mục tiêu & giữ vị trí; tenacity nhân thời gian bị choáng. */
 const ROLES = {
   tank: { name: 'Đỡ đòn', tenacity: 0.6 },
@@ -28,17 +34,22 @@ const ROLES = {
   mage: { name: 'Pháp sư', tenacity: 1 }
 };
 const UNIT_DEFS = {
-  kiemtien: { name: 'Kiếm Tiên', cost: 3, traits: ['kiemtu'], look: 'kiemtien', hp: 820, atk: 62, def: 28, aspd: 1.0, range: 2.2, speed: 4.6, mana: 100, mana0: 45, dodge: 0.1, crit: 0.15, critDmg: 1.7, skill: 'vanKiem', dash: true, poise: 50, role: 'fighter' },
+  kiemtien: { name: 'Kiếm Tiên', cost: 5, traits: ['kiemtu'], look: 'kiemtien', hp: 1000, atk: 76, def: 28, aspd: 1.0, range: 2.2, speed: 4.6, mana: 100, mana0: 45, dodge: 0.1, crit: 0.15, critDmg: 1.7, skill: 'vanKiem', dash: true, poise: 50, role: 'fighter' },
   loi: { name: 'Lôi Pháp Sư', short: 'Lôi Pháp', cost: 2, traits: ['phaptu'], look: 'loi', hp: 560, atk: 50, def: 16, aspd: 0.8, range: 8, speed: 3.6, mana: 80, mana0: 20, dodge: 0.03, crit: 0.08, critDmg: 1.5, skill: 'thienLoi', ranged: 'thunder', poise: 30, role: 'mage' },
   hoa: { name: 'Hỏa Linh', cost: 2, traits: ['phaptu'], look: 'hoa', hp: 540, atk: 54, def: 15, aspd: 0.75, range: 7.5, speed: 3.6, mana: 90, mana0: 30, dodge: 0.03, crit: 0.08, critDmg: 1.5, skill: 'hoaPhuong', ranged: 'fire', poise: 30, role: 'mage' },
   hophap: { name: 'Hộ Pháp', cost: 1, traits: ['hophap'], look: 'hophap', hp: 1100, atk: 42, def: 45, aspd: 0.85, range: 2.6, speed: 3.8, mana: 70, mana0: 30, dodge: 0, crit: 0.05, critDmg: 1.5, skill: 'hoThe', poise: 80, role: 'tank' },
-  huyetkiem: { name: 'Huyết Ảnh Kiếm Khách', look: 'huyetkiem', hp: 700, atk: 58, def: 22, aspd: 1.05, range: 2.2, speed: 4.8, mana: 80, mana0: 20, dodge: 0.15, crit: 0.15, critDmg: 1.6, skill: 'huyetAnh', dash: true, poise: 45, role: 'assassin' },
-  uminh: { name: 'U Minh Ma Tu', look: 'uminh', hp: 520, atk: 48, def: 14, aspd: 0.8, range: 7.5, speed: 3.5, mana: 80, mana0: 20, dodge: 0.03, crit: 0.08, critDmg: 1.5, skill: 'uMinh', ranged: 'nether', poise: 30, role: 'mage' },
-  mathu: { name: 'Ma Thú Hống', look: 'mathu', hp: 1250, atk: 46, def: 38, aspd: 0.75, range: 2.4, speed: 3.6, mana: 90, mana0: 25, dodge: 0, crit: 0.05, critDmg: 1.5, skill: 'phaDia', poise: 90, role: 'tank' },
+  huyetkiem: { name: 'Huyết Ảnh Kiếm Khách', short: 'Huyết Ảnh', cost: 3, traits: ['kiemtu', 'matu'], look: 'huyetkiem', hp: 700, atk: 58, def: 22, aspd: 1.05, range: 2.2, speed: 4.8, mana: 80, mana0: 20, dodge: 0.15, crit: 0.15, critDmg: 1.6, skill: 'huyetAnh', dash: true, poise: 45, role: 'assassin' },
+  uminh: { name: 'U Minh Ma Tu', short: 'U Minh', cost: 2, traits: ['phaptu', 'matu'], look: 'uminh', hp: 520, atk: 48, def: 14, aspd: 0.8, range: 7.5, speed: 3.5, mana: 80, mana0: 20, dodge: 0.03, crit: 0.08, critDmg: 1.5, skill: 'uMinh', ranged: 'nether', poise: 30, role: 'mage' },
+  mathu: { name: 'Ma Thú Hống', short: 'Ma Thú', cost: 3, traits: ['hophap', 'matu'], look: 'mathu', hp: 1250, atk: 46, def: 38, aspd: 0.75, range: 2.4, speed: 3.6, mana: 90, mana0: 25, dodge: 0, crit: 0.05, critDmg: 1.5, skill: 'phaDia', poise: 90, role: 'tank' },
   kiemdong: { name: 'Kiếm Đồng', cost: 1, traits: ['kiemtu'], look: 'kiemdong', hp: 600, atk: 48, def: 20, aspd: 0.95, range: 2.2, speed: 4.4, mana: 60, mana0: 20, dodge: 0.08, crit: 0.1, critDmg: 1.5, skill: 'kiemKhi', poise: 40, role: 'fighter' },
   thietve: { name: 'Thiết Vệ', cost: 1, traits: ['hophap'], look: 'thietve', hp: 920, atk: 40, def: 40, aspd: 0.8, range: 2.6, speed: 3.8, mana: 80, mana0: 30, dodge: 0, crit: 0.05, critDmg: 1.5, skill: 'phaDia', poise: 80, role: 'tank' },
   anhkiem: { name: 'Ảnh Kiếm', cost: 2, traits: ['kiemtu', 'matu'], look: 'anhkiem', hp: 640, atk: 56, def: 20, aspd: 1.05, range: 2.2, speed: 4.8, mana: 70, mana0: 20, dodge: 0.18, crit: 0.18, critDmg: 1.6, skill: 'huyetAnh', dash: true, poise: 45, role: 'assassin' },
-  uhon: { name: 'U Hồn Sư', short: 'U Hồn', cost: 3, traits: ['phaptu', 'matu'], look: 'uhon', hp: 600, atk: 56, def: 16, aspd: 0.8, range: 7.5, speed: 3.5, mana: 80, mana0: 30, dodge: 0.05, crit: 0.1, critDmg: 1.5, skill: 'uMinh', ranged: 'nether', poise: 30, role: 'mage' }
+  uhon: { name: 'U Hồn Sư', short: 'U Hồn', cost: 3, traits: ['phaptu', 'matu'], look: 'uhon', hp: 600, atk: 56, def: 16, aspd: 0.8, range: 7.5, speed: 3.5, mana: 80, mana0: 30, dodge: 0.05, crit: 0.1, critDmg: 1.5, skill: 'uMinh', ranged: 'nether', poise: 30, role: 'mage' },
+  loiton: { name: 'Lôi Tôn', cost: 4, traits: ['phaptu'], look: 'loiton', hp: 760, atk: 62, def: 22, aspd: 0.8, range: 8, speed: 3.6, mana: 100, mana0: 30, dodge: 0.03, crit: 0.1, critDmg: 1.5, skill: 'cuuThienLoi', ranged: 'thunder', poise: 40, role: 'mage' },
+  kimcuong: { name: 'Kim Cương Hộ Pháp', short: 'Kim Cương', cost: 4, traits: ['hophap'], look: 'kimcuong', hp: 1500, atk: 58, def: 60, aspd: 0.8, range: 2.6, speed: 3.8, mana: 90, mana0: 40, dodge: 0, crit: 0.05, critDmg: 1.5, skill: 'kimCuong', poise: 95, role: 'tank' },
+  hoaton: { name: 'Hỏa Tôn', cost: 5, traits: ['phaptu'], look: 'hoaton', hp: 860, atk: 72, def: 24, aspd: 0.8, range: 7.5, speed: 3.6, mana: 100, mana0: 30, dodge: 0.03, crit: 0.1, critDmg: 1.6, skill: 'songPhuong', ranged: 'fire', poise: 40, role: 'mage' },
+  yeulang: { name: 'Yêu Lang', look: 'yeulang', hp: 520, atk: 40, def: 12, aspd: 1.0, range: 2.2, speed: 4.8, mana: 60, mana0: 0, dodge: 0.1, crit: 0.1, critDmg: 1.5, skill: 'huyetAnh', dash: true, poise: 30, role: 'assassin', monster: true },
+  yeuvuong: { name: 'Yêu Thú Vương', look: 'yeuvuong', hp: 1400, atk: 55, def: 30, aspd: 0.8, range: 2.4, speed: 3.8, mana: 90, mana0: 20, dodge: 0, crit: 0.08, critDmg: 1.5, skill: 'phaDia', poise: 90, role: 'tank', monster: true }
 };
 
 /* =====================================================================
@@ -88,7 +99,7 @@ class Unit {
   get alive() { return this.hp > 0; }
   reset(scale) {
     const d = this.def, b = this.bonus, sm = STAR_MUL[this.star];
-    this.maxHp = Math.round(d.hp * scale * sm * b.hp); this.hp = this.maxHp; this.atk = d.atk * scale * sm * b.atk; this.def_ = d.def * Math.sqrt(scale) + b.def;
+    this.maxHp = Math.round((d.hp * scale * sm + (b.hpAdd || 0)) * b.hp); this.hp = this.maxHp; this.atk = d.atk * scale * sm * b.atk; this.def_ = d.def * Math.sqrt(scale) + b.def;
     this.mana = Math.min(d.mana, d.mana0 + b.mana0); this.maxMana = d.mana; this.shield = 0; this.shieldTime = 0;
     this.status = { stun: 0, burn: 0, burnTick: 0, burnDmg: 0 };
     this.target = null; this.retarget = 0; this.atkCd = rand(0, 0.4); this.attackIdx = 0; this.dashCd = 0;

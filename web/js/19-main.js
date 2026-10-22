@@ -50,6 +50,7 @@ function frame(now) {
   combatCam.update(dt);
   sun.position.set(combatCam.focus.x - 14, 26, combatCam.focus.z - 10); sun.target.position.copy(combatCam.focus);
   benchTick(dt);
+  tickPrepTimer(dt);
   ui.tick(dt);
   renderer.info.reset();
   try { bloom.render(scene, camera); } catch (e) { console.error('[Bloom] tắt bloom do lỗi', e); bloom.setLevel(0, window.innerWidth, window.innerHeight); renderer.setRenderTarget(null); renderer.render(scene, camera); }
@@ -76,4 +77,5 @@ function simulate(seconds) {
 window.__vkkt = { units, battle, timelines, QualityManager, startBattle, forceUltimate, vfx, renderer, scene, loadGlbBuffer, solveTwoBoneIK, options, game, store,
   buyShop, reroll, buyXP, nextRound, newGame, moveTo, sellSrc, benchToBoard, mergeAll, traitCounts, traitLevel, applyTraits, boardAllies, boardCap, benchUnits, benchSlotPos, tileCenter,
   snapshotGame, enemyLineup, sellPrice, combatCam, camera, prepFit, simulate, UNIT_DEFS, XP_NEED, MAX_LEVEL, BENCH_SIZE, STAR_MUL,
-  combatLog, ROLES, SKILLS, placeUnit, removeUnit, setupRound, BOARD };
+  combatLog, ROLES, SKILLS, placeUnit, removeUnit, setupRound, BOARD,
+  poolLeft, poolOwned, POOL_SIZE, SHOP_POOL, SHOP_ODDS, rollShop, rivalsDraft, ITEMS, equipItem, isMonsterRound, interestOf, streakBonusOf, autoFillBoard };

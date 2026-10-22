@@ -58,13 +58,14 @@ class CombatCamera {
 const combatCam = new CombatCamera(camera);
 /** Khung camera lúc chuẩn bị (giống TFT): tìm khoảng cách + điểm nhìn để nửa bàn phe ta và hàng chờ
  *  nằm gọn trong vùng trống giữa thanh nút trên cùng và cửa hàng – tự tính theo kích thước màn hình. */
-const prepFit = { dist: 0, tz: -2.2, shiftX: 0, shiftY: 0 };
+const prepFit = { dist: 0, tz: -2.2, shiftX: 0, shiftY: 0, items: false };
 function fitPrepCamera() {
   const W = window.innerWidth, H = window.innerHeight;
   const rectTop = el => (el && !el.hidden && el.offsetParent !== null ? el.getBoundingClientRect().top : H);
   const ta = (document.querySelector('.top-actions').getBoundingClientRect().bottom || 0) + 6;
   const lc = document.querySelector('.left-col').getBoundingClientRect();
   const bottom = Math.min(rectTop(document.getElementById('prep-panel')), rectTop(document.querySelector('.main-actions'))) - 6;
+  prepFit.items = !document.getElementById('items-row').hidden;
   const cam = new THREE.PerspectiveCamera(camera.fov, W / H, 0.1, 400), p = combatCam.defaults.pitch, v = new V3();
   // Khung tối thiểu: hàng chờ + nửa bàn phe ta. Thêm các hàng địch đứng nếu hình không nhỏ đi quá 20%.
   const PTS_ALLY = [[9.3, 0, -11.9], [-9.3, 0, -11.9], [9.3, 0, 0.6], [-9.3, 0, 0.6], [8, 2.2, -1.2], [-8, 2.2, -1.2]];

@@ -38,6 +38,95 @@ const SkillAI = {
   countNear(caster, r) { return caster.enemies().filter(f => f.pos.distanceTo(caster.pos) <= r).length; }
 };
 
+/** Lôi pháp: N tia sét giáng vào các địch quanh vùng đông nhất (Thiên Lôi Quyết, Cửu Thiên Lôi Kiếp). */
+function thunderSkill(cfg) {
+  cfg.times = Array.from({ length: cfg.strikes }, (_, i) => 0.65 + i * cfg.gap);
+  cfg.end = cfg.times[cfg.times.length - 1] + 0.25;
+  return {
+    name: cfg.name, desc: cfg.desc,
+    pick: c => SkillAI.densest(c, cfg.radius),
+    build(caster, target, release) {
+      const tl = new SkillTimeline(cfg.name, caster);
+      const spots = [];
+      tl.at(0, 'AnimationEvent', () => caster.anim.play('SkillCast', { dur: cfg.end, windup: 0.35, active: 0.5, hold: cfg.end - 0.8 }));
+      tl.at(0, 'SpawnVFX', () => vfx.magicCircle(caster.pos, 1.6, COLORS.thunder, COLORS.enemyB, { reveal: 0.35, life: cfg.end }));
+      tl.at(0.35, 'SpawnVFX', () => {
+        const c = target.alive ? target.pos : caster.pos;
+        const foes = caster.enemies().sort((a, b) => a.pos.distanceTo(c) - b.pos.distanceTo(c));
+        for (let i = 0; i < cfg.strikes; i++) { const f = foes[i % Math.max(1, foes.length)]; spots.push((f ? f.pos : c).clone().add(new V3(rand(-0.6, 0.6), 0, rand(-0.6, 0.6)))); }
+        spots.forEach(s => vfx.magicCircle(s, 1.3, COLORS.thunder, COLORS.white, { reveal: 0.2, spin: 3, life: 0.9, alpha: 0.8 }));
+      });
+      cfg.times.forEach((at, i) => {
+        tl.at(at, 'SpawnVFX', () => { const s = spots[i]; if (s) lightningBolt(new V3(s.x + rand(-3, 3), 18, s.z + rand(-3, 3)), new V3(s.x, 0.1, s.z), COLORS.thunder, 0.22); });
+        tl.at(at, 'ApplyDamage', (self) => { const s = spots[i]; if (!s) return; self.hit = aoe(caster, s, cfg.radius, cfg.mult, { color: COLORS.thunder }); combatCam.shake(0.25); hitStop(0.04); flashLight(_v1.set(s.x, 3, s.z), 0xbfe0ff, 7); Sfx.thunder(); vfx.shockwave(new V3(s.x, 0, s.z), 2.6, COLORS.thunder, 0.4); });
+        tl.at(at, 'ApplyStatusEffect', (self) => (self.hit || []).forEach(u => applyStun(u, cfg.stun)));
+      });
+      tl.at(cfg.end, 'Cleanup', () => release());
+      tl.onCleanup(c => { if (c) release(); });
+      return tl;
+    }
+  };
+}
+/** Hỏa pháp: phóng N hỏa phượng truy đuổi, nổ diện rộng + thiêu đốt (Hỏa Phượng Phần Thiên, Song Phượng Diệt Thế). */
+function phoenixSkill(cfg) {
+  return {
+    name: cfg.name, desc: cfg.desc,
+    pick: c => SkillAI.densest(c, 3),
+    build(caster, target, release) {
+      const tl = new SkillTimeline(cfg.name, caster);
+      // Phượng thứ 2+ bay vào cụm địch khác (cách mục tiêu đầu > 3 m) nếu có.
+      const targets = [target];
+      for (let k = 1; k < cfg.count; k++) { const o = caster.enemies().filter(f => targets.every(tg => f.pos.distanceTo(tg.pos) > 3)).sort((x, y) => x.pos.distanceTo(caster.pos) - y.pos.distanceTo(caster.pos))[0]; targets.push(o || target); }
+      tl.at(0, 'AnimationEvent', () => caster.anim.play('SkillCast', { dur: 1.1, windup: 0.45, active: 0.55, hold: 0.3 }));
+      tl.track(0, 0.5, 'SpawnVFX', () => { const p = caster.rig.getSocket('weaponTip').getWorldPosition(_v1); for (let i = 0; i < 3; i++) { const a = Math.random() * TAU, r = rand(0.8, 1.6); vfx.particles.emit(p.x + Math.sin(a) * r, p.y + rand(-0.5, 0.8), p.z + Math.cos(a) * r, -Math.sin(a) * r * 3, 0, -Math.cos(a) * r * 3, 0.32, 0.3, 0.05, Math.random() < 0.5 ? COLORS.fire : COLORS.fireHot, 0.9, 0.5); } });
+      targets.forEach((tg, k) => tl.at(0.5 + k * 0.25, 'LaunchProjectile', () => {
+        Sfx.fire();
+        Projectiles.spawn({ src: caster, target: tg.alive ? tg : target, pos: caster.rig.getSocket('weaponTip').getWorldPosition(new V3()), speed: 11, homing: true, turn: 4, color: COLORS.fire, size: 1.1, life: 3, radius: 1.1,
+          update: (p) => { for (let i = 0; i < 3; i++) vfx.particles.emit(p.pos.x + rand(-0.4, 0.4), p.pos.y + rand(-0.4, 0.4), p.pos.z + rand(-0.4, 0.4), rand(-1, 1), rand(0.5, 2), rand(-1, 1), 0.5, 0.5, 0.05, Math.random() < 0.4 ? COLORS.fireHot : COLORS.fire, 0.8, 1.5);
+            const side = _v3.set(-p.vel.z, 0, p.vel.x).normalize(); // đôi cánh phượng
+            for (const sgn of [-1, 1]) vfx.particles.emit(p.pos.x + side.x * sgn * 1.2, p.pos.y + 0.3, p.pos.z + side.z * sgn * 1.2, side.x * sgn * 2 - p.vel.x * 0.2, 0.8, side.z * sgn * 2 - p.vel.z * 0.2, 0.4, 0.45, 0.05, COLORS.fire, 0.7, 2); },
+          onHit: (p) => {
+            const c = new V3(p.pos.x, 0, p.pos.z);
+            aoe(caster, c, 3, cfg.mult, { color: COLORS.fire, burn: cfg.burn });
+            vfx.shockwave(c, 3.6, COLORS.fire, 0.55, 0.1); vfx.magicCircle(c, 3, COLORS.fire, COLORS.fireHot, { reveal: 0.1, life: 0.6, spin: 2 });
+            vfx.particles.burst(_v1.set(c.x, 0.6, c.z), COLORS.fire, 60, 9, 0.9, 0.55, { up: 3, gravity: -2, drag: 2 });
+            vfx.particles.burst(_v1.set(c.x, 0.6, c.z), COLORS.fireHot, 25, 5, 0.5, 0.7, { drag: 3 });
+            flashLight(_v1.set(c.x, 2, c.z), 0xff9a4a, 8); combatCam.shake(0.35); hitStop(0.06); Sfx.boom();
+          } });
+      }));
+      tl.at(1.0 + (cfg.count - 1) * 0.25, 'Cleanup', () => release());
+      tl.onCleanup(c => { if (c) release(); });
+      return tl;
+    }
+  };
+}
+/** Hộ pháp: khiên cho N đồng minh đang yếu nhất (luôn gồm bản thân) (Hộ Thể Chân Khí, Kim Cương Bất Hoại). */
+function shieldSkill(cfg) {
+  return {
+    name: cfg.name, desc: cfg.desc,
+    pick: c => c.findTarget(), ready: c => c.allies().some(a => a.hp < a.maxHp * 0.8) || SkillAI.countNear(c, 5) >= 1,   // khiên khi có người bị thương / địch áp sát
+    build(caster, target, release) {
+      const tl = new SkillTimeline(cfg.name, caster);
+      tl.at(0, 'AnimationEvent', () => caster.anim.play('SkillCast', { dur: 1.0, windup: 0.35, active: 0.45, hold: 0.3 }));
+      tl.at(0, 'SpawnVFX', () => vfx.magicCircle(caster.pos, 2, COLORS.shield, COLORS.allyB, { reveal: 0.3, life: 1.2 }));
+      tl.at(0.4, 'ApplyStatusEffect', () => {
+        Sfx.shield();
+        const list = caster.allies().sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp).slice(0, cfg.count);
+        if (!list.includes(caster)) list[list.length - 1] = caster;
+        list.forEach(u => {
+          u.shield = caster.maxHp * cfg.pct; u.shieldTime = 6;
+          if (!u.shieldFx) u.shieldFx = makeShield(u);
+          floatText(u.chest(new V3()), '+Khiên ' + Math.round(u.shield), '#9ff0d0', 0.9);
+          vfx.particles.burst(u.chest(new V3()), COLORS.shield, 20, 4, 0.6, 0.3, { up: 2, drag: 2 });
+        });
+      });
+      tl.at(1.0, 'Cleanup', () => release());
+      tl.onCleanup(c => { if (c) release(); });
+      return tl;
+    }
+  };
+}
+
 const SKILLS = {
   /* -------- VẠN KIẾM QUY TÔNG (kỹ năng mẫu đầy đủ 5 giai đoạn) -------- */
   vanKiem: {
@@ -230,87 +319,22 @@ const SKILLS = {
   },
 
   /* -------- THIÊN LÔI QUYẾT: 3 đạo sét thủ tục -------- */
-  thienLoi: {
-    name: 'Thiên Lôi Quyết',
-    desc: 'Gọi 3 tia sét giáng quanh mục tiêu: mỗi tia gây 160% công trong bán kính 2,4 m và choáng 0,8 giây.',
-    pick: c => SkillAI.densest(c, 2.4),
-    build(caster, target, release) {
-      const tl = new SkillTimeline('Thiên Lôi Quyết', caster);
-      const spots = [];
-      tl.at(0, 'AnimationEvent', () => caster.anim.play('SkillCast', { dur: 1.4, windup: 0.35, active: 0.5, hold: 0.6 }));
-      tl.at(0, 'SpawnVFX', () => vfx.magicCircle(caster.pos, 1.6, COLORS.thunder, COLORS.enemyB, { reveal: 0.35, life: 1.4 }));
-      tl.at(0.35, 'SpawnVFX', () => {
-        const c = target.alive ? target.pos : caster.pos;
-        const foes = caster.enemies().sort((a, b) => a.pos.distanceTo(c) - b.pos.distanceTo(c));
-        for (let i = 0; i < 3; i++) { const f = foes[i % Math.max(1, foes.length)]; spots.push((f ? f.pos : c).clone().add(new V3(rand(-0.6, 0.6), 0, rand(-0.6, 0.6)))); }
-        spots.forEach(s => vfx.magicCircle(s, 1.3, COLORS.thunder, COLORS.white, { reveal: 0.2, spin: 3, life: 0.9, alpha: 0.8 }));
-      });
-      [0.65, 0.9, 1.15].forEach((at, i) => {
-        tl.at(at, 'SpawnVFX', () => { const s = spots[i]; if (s) lightningBolt(new V3(s.x + rand(-3, 3), 18, s.z + rand(-3, 3)), new V3(s.x, 0.1, s.z), COLORS.thunder, 0.22); });
-        tl.at(at, 'ApplyDamage', (self) => { const s = spots[i]; if (!s) return; self.hit = aoe(caster, s, 2.4, 1.6, { color: COLORS.thunder }); combatCam.shake(0.25); hitStop(0.04); flashLight(_v1.set(s.x, 3, s.z), 0xbfe0ff, 7); Sfx.thunder(); vfx.shockwave(new V3(s.x, 0, s.z), 2.6, COLORS.thunder, 0.4); });
-        tl.at(at, 'ApplyStatusEffect', (self) => (self.hit || []).forEach(u => applyStun(u, 0.8)));
-      });
-      tl.at(1.4, 'Cleanup', () => release());
-      tl.onCleanup(c => { if (c) release(); });
-      return tl;
-    }
-  },
+  thienLoi: thunderSkill({ name: 'Thiên Lôi Quyết', strikes: 3, gap: 0.25, radius: 2.4, mult: 1.6, stun: 0.8,
+    desc: 'Gọi 3 tia sét giáng quanh mục tiêu: mỗi tia gây 160% công trong bán kính 2,4 m và choáng 0,8 giây.' }),
+  cuuThienLoi: thunderSkill({ name: 'Cửu Thiên Lôi Kiếp', strikes: 6, gap: 0.2, radius: 2.6, mult: 1.8, stun: 1.0,
+    desc: 'Gọi 6 tia sét giáng xuống các kẻ địch quanh vùng đông nhất: mỗi tia gây 180% công trong bán kính 2,6 m và choáng 1 giây.' }),
 
   /* -------- HỎA PHƯỢNG PHẦN THIÊN: cầu lửa lớn → nổ + thiêu đốt -------- */
-  hoaPhuong: {
-    name: 'Hỏa Phượng Phần Thiên',
-    desc: 'Phóng hỏa phượng truy đuổi mục tiêu, nổ gây 200% công trong bán kính 3 m và thiêu đốt theo thời gian.',
-    pick: c => SkillAI.densest(c, 3),
-    build(caster, target, release) {
-      const tl = new SkillTimeline('Hỏa Phượng', caster);
-      tl.at(0, 'AnimationEvent', () => caster.anim.play('SkillCast', { dur: 1.1, windup: 0.45, active: 0.55, hold: 0.3 }));
-      tl.track(0, 0.5, 'SpawnVFX', () => { const p = caster.rig.getSocket('weaponTip').getWorldPosition(_v1); for (let i = 0; i < 3; i++) { const a = Math.random() * TAU, r = rand(0.8, 1.6); vfx.particles.emit(p.x + Math.sin(a) * r, p.y + rand(-0.5, 0.8), p.z + Math.cos(a) * r, -Math.sin(a) * r * 3, 0, -Math.cos(a) * r * 3, 0.32, 0.3, 0.05, Math.random() < 0.5 ? COLORS.fire : COLORS.fireHot, 0.9, 0.5); } });
-      tl.at(0.5, 'LaunchProjectile', () => {
-        Sfx.fire();
-        Projectiles.spawn({ src: caster, target, pos: caster.rig.getSocket('weaponTip').getWorldPosition(new V3()), speed: 11, homing: true, turn: 4, color: COLORS.fire, size: 1.1, life: 3, radius: 1.1,
-          update: (p) => { for (let i = 0; i < 3; i++) vfx.particles.emit(p.pos.x + rand(-0.4, 0.4), p.pos.y + rand(-0.4, 0.4), p.pos.z + rand(-0.4, 0.4), rand(-1, 1), rand(0.5, 2), rand(-1, 1), 0.5, 0.5, 0.05, Math.random() < 0.4 ? COLORS.fireHot : COLORS.fire, 0.8, 1.5);
-            const side = _v3.set(-p.vel.z, 0, p.vel.x).normalize(); // đôi cánh phượng
-            for (const sgn of [-1, 1]) vfx.particles.emit(p.pos.x + side.x * sgn * 1.2, p.pos.y + 0.3, p.pos.z + side.z * sgn * 1.2, side.x * sgn * 2 - p.vel.x * 0.2, 0.8, side.z * sgn * 2 - p.vel.z * 0.2, 0.4, 0.45, 0.05, COLORS.fire, 0.7, 2); },
-          onHit: (p) => {
-            const c = new V3(p.pos.x, 0, p.pos.z);
-            aoe(caster, c, 3, 2.0, { color: COLORS.fire, burn: 0.18 });
-            vfx.shockwave(c, 3.6, COLORS.fire, 0.55, 0.1); vfx.magicCircle(c, 3, COLORS.fire, COLORS.fireHot, { reveal: 0.1, life: 0.6, spin: 2 });
-            vfx.particles.burst(_v1.set(c.x, 0.6, c.z), COLORS.fire, 60, 9, 0.9, 0.55, { up: 3, gravity: -2, drag: 2 });
-            vfx.particles.burst(_v1.set(c.x, 0.6, c.z), COLORS.fireHot, 25, 5, 0.5, 0.7, { drag: 3 });
-            flashLight(_v1.set(c.x, 2, c.z), 0xff9a4a, 8); combatCam.shake(0.35); hitStop(0.06); Sfx.boom();
-          } });
-      });
-      tl.at(1.0, 'Cleanup', () => release());
-      tl.onCleanup(c => { if (c) release(); });
-      return tl;
-    }
-  },
+  hoaPhuong: phoenixSkill({ name: 'Hỏa Phượng Phần Thiên', count: 1, mult: 2.0, burn: 0.18,
+    desc: 'Phóng hỏa phượng truy đuổi mục tiêu, nổ gây 200% công trong bán kính 3 m và thiêu đốt theo thời gian.' }),
+  songPhuong: phoenixSkill({ name: 'Song Phượng Diệt Thế', count: 2, mult: 2.6, burn: 0.25,
+    desc: 'Phóng 2 hỏa phượng vào 2 cụm địch khác nhau, mỗi con nổ gây 260% công trong bán kính 3 m và thiêu đốt mạnh.' }),
 
   /* -------- HỘ THỂ CHÂN KHÍ: khiên Fresnel cho đồng đội yếu nhất -------- */
-  hoThe: {
-    name: 'Hộ Thể Chân Khí',
-    desc: 'Tạo khiên bằng 30% máu tối đa của bản thân cho 3 đồng minh đang yếu nhất (luôn gồm bản thân), giữ 6 giây.',
-    pick: c => c.findTarget(), ready: c => c.allies().some(a => a.hp < a.maxHp * 0.8) || SkillAI.countNear(c, 5) >= 1,   // khiên khi có người bị thương / địch áp sát
-    build(caster, target, release) {
-      const tl = new SkillTimeline('Hộ Thể Chân Khí', caster);
-      tl.at(0, 'AnimationEvent', () => caster.anim.play('SkillCast', { dur: 1.0, windup: 0.35, active: 0.45, hold: 0.3 }));
-      tl.at(0, 'SpawnVFX', () => vfx.magicCircle(caster.pos, 2, COLORS.shield, COLORS.allyB, { reveal: 0.3, life: 1.2 }));
-      tl.at(0.4, 'ApplyStatusEffect', () => {
-        Sfx.shield();
-        const list = caster.allies().sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp).slice(0, 3);
-        if (!list.includes(caster)) list[list.length - 1] = caster;
-        list.forEach(u => {
-          u.shield = caster.maxHp * 0.3; u.shieldTime = 6;
-          if (!u.shieldFx) u.shieldFx = makeShield(u);
-          floatText(u.chest(new V3()), '+Khiên ' + Math.round(u.shield), '#9ff0d0', 0.9);
-          vfx.particles.burst(u.chest(new V3()), COLORS.shield, 20, 4, 0.6, 0.3, { up: 2, drag: 2 });
-        });
-      });
-      tl.at(1.0, 'Cleanup', () => release());
-      tl.onCleanup(c => { if (c) release(); });
-      return tl;
-    }
-  },
+  hoThe: shieldSkill({ name: 'Hộ Thể Chân Khí', count: 3, pct: 0.3,
+    desc: 'Tạo khiên bằng 30% máu tối đa của bản thân cho 3 đồng minh đang yếu nhất (luôn gồm bản thân), giữ 6 giây.' }),
+  kimCuong: shieldSkill({ name: 'Kim Cương Bất Hoại', count: 5, pct: 0.4,
+    desc: 'Tạo khiên bằng 40% máu tối đa của bản thân cho 5 đồng minh đang yếu nhất (luôn gồm bản thân), giữ 6 giây.' }),
 
   /* -------- HUYẾT ẢNH TRẢM (địch): lướt xuyên mục tiêu, vết chém đỏ góc cạnh -------- */
   huyetAnh: {

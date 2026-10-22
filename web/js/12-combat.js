@@ -6,7 +6,10 @@
  * 16. Sát thương, khiên, trạng thái, hit stop
  * ===================================================================*/
 let hitStopTimer = 0;
-const options = { hitstop: store.get('hitstop', true), swordCount: store.get('swords', 0), footIK: store.get('footIK', true), haptics: store.get('haptics', true) };
+const options = { hitstop: store.get('hitstop', true), swordCount: store.get('swords', 0), footIK: store.get('footIK', true), haptics: store.get('haptics', true), prepTimer: store.get('prepTimer', true) };
+/** Thời gian: chuẩn bị (đếm ngược, tắt được), trận tối đa 60 s; từ giây 40 "linh khí hỗn loạn" – sát thương +6%/giây để trận ngã ngũ. */
+const PREP_TIME = 30, FIRST_PREP_TIME = 45, FIGHT_LIMIT = 60, OVERTIME_AT = 40;
+const overtimeMul = () => (battle.phase === 'fight' && battle.time > OVERTIME_AT ? 1 + (battle.time - OVERTIME_AT) * 0.06 : 1);
 /** 0 = theo mức đồ hoạ; > 0 = số người chơi chọn. */
 const swordCount = () => (options.swordCount > 0 ? options.swordCount : Q().swords);
 function hitStop(d) { if (options.hitstop) hitStopTimer = Math.max(hitStopTimer, d); }
@@ -43,7 +46,7 @@ function dealDamage(src, dst, mult, opts = {}) {
   const crit = opts.crit !== undefined ? opts.crit : Math.random() < src.def.crit;
   if (crit && !opts.dot) combatLog.crits++;
   const mitig = dst.def_ / (dst.def_ + 100);
-  let dmg = Math.round(src.atk * mult * (1 - mitig) * (crit ? src.def.critDmg : 1) * rand(0.95, 1.05));
+  let dmg = Math.round(src.atk * mult * (1 - mitig) * (crit ? src.def.critDmg : 1) * rand(0.95, 1.05) * overtimeMul());
   if (opts.skill && src.bonus) dmg = Math.round(dmg * src.bonus.skill);
   dmg = Math.max(1, dmg);
   if (battle.bench) { dst.hp = dst.maxHp; }

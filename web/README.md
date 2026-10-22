@@ -70,26 +70,31 @@ Mô phỏng chạy bước cố định 60 Hz; sát thương nằm trên timelin
 ## Cách chơi (kinh tế)
 | Thành phần | Quy tắc |
 |---|---|
-| Cửa hàng | 5 tướng mỗi vòng. Làm mới: 2 linh thạch (phím D). Tỉ lệ bậc 1/2/3 theo cấp: cấp 1–2 100/0/0 → cấp 8 20/40/40 |
-| Tướng | Bậc 1 (1 linh thạch): Kiếm Đồng, Hộ Pháp, Thiết Vệ · Bậc 2: Lôi Pháp Sư, Hỏa Linh, Ảnh Kiếm · Bậc 3: Kiếm Tiên, U Hồn Sư |
-| Cấp | Cấp = số tu sĩ tối đa trên bàn (khởi đầu cấp 3); kéo thêm khi đã đủ sẽ bị chặn (ô đích đỏ). Vào trận mà bàn còn chỗ thì tự đưa tướng mạnh nhất từ hàng chờ lên (giống TFT). Mua kinh nghiệm: 4 linh thạch → 4 KN (phím F); +2 KN mỗi vòng. Tối đa cấp 8 |
+| Cửa hàng | 5 ô mỗi vòng, tướng giá 1–5 linh thạch. Làm mới: 2 linh thạch (phím D). Tỉ lệ bậc 1/2/3/4/5 theo cấp (hiện ngay dưới cửa hàng): cấp 3 75/25/0/0/0 · cấp 5 45/33/20/2/0 · cấp 7 19/30/35/15/1 · cấp 9 15/18/25/30/12 |
+| Tướng | Bậc 1: Kiếm Đồng, Hộ Pháp, Thiết Vệ · Bậc 2: Lôi Pháp Sư, Hỏa Linh, Ảnh Kiếm, U Minh Ma Tu · Bậc 3: U Hồn Sư, Huyết Ảnh Kiếm Khách, Ma Thú Hống · Bậc 4: Lôi Tôn (Cửu Thiên Lôi Kiếp), Kim Cương Hộ Pháp (Kim Cương Bất Hoại) · Bậc 5: Kiếm Tiên (Vạn Kiếm Quy Tông), Hỏa Tôn (Song Phượng Diệt Thế) |
+| Cấp | Cấp = số tu sĩ tối đa trên bàn (khởi đầu cấp 3); kéo thêm khi đã đủ sẽ bị chặn (ô đích đỏ). Vào trận mà bàn còn chỗ thì tự đưa tướng mạnh nhất từ hàng chờ lên (giống TFT). Mua kinh nghiệm: 4 linh thạch → 4 KN (phím F); +2 KN mỗi vòng. Tối đa cấp 9 |
+| Bể tướng chung | Mỗi tướng có hạn số bản theo bậc: 22 / 18 / 14 / 10 / 8. Tướng người chơi giữ (★2 = 3 bản, ★3 = 9), tướng đang bày ở cửa hàng và tướng 7 đối thủ ảo giữ đều trừ vào bể; hết bản thì không còn xuất hiện. Đối thủ ảo mỗi vòng trả lại ~30% và lấy thêm 4 + vòng bản (¼ nhắm vào tướng bạn đang gom). Thẻ cửa hàng hiện "còn N" |
+| Trang bị | Rơi ở vòng yêu thú (3, 7, 11, 15…): Thanh Phong Kiếm +18% công · Huyền Thiết Giáp +25 giáp · Tụ Linh Châu +20 linh lực đầu, tuyệt kỹ +10% · Hộ Mệnh Phù +250 máu · Phong Hành Ngoa +18% tốc đánh · Huyết Ngọc +15% hút máu. Tối đa 3 món mỗi tướng; chạm món trong túi rồi chạm tướng (hoặc kéo lên tướng) để gắn; gộp sao giữ trang bị; bán tướng thì trang bị về túi |
+| Thời gian | Chuẩn bị 30 s (vòng 1: 45 s), hết giờ tự vào trận – tắt được trong Cài đặt. Trận tối đa 60 s; từ giây 40 linh khí hỗn loạn, sát thương +6% mỗi giây |
 | Bàn cờ | 8×8: 4 hàng ô xanh phía dưới là phe ta (đặt được), 4 hàng ô đỏ là địch; vạch vàng ở giữa |
 | Thông tin tướng | Chạm vào bất kỳ tướng nào (phe ta, hàng chờ, địch; cả lúc đang đánh – máu/linh lực cập nhật trực tiếp) để xem chỉ số, tộc/hệ, kỹ năng. Nhấn giữ (chuột phải) thẻ cửa hàng để xem trước khi mua. Bảng tự đặt ở phía không che tướng vừa chạm và không che cửa hàng |
 | Hàng chờ | Kiểu TFT: 9 ô 3D ngay sau hàng cuối phe ta, tướng đứng trên ô. **Kéo thả** tướng giữa bàn cờ và hàng chờ (thả lên quân khác = đổi chỗ), kéo vào cửa hàng để bán. Vẫn dùng được chạm-chọn rồi chạm-đích |
 | Nâng sao | 3 bản giống nhau cùng sao tự gộp: ★2 (chỉ số ×1.8), ★3 (×3.24). Được mua khi hàng chờ đầy nếu lần mua đó tạo ra gộp |
 | Bán | Hoàn giá × 3^(sao−1), trừ 1 với tướng ★2 trở lên |
-| Thu nhập | 5 + lãi (1 mỗi 10 linh thạch, tối đa 5) + chuỗi thắng/thua (2: +1, 4: +2, 5+: +3) + 1 khi thắng |
-| Máu | 100. Thua mất 2 + ⌊vòng/2⌋ + tổng số sao của địch còn sống. Hết 90 giây tính là thua. Hết máu = hết ván |
+| Thu nhập | 5 + lãi (1 mỗi 10 linh thạch, tối đa 5 – bảng thông tin nhắc mốc kế tiếp) + chuỗi thắng/thua (2: +1, 4: +2, 5+: +3) + 1 khi thắng. Vòng yêu thú: 5 + lãi + linh thạch yêu thú rơi, không tính chuỗi |
+| Máu | 100. Thua mất 2 + ⌊vòng/2⌋ + tổng số sao của địch còn sống (vòng yêu thú: một nửa). Hết 60 giây tính là thua. Hết máu = hết ván |
 | Lưu | Tự lưu vào `localStorage` (`vkkt_save`) sau mỗi thao tác; mở lại trang có nút "Tiếp tục" và "Ván mới" |
 
 | Tộc / hệ | Mốc | Hiệu ứng |
 |---|---|---|
-| Kiếm Tu (Kiếm Đồng, Ảnh Kiếm, Kiếm Tiên) | 2 / 3 | +20% công · +45% công, +15% tốc đánh |
-| Pháp Tu (Lôi Pháp Sư, Hỏa Linh, U Hồn Sư) | 2 / 3 | Tuyệt kỹ +25%, linh lực đầu +20 · tuyệt kỹ +60%, linh lực đầu +40 |
-| Hộ Pháp (Hộ Pháp, Thiết Vệ) | 2 | +30% máu, +20 phòng thủ |
-| Ma Tu (Ảnh Kiếm, U Hồn Sư) | 2 | Hút máu 25% sát thương gây ra |
+| Kiếm Tu (Kiếm Đồng, Ảnh Kiếm, Huyết Ảnh, Kiếm Tiên) | 2 / 4 | +20% công · +50% công, +20% tốc đánh |
+| Pháp Tu (Lôi Pháp Sư, Hỏa Linh, U Minh, U Hồn Sư, Lôi Tôn, Hỏa Tôn) | 2 / 4 | Tuyệt kỹ +25%, linh lực đầu +20 · tuyệt kỹ +60%, linh lực đầu +40 |
+| Hộ Pháp (Hộ Pháp, Thiết Vệ, Ma Thú Hống, Kim Cương) | 2 / 4 | +30% máu, +20 giáp · +60% máu, +45 giáp |
+| Ma Tu (Ảnh Kiếm, U Minh, U Hồn Sư, Huyết Ảnh, Ma Thú Hống) | 2 / 4 | Hút máu 20% · hút máu 40%, +15% công |
 
-Tộc/hệ đếm số **tướng khác nhau** trên bàn (2 bản cùng tướng chỉ tính 1). Địch: 2 quân ở vòng 1, cứ 2 vòng thêm 1 (tối đa 8); máu và công ×1.07 mỗi vòng; ★2 từ vòng 5 (thêm quân ★2 ở vòng 8, 11), ★3 từ vòng 15.
+Tộc/hệ đếm số **tướng khác nhau** trên bàn (2 bản cùng tướng chỉ tính 1). Địch: 2 quân ở vòng 1, cứ 2 vòng thêm 1 (tối đa 8); máu và công ×1.07 mỗi vòng; ★2 từ vòng 5 (thêm quân ★2 ở vòng 8, 11), ★3 từ vòng 15. Vòng yêu thú: Yêu Lang (40% rơi trang bị, còn lại 1 linh thạch), Yêu Thú Vương (chắc chắn 1 trang bị + 3 linh thạch); thắng vòng yêu thú luôn được ít nhất 1 trang bị.
+
+`tests/economy.js` (`npm run test:economy`): thống kê tỉ lệ ra tướng ở 9 cấp, bảo toàn số bản trong bể, tướng cạn bể không xuất hiện, đồng hồ chuẩn bị / giới hạn trận, trang bị qua tải lại trang, và cho 3 bot (tiết kiệm / lên cấp nhanh / làm mới liên tục) tự chơi để so đội hình.
 Benchmark chụp lại ván đang chơi, chạy đội hình cố định rồi khôi phục nguyên trạng.
 
 **Cảm ứng (Android)**: vùng chạm tướng rộng 46 px (chuột 34 px); kéo khi di quá 12 px (chuột 8 px) để rung tay không thành kéo;

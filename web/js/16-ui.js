@@ -11,7 +11,7 @@ const ui = {
   update() {
     syncBench();
     const a = units.filter(u => u.team === 'ally' && u.alive).length, e = units.filter(u => u.team === 'enemy' && u.alive).length;
-    $('round-title').textContent = 'Vòng ' + battle.round;
+    $('round-title').innerHTML = 'Vòng ' + battle.round + (isMonsterRound(battle.round) ? '<span class="monster-tag">Yêu thú</span>' : '');
     $('ally-count').textContent = 'Đồng minh ' + a; $('enemy-count').textContent = 'Địch ' + e;
     const st = $('btn-start'), prep = battle.phase === 'prep' && !game.over;
     if (game.over && battle.phase !== 'fight') { $('phase-label').textContent = 'Kết thúc ván – trụ được ' + battle.round + ' vòng'; st.textContent = 'Ván mới'; st.disabled = false; }
@@ -23,11 +23,17 @@ const ui = {
     $('hud-mini').innerHTML = `<b class="h">♥ ${game.hp}</b> · <b class="g">◆ ${game.gold}</b> · <b class="l">Cấp ${game.level}</b>`;
     $('hp-val').textContent = game.hp; $('gold-val').textContent = game.gold; $('lvl-val').textContent = game.level;
     $('cap-val').textContent = boardAllies().length + '/' + boardCap();
+    { const it = interestOf(game.gold), next = it < 5 ? (it + 1) * 10 : 0;
+      $('int-val').innerHTML = `Lãi <b>+${it}</b>` + (next ? ` · giữ ${next} để +${it + 1}` : ' (tối đa)'); }
     $('xp-fill').style.transform = 'scaleX(' + (game.level >= MAX_LEVEL ? 1 : game.xp / XP_NEED[game.level]) + ')';
     $('xp-val').textContent = game.level >= MAX_LEVEL ? 'tối đa' : game.xp + '/' + XP_NEED[game.level];
     $('prep-panel').hidden = !prep;
     $('hint').textContent = prep ? 'Kéo tu sĩ giữa bàn cờ và hàng chờ · kéo vào cửa hàng để bán' : 'Kéo để xoay bàn cờ · Chụm hai ngón / lăn chuột để phóng to';
-    if (prep) { renderShop(); renderSelActions(); }
+    if (prep) {
+      renderShop(); renderSelActions(); renderItems(); renderOdds();
+      // Túi trang bị hiện / ẩn làm cửa hàng đổi chiều cao: căn lại khoảng cách camera (không xoay lại góc nhìn) để hàng chờ không bị che.
+      if (prepFit.dist && prepFit.items !== !$('items-row').hidden) requestAnimationFrame(() => { fitPrepCamera(); combatCam.tDist = prepFit.dist; });
+    }
     renderTraits();
   },
   toast(text) { const t = $('toast'); t.textContent = text; t.hidden = false; this.toastTimer = 2.4; },
@@ -36,6 +42,15 @@ const ui = {
     if (this.toastTimer > 0) { this.toastTimer -= dt; if (this.toastTimer <= 0) $('toast').hidden = true; }
     if (this.bannerTimer > 0) { this.bannerTimer -= dt; if (this.bannerTimer <= 0) $('skill-banner').classList.remove('show'); }
     if (info.key && info.unit) { info.refresh -= dt; if (info.refresh <= 0) { info.refresh = 0.2; renderUnitInfo(); } }   // máu / linh lực trực tiếp
+    this.timer();
+  },
+  /** Đồng hồ: đếm ngược chuẩn bị (nếu bật) / thời gian trận còn lại; đỏ khi sắp hết, vàng khi đã vào giai đoạn hỗn loạn. */
+  timer() {
+    const el = $('timer'); let txt = '', cls = '';
+    if (battle.phase === 'prep' && !game.over && options.prepTimer && !battle.bench) { const t = Math.ceil(game.prepT); txt = '⏱ ' + t + 's'; cls = t <= 5 ? 'low' : ''; }
+    else if (battle.phase === 'fight' && !battle.bench) { const t = Math.max(0, Math.ceil(FIGHT_LIMIT - battle.time)); txt = '⚔ ' + t + 's'; cls = battle.time > OVERTIME_AT ? 'ot' : ''; }
+    if (el.textContent !== txt) el.textContent = txt;
+    el.hidden = !txt; el.className = 'timer' + (cls ? ' ' + cls : '');
   }
 };
 
@@ -89,6 +104,8 @@ function renderUnitInfo() {
     tags.push(`<span class="ui-tag${lv ? ' on' : ''}" style="--c:${T.color}">${T.name}${!enemy ? ` ${n}/${T.tiers.find(m => m > n) || T.tiers[T.tiers.length - 1]}` : ''}</span>`);
   });
   $('ui-tags').innerHTML = tags.join('');
+  const its = u ? u.items || [] : [];
+  $('ui-items').innerHTML = its.map(k => `<span style="--c:${ITEMS[k].color}" title="${ITEMS[k].desc}">${ITEMS[k].name}: ${ITEMS[k].desc}</span>`).join('');
   $('ui-bars').innerHTML = `<div class="ui-bar hp"><i style="width:${(hp / maxHp * 100).toFixed(1)}%"></i><span>Máu ${Math.round(hp)}/${maxHp}${shield > 0 ? ' · khiên ' + Math.round(shield) : ''}</span></div>` +
     `<div class="ui-bar mana"><i style="width:${(mana / maxMana * 100).toFixed(1)}%"></i><span>Linh lực ${Math.round(mana)}/${maxMana}</span></div>`;
   const range = d.range > 3 ? 'Xa ' + Math.round(d.range / BOARD.tile) + ' ô' : 'Cận';
@@ -101,10 +118,12 @@ function renderUnitInfo() {
   $('ui-skill-mana').textContent = 'Cần ' + d.mana + ' linh lực';
   $('ui-skill-desc').textContent = sk.desc || '';
   let foot = '';
-  if (!u && d.cost) foot = `Giá ${d.cost} linh thạch · đang có ${countCopies(info.key, 1)}/3 bản ★1`;
+  const poolTxt = d.cost ? ` · bể chung còn ${poolLeft(info.key)}/${POOL_SIZE[d.cost]}` + (game.rivals[info.key] ? ` (đối thủ giữ ${game.rivals[info.key]})` : '') : '';
+  if (!u && d.cost) foot = `Giá ${d.cost} linh thạch · đang có ${countCopies(info.key, 1)}/3 bản ★1` + poolTxt;
   else if (onBench) foot = `Đang ở hàng chờ – tộc/hệ chưa tính. Kéo lên ô xanh để ra trận · bán +${sellPrice(u.key, u.star)}`;
   else if (u && !enemy) foot = battle.phase === 'prep' ? `Bán +${sellPrice(u.key, u.star)} linh thạch · kéo để đổi vị trí` : '';
   else if (enemy) foot = `Chỉ số đã nhân theo vòng ${battle.round}`;
+  if (u && !enemy && poolTxt) foot += poolTxt;
   $('ui-foot').textContent = foot;
 }
 $('btn-info-close').addEventListener('click', () => { closeUnitInfo(); if (game.sel) select(null); });
@@ -114,10 +133,10 @@ function renderShop() {
   game.shop.forEach((key, i) => {
     const b = document.createElement('button');
     if (!key) { b.className = 'card sold'; b.disabled = true; b.setAttribute('aria-label', 'Đã mua'); el.appendChild(b); return; }
-    const d = UNIT_DEFS[key], owned = countCopies(key, 1);
-    b.className = 'card t' + d.cost + (game.gold < d.cost ? ' poor' : '') + (owned >= 2 ? ' ready' : '');
+    const d = UNIT_DEFS[key], owned = countCopies(key, 1), left = poolLeft(key);
+    b.className = 'card t' + d.cost + (game.gold < d.cost ? ' poor' : '') + (owned >= 2 ? ' ready' : '') + (left <= 2 ? ' empty-pool' : '');
     b.innerHTML = `<span class="nm">${d.name}</span><span class="tr">${d.traits.map(t => TRAITS[t].name).join(' · ')}</span>` +
-      `<span class="ft"><span class="cost">${d.cost}</span>${owned ? `<span class="own">${owned}/3</span>` : ''}</span>`;
+      `<span class="ft"><span class="cost">${d.cost}</span><span class="pool" title="Số bản còn trong bể chung">còn ${left}</span>${owned ? `<span class="own">${owned}/3</span>` : ''}</span>`;
     b.setAttribute('aria-label', `Mua ${d.name}, giá ${d.cost} linh thạch${owned ? ', đang có ' + owned : ''}`);
     // Nhấn giữ (hoặc chuột phải) để xem thông tin trước khi mua; nhả sau khi giữ thì không mua.
     let lpTimer = 0, longPressed = false;
@@ -131,12 +150,55 @@ function renderShop() {
   $('btn-reroll').disabled = game.gold < REROLL_COST;
   $('btn-xp').disabled = game.gold < XP_COST || game.level >= MAX_LEVEL;
 }
+function renderOdds() {
+  const o = SHOP_ODDS[game.level];
+  $('odds').innerHTML = `<span>Cấp ${game.level}:</span>` + o.map((p, i) => `<span class="o${i + 1}${p ? '' : ' z'}">◆${i + 1} <b>${p}%</b></span>`).join('');
+}
+/** Túi trang bị: chạm để chọn rồi chạm tướng (trên bàn / hàng chờ) để gắn, hoặc kéo thẳng lên tướng. */
+function renderItems() {
+  const row = $('items-row'), el = $('items'); row.hidden = !game.items.length; el.textContent = '';
+  game.items.forEach((key, idx) => {
+    const it = ITEMS[key], b = document.createElement('button');
+    b.className = 'item' + (game.selItem === idx ? ' sel' : ''); b.style.setProperty('--c', it.color);
+    b.textContent = it.short; b.title = it.name + ': ' + it.desc;
+    b.setAttribute('aria-label', `${it.name} (${it.desc}) – chạm rồi chạm tướng để gắn`);
+    b.addEventListener('pointerdown', e => startItemDrag(e, idx, b));
+    el.appendChild(b);
+  });
+}
+let itemDrag = null;
+function startItemDrag(e, idx, btn) {
+  e.preventDefault();
+  try { btn.setPointerCapture(e.pointerId); } catch (err) { /* bỏ qua */ }
+  itemDrag = { idx, id: e.pointerId, x0: e.clientX, y0: e.clientY, moved: false, ghost: null, touch: e.pointerType !== 'mouse' };
+  const move = ev => {
+    if (!itemDrag || ev.pointerId !== itemDrag.id) return;
+    if (!itemDrag.moved && Math.hypot(ev.clientX - itemDrag.x0, ev.clientY - itemDrag.y0) > 10) {
+      itemDrag.moved = true; itemDrag.ghost = btn.cloneNode(true); itemDrag.ghost.classList.add('item-ghost', 'sel'); document.body.appendChild(itemDrag.ghost); haptic(8);
+    }
+    if (itemDrag.ghost) { itemDrag.ghost.style.left = ev.clientX + 'px'; itemDrag.ghost.style.top = ev.clientY + 'px'; }
+  };
+  const up = ev => {
+    if (!itemDrag || ev.pointerId !== itemDrag.id) return;
+    btn.removeEventListener('pointermove', move); btn.removeEventListener('pointerup', up); btn.removeEventListener('pointercancel', up);
+    const d = itemDrag; itemDrag = null; if (d.ghost) d.ghost.remove();
+    if (!d.moved) { game.selItem = game.selItem === d.idx ? -1 : d.idx; if (game.selItem >= 0) ui.toast('Chạm vào tướng để gắn ' + ITEMS[game.items[d.idx]].name); ui.update(); return; }
+    if (ev.type === 'pointercancel') return;
+    lastPointerTouch = d.touch;
+    const pk = screenPick(ev.clientX, ev.clientY);   // gắn cho tướng dưới điểm thả (trên bàn hoặc hàng chờ)
+    if (pk && pk.type !== 'enemy') equipItem(d.idx, pk.type === 'board' ? { type: 'board', unit: pk.unit } : { type: 'bench', i: pk.i });
+    else ui.toast('Thả trang bị lên một tướng phe ta để gắn');
+  };
+  btn.addEventListener('pointermove', move); btn.addEventListener('pointerup', up); btn.addEventListener('pointercancel', up);
+}
 function renderSelActions() {
   const sel = game.sel, sell = $('btn-sell'), back = $('btn-tobench');
   let key = null, star = 1;
   if (sel && sel.type === 'bench' && game.bench[sel.i]) { key = game.bench[sel.i].key; star = game.bench[sel.i].star; }
   if (sel && sel.type === 'board') { key = sel.unit.key; star = sel.unit.star; }
   sell.hidden = !key; back.hidden = !(sel && sel.type === 'board');
+  // Đang chọn tướng: nút Bán / Về hàng chờ thay chỗ Làm mới / Mua kinh nghiệm → cửa hàng giữ nguyên chiều cao, camera không nhảy.
+  $('btn-reroll').hidden = $('btn-xp').hidden = !!key;
   if (key) sell.textContent = 'Bán ' + (UNIT_DEFS[key].short || UNIT_DEFS[key].name) + ' +' + sellPrice(key, star);
 }
 function renderTraits() {
@@ -189,6 +251,7 @@ $('btn-hud-toggle').addEventListener('click', () => setHudCollapsed(!$('left-col
 setHudCollapsed(store.get('hudCollapsed', false));
 $('btn-close-settings').addEventListener('click', () => { closeSettings(); $('btn-settings').focus(); });
 window.addEventListener('keydown', e => { if (e.key === 'Escape') closeSettings(); });
+$('opt-preptimer').checked = options.prepTimer; $('opt-preptimer').addEventListener('change', e => { options.prepTimer = e.target.checked; store.set('prepTimer', e.target.checked); ui.timer(); });
 $('opt-haptics').checked = options.haptics; $('opt-haptics').addEventListener('change', e => { options.haptics = e.target.checked; store.set('haptics', e.target.checked); if (e.target.checked) haptic(15); });
 $('opt-sound').checked = !Sfx.muted; $('opt-sound').addEventListener('change', e => { Sfx.muted = !e.target.checked; store.set('mute', Sfx.muted); });
 $('btn-enter').addEventListener('click', () => { Sfx.init(); $('intro').hidden = true; canvas.focus(); });
@@ -236,6 +299,11 @@ QualityManager.onChange(applyQuality);
  * ===================================================================*/
 const fx2d = $('fx2d'), g2 = fx2d.getContext('2d');
 let fxScale = 1;
+/** Ô vuông nhỏ màu theo trang bị, dưới thanh máu. */
+function drawItemDots(items, x, y, s) {
+  const w = 7 * s, gap = 2 * s, x0 = x - (items.length * (w + gap) - gap) / 2;
+  items.forEach((k, i) => { g2.fillStyle = 'rgba(0,0,0,0.7)'; g2.fillRect(x0 + i * (w + gap) - 1, y - 1, w + 2, w + 2); g2.fillStyle = ITEMS[k] ? ITEMS[k].color : '#fff'; g2.fillRect(x0 + i * (w + gap), y, w, w); });
+}
 function draw2D(dt) {
   const W = fx2d.width, H = fx2d.height; g2.clearRect(0, 0, W, H);
   const s = fxScale;
@@ -259,6 +327,7 @@ function draw2D(dt) {
       g2.font = `700 ${12 * s}px system-ui, sans-serif`; g2.fillStyle = u.star === 3 ? '#ffd166' : '#d8e2ea';
       g2.fillText('★'.repeat(u.star), x, y - (battle.phase === 'prep' || u.status.stun > 0 ? 21 : 9) * s);
     }
+    if (u.items && u.items.length) drawItemDots(u.items, x, y + h * 1.7 + 6 * s, s);
   }
   g2.font = `700 ${12 * s}px system-ui, sans-serif`;
   for (const u of benchUnits) {
@@ -267,6 +336,7 @@ function draw2D(dt) {
     const x = (_v1.x * 0.5 + 0.5) * W, y = (-_v1.y * 0.5 + 0.5) * H;
     g2.lineWidth = 3 * s; g2.strokeStyle = 'rgba(0,0,0,0.75)'; const txt = '★'.repeat(u.star);
     g2.strokeText(txt, x, y); g2.fillStyle = u.star === 3 ? '#ffd166' : u.star === 2 ? '#d8e2ea' : '#c79a6a'; g2.fillText(txt, x, y);
+    if (u.items && u.items.length) drawItemDots(u.items, x, y + 10 * s, s);
   }
   for (let i = floaters.length - 1; i >= 0; i--) {
     const f = floaters[i]; f.t += dt;
