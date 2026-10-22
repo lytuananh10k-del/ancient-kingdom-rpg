@@ -89,7 +89,7 @@ class Unit {
     this.status = { stun: 0, frozen: 0, burn: 0 };
     this.fx.clear();
     this.target = null; this.retarget = 0; this.atkCd = crand() * 0.4; this.attackIdx = 0; this.attackSeq = 0; this.dashCd = 0; this.nav = null; this.searchT = 0;
-    this.cs = { dealt: 0, physical: 0, magic: 0, true: 0, taken: 0, healed: 0, shielded: 0, casts: 0, kills: 0, attacks: 0 };   // thống kê trận (CombatTestRunner)
+    this.cs = { dealt: 0, physical: 0, magic: 0, true: 0, taken: 0, healed: 0, shielded: 0, casts: 0, kills: 0, attacks: 0, cc: 0, deathT: -1, maxHit: 0, maxHitRatio: 0, maxStatus: 0, maxAtkMul: 1 };   // thống kê trận (CombatTestRunner)
     this.ccImmune = 0; this.avoid = null; this.stuckT = 0; this.progT = 0; this.progD = Infinity; this.fullManaT = 0;
     this.knock = new V3(); this.deathT = 0; this.casting = null; this.flash = 0; this.manaLock = false;
     tileCenter(this.homeTile.c, this.homeTile.r, this.pos); this.yaw = this.team === 'ally' ? 0 : Math.PI;
@@ -140,12 +140,16 @@ class Unit {
       .add('recover', {
         maxTime: 1, fallback: 'move',
         enter(prev, dur = 0.15) { self.recoverT = dur; self.anim.locomotion(0); },
-        update(dt) { self.recoverT -= dt; if (self.recoverT <= 0) self.fsm.set('move'); }
+        update(dt) { self.recoverT -= dt; if (self.recoverT <= 0 || (self.attackTarget && !self.attackTarget.alive)) self.fsm.set('move'); }   // mục tiêu chết → bỏ phần thu chiêu, chọn mục tiêu mới ngay
       })
       .add('attack', {
         maxTime: 2.5, fallback: 'move',
         enter() { self.startAttack(); },
-        update() { self.anim.locomotion(0); },
+        update() {
+          self.anim.locomotion(0);
+          // mục tiêu chết khi đòn còn đang vung (chưa tới khung va chạm) → huỷ đòn, đánh ngay mục tiêu mới (không mất nhịp)
+          if (self.attackTarget && !self.attackTarget.alive && !self.attackHit) { self.atkCd = Math.min(self.atkCd, 0.05); self.retarget = 0; self.fsm.set('move'); }
+        },
         exit() { self.anim.trail(false); if (self.attackTl && !self.attackTl.done) self.attackTl.cancel(); }
       })
       .add('dash', {
@@ -182,7 +186,11 @@ class Unit {
         update(dt, time) { self.pos.addScaledVector(self.knock, dt); self.knock.multiplyScalar(Math.max(0, 1 - 6 * dt)); if (time > 0.55) self.fsm.set(self.status.stun > 0 ? 'stun' : 'move'); }
       })
       .add('dead', {
-        enter() { self.anim.hold('Death', true); self.deathT = 0; if (self.casting && !self.casting.tl.done) self.casting.tl.cancel(); },
+        enter() {
+          self.anim.hold('Death', true); self.deathT = 0; if (self.casting && !self.casting.tl.done) self.casting.tl.cancel();
+          self.fx.clear(); self.nav = null; self.target = null;   // không giữ trạng thái / đường đi / mục tiêu sau khi chết
+          for (const o of units) if (o.target === self) { o.target = null; o.retarget = 0; }   // ai đang nhắm tướng này chọn lại ngay
+        },
         update(dt) { self.deathT += dt; self.U.uDissolve.value = clamp((self.deathT - 1.1) / 1.4, 0, 1.05);
           if (self.deathT > 1.1 && self.deathT < 2.4 && Math.random() < 0.6) { const p = self.pos; vfx.particles.emit(p.x + rand(-0.5, 0.5), rand(0.1, 0.6), p.z + rand(-0.5, 0.5), 0, rand(1, 2.5), 0, 0.8, 0.18, 0.02, self.team === 'ally' ? COLORS.allyA : COLORS.enemyA, 0.8, 0.5); }
           if (self.deathT > 2.6) self.rig.root.visible = false; }
@@ -297,6 +305,7 @@ class Unit {
   startAttack() {
     const t = this.findTarget(); if (!t) { this.fsm.set('move'); return; }
     TraitEvents.emit('onAttack', this, t);
+    this.attackTarget = t; this.attackHit = false;
     this.cs.attacks++; if (!t.alive) CombatAudit.deadTargetAttacks++;
     this.snapFace(t.pos);
     const ranged = !!this.def.ranged;
@@ -320,6 +329,7 @@ class Unit {
     const aseq = ++this.attackSeq;   // mã đòn: mỗi đòn đánh thường gây sát thương tối đa 1 lần (kiểm thử đếm theo mã này)
     tl.at(tim.active, ranged ? 'LaunchProjectile' : 'ApplyDamage', () => {
       if (act && this.rig.action === act) { combatLog.syncChecks++; combatLog.syncMaxErr = Math.max(combatLog.syncMaxErr, Math.abs(act.t - act.ae)); }
+      this.attackHit = true;
       if (!t.alive) { combatLog.deadTargetSkips = (combatLog.deadTargetSkips || 0) + 1; return; }   // mục tiêu đã chết: không đánh xác
       if (ranged) Projectiles.basic(this, t, heavy, aseq);
       else if (t.pos.distanceTo(this.pos) <= this.def.range + 0.9) {

@@ -42,6 +42,7 @@ function applyStun(u, dur, kind = 'stun', src) {
   const freeze = kind === 'freeze';
   if (u.status.stun <= 0 || (freeze && u.status.frozen <= 0)) floatText(u.chest(_v2.clone()), freeze ? 'Đóng băng' : 'Choáng', freeze ? '#cfeeff' : '#ffe08a', 0.8);
   u.fx.push({ type: freeze ? 'freeze' : 'stun', dur: d, src });
+  if (src && src.cs) src.cs.cc += d;   // thời gian khống chế gây ra (BalanceSimulator)
   if (freeze) { combatLog.freezes = (combatLog.freezes || 0) + 1; vfx.particles.burst(u.chest(_v2.clone()), SKILL_COLORS.ice, 24, 3, 0.7, 0.3, { drag: 3 }); }
   else combatLog.stuns++;
   return true;
@@ -98,7 +99,7 @@ function dealDamage(src, dst, mult, opts = {}) {
   dst.hp = Math.max(0, dst.hp - dmg);
   if (opts.attack) { const k = src.id + ':' + opts.attack; if (CombatAudit.hitKeys.has(k)) CombatAudit.doubleHits++; else CombatAudit.hitKeys.add(k); }
   if (!Number.isFinite(dst.hp) || !Number.isFinite(dmg)) CombatAudit.nonFinite++;
-  if (src.cs) { src.cs.dealt += dmg + absorbed; src.cs[r.type] += dmg + absorbed; }
+  if (src.cs) { const hit = dmg + absorbed; src.cs.dealt += hit; src.cs[r.type] += hit; if (hit > src.cs.maxHit) { src.cs.maxHit = hit; src.cs.maxHitRatio = hit / Math.max(1, src.atkNow ? src.atkNow() : src.atk); } }
   if (dst.cs) dst.cs.taken += dmg + absorbed;
   const by = combatLog.byType || (combatLog.byType = { physical: 0, magic: 0, true: 0 }); by[r.type] = (by[r.type] || 0) + dmg + absorbed;
   const ls = (src.bonus ? src.bonus.ls : 0) + (src.fx ? src.fx.sum('ls') : 0);
@@ -128,7 +129,7 @@ function dealDamage(src, dst, mult, opts = {}) {
   }
   if (opts.stun && dst.hp > 0) applyStun(dst, opts.stun, 'stun', src);
   if (opts.burn && dst.hp > 0) applyBurn(dst, src, opts.burn);
-  if (dst.hp <= 0) { if (src.cs) src.cs.kills++; dst.fsm.set('dead'); onUnitDeath(dst); }
+  if (dst.hp <= 0) { if (src.cs) src.cs.kills++; if (dst.cs) dst.cs.deathT = battle.time; dst.fsm.set('dead'); onUnitDeath(dst); }
   // Sự kiện cho tộc/hệ – phát SAU khi xử lý chết để hiệu ứng phụ (nổ Pháp Tu) không làm một tướng chết hai lần.
   TraitEvents.emit('onHit', src, dst, dmg, opts);
   TraitEvents.emit('onDamageTaken', dst, src, dmg, opts);

@@ -59,7 +59,7 @@ function thunderSkill(cfg) {
       cfg.times.forEach((at, i) => {
         tl.at(at, 'SpawnVFX', () => { const s = spots[i]; if (s) lightningBolt(new V3(s.x + rand(-3, 3), 18, s.z + rand(-3, 3)), new V3(s.x, 0.1, s.z), COLORS.thunder, 0.22); });
         tl.at(at, 'ApplyDamage', (self) => { const s = spots[i]; if (!s) return; self.hit = aoe(caster, s, cfg.radius, cfg.mult, { color: COLORS.thunder }); combatCam.shake(0.25); hitStop(0.04); flashLight(_v1.set(s.x, 3, s.z), 0xbfe0ff, 7); Sfx.thunder(); vfx.shockwave(new V3(s.x, 0, s.z), 2.6, COLORS.thunder, 0.4); });
-        tl.at(at, 'ApplyStatusEffect', (self) => (self.hit || []).forEach(u => applyStun(u, cfg.stun)));
+        tl.at(at, 'ApplyStatusEffect', (self) => (self.hit || []).forEach(u => applyStun(u, cfg.stun, 'stun', caster)));
       });
       tl.at(cfg.end, 'Cleanup', () => release());
       tl.onCleanup(c => { if (c) release(); });
@@ -280,7 +280,7 @@ const SKILLS = {
         vfx.particles.emit(center.x + rand(-0.6, 0.6), y - rand(0, 4), center.z + rand(-0.6, 0.6), 0, 6, 0, 0.3, 0.4, 0.05, A, 0.8, 0);
       });
       tl.at(T.slam, 'ApplyDamage', (self) => { self.hitList = aoe(caster, center, 5, 3.0, { heavy: true, knock: 2.2, color: COLORS.white }); });
-      tl.at(T.slam, 'ApplyStatusEffect', (self) => { (self.hitList || []).forEach(u => applyStun(u, 1.2)); });
+      tl.at(T.slam, 'ApplyStatusEffect', (self) => { (self.hitList || []).forEach(u => applyStun(u, 1.2, 'stun', caster)); });
       tl.at(T.slam, 'CameraImpulse', () => { hitStop(0.12); combatCam.shake(0.85); combatCam.kick(new V3(0, -1, 0), 14); flashLight(_v1.set(center.x, 2, center.z), 0xbfe4ff, 9, 4); });
       tl.at(T.slam, 'SpawnVFX', () => {
         const g = new V3(center.x, 0, center.z);

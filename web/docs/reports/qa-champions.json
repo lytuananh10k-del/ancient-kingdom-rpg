@@ -1,0 +1,1658 @@
+[
+ {
+  "key": "kiemdong",
+  "name": "Kiếm Đồng",
+  "cost": 1,
+  "role": "Đấu sĩ",
+  "skill": "Nhất Kiếm Đoạn Thủy",
+  "checks": {
+   "1": {
+    "ok": true,
+    "note": "bậc 1"
+   },
+   "2": {
+    "ok": true,
+    "note": "mua 1, bán ★1/★2/★3 1/2/8"
+   },
+   "3": {
+    "ok": true,
+    "note": "máu 600 công 52 giáp 20 kháng 20"
+   },
+   "4": {
+    "ok": true,
+    "note": "máu 600/1080/1920 · công 52/78/130 · AP 100/115/140"
+   },
+   "5": {
+    "ok": true,
+    "note": "16 đòn, xa nhất 2.54 m / tầm 2.2"
+   },
+   "6": {
+    "ok": true,
+    "note": "mọi đòn vào địch còn sống"
+   },
+   "7": {
+    "ok": true,
+    "note": "3 lần nhatKiem, thiếu năng lượng: 0"
+   },
+   "8": {
+    "ok": true,
+    "note": "gây 1840 · hồi 0 · khiên 0"
+   },
+   "9": {
+    "ok": true,
+    "note": "lệch tư thế–sát thương 16.7 ms / 49 lần đo, đánh 2 lần: 0"
+   },
+   "10": {
+    "ok": true,
+    "note": "máu 0, trạng thái dead, hiệu ứng còn 0, 0 người 0 mẫu máu 0 chưa chết"
+   },
+   "11": {
+    "ok": true,
+    "note": "mọi tướng hiện đủ, máu đầy"
+   },
+   "12": {
+    "ok": true,
+    "note": "đứng yên khi chưa tới tầm lâu nhất 0.00 s"
+   },
+   "13": {
+    "ok": true,
+    "note": "choáng 0.85 s → thoát sau 0.850 s"
+   },
+   "14": {
+    "ok": true,
+    "note": "đổi mục tiêu sau 0.03 s"
+   },
+   "15": {
+    "ok": true,
+    "note": "2 lần tung khi 8 tướng cùng đầy năng lượng, lỗi 0"
+   }
+  }
+ },
+ {
+  "key": "thietve",
+  "name": "Thiết Vệ",
+  "cost": 1,
+  "role": "Đỡ đòn",
+  "skill": "Thiết Bích",
+  "checks": {
+   "1": {
+    "ok": true,
+    "note": "bậc 1"
+   },
+   "2": {
+    "ok": true,
+    "note": "mua 1, bán ★1/★2/★3 1/2/8"
+   },
+   "3": {
+    "ok": true,
+    "note": "máu 920 công 40 giáp 40 kháng 30"
+   },
+   "4": {
+    "ok": true,
+    "note": "máu 920/1656/2944 · công 40/60/100 · AP 100/115/140"
+   },
+   "5": {
+    "ok": true,
+    "note": "39 đòn, xa nhất 2.95 m / tầm 2.6"
+   },
+   "6": {
+    "ok": true,
+    "note": "mọi đòn vào địch còn sống"
+   },
+   "7": {
+    "ok": true,
+    "note": "5 lần thietBich, thiếu năng lượng: 0"
+   },
+   "8": {
+    "ok": true,
+    "note": "gây 1474 · hồi 0 · khiên 0"
+   },
+   "9": {
+    "ok": true,
+    "note": "lệch tư thế–sát thương 16.7 ms / 83 lần đo, đánh 2 lần: 0"
+   },
+   "10": {
+    "ok": true,
+    "note": "máu 0, trạng thái dead, hiệu ứng còn 0, 0 người 0 mẫu máu 0 chưa chết"
+   },
+   "11": {
+    "ok": true,
+    "note": "mọi tướng hiện đủ, máu đầy"
+   },
+   "12": {
+    "ok": true,
+    "note": "đứng yên khi chưa tới tầm lâu nhất 0.02 s"
+   },
+   "13": {
+    "ok": true,
+    "note": "choáng 0.60 s → thoát sau 0.600 s"
+   },
+   "14": {
+    "ok": true,
+    "note": "đổi mục tiêu sau 0.02 s"
+   },
+   "15": {
+    "ok": true,
+    "note": "1 lần tung khi 8 tướng cùng đầy năng lượng, lỗi 0"
+   }
+  }
+ },
+ {
+  "key": "hoa",
+  "name": "Hỏa Linh",
+  "cost": 1,
+  "role": "Pháp sư",
+  "skill": "Hỏa Cầu Thuật",
+  "checks": {
+   "1": {
+    "ok": true,
+    "note": "bậc 1"
+   },
+   "2": {
+    "ok": true,
+    "note": "mua 1, bán ★1/★2/★3 1/2/8"
+   },
+   "3": {
+    "ok": true,
+    "note": "máu 560 công 46 giáp 14 kháng 20"
+   },
+   "4": {
+    "ok": true,
+    "note": "máu 560/1008/1792 · công 46/69/115 · AP 100/115/140"
+   },
+   "5": {
+    "ok": true,
+    "note": "18 đòn, xa nhất 7.83 m / tầm 7.5"
+   },
+   "6": {
+    "ok": true,
+    "note": "mọi đòn vào địch còn sống"
+   },
+   "7": {
+    "ok": true,
+    "note": "3 lần hoaCau, thiếu năng lượng: 0"
+   },
+   "8": {
+    "ok": true,
+    "note": "gây 1662 · hồi 0 · khiên 0"
+   },
+   "9": {
+    "ok": true,
+    "note": "lệch tư thế–sát thương 16.7 ms / 61 lần đo, đánh 2 lần: 0"
+   },
+   "10": {
+    "ok": true,
+    "note": "máu 0, trạng thái dead, hiệu ứng còn 0, 0 người 0 mẫu máu 0 chưa chết"
+   },
+   "11": {
+    "ok": true,
+    "note": "mọi tướng hiện đủ, máu đầy"
+   },
+   "12": {
+    "ok": true,
+    "note": "đứng yên khi chưa tới tầm lâu nhất 0.00 s"
+   },
+   "13": {
+    "ok": true,
+    "note": "choáng 1.00 s → thoát sau 1.000 s"
+   },
+   "14": {
+    "ok": true,
+    "note": "đổi mục tiêu sau 0.03 s"
+   },
+   "15": {
+    "ok": true,
+    "note": "2 lần tung khi 8 tướng cùng đầy năng lượng, lỗi 0"
+   }
+  }
+ },
+ {
+  "key": "thanhmoc",
+  "name": "Thanh Mộc",
+  "cost": 1,
+  "role": "Hỗ trợ",
+  "skill": "Mộc Linh Hồi Xuân",
+  "checks": {
+   "1": {
+    "ok": true,
+    "note": "bậc 1"
+   },
+   "2": {
+    "ok": true,
+    "note": "mua 1, bán ★1/★2/★3 1/2/8"
+   },
+   "3": {
+    "ok": true,
+    "note": "máu 560 công 32 giáp 18 kháng 25"
+   },
+   "4": {
+    "ok": true,
+    "note": "máu 560/1008/1792 · công 32/48/80 · AP 100/115/140"
+   },
+   "5": {
+    "ok": true,
+    "note": "25 đòn, xa nhất 6.85 m / tầm 6.5"
+   },
+   "6": {
+    "ok": true,
+    "note": "mọi đòn vào địch còn sống"
+   },
+   "7": {
+    "ok": true,
+    "note": "4 lần mocLinh, thiếu năng lượng: 0"
+   },
+   "8": {
+    "ok": true,
+    "note": "gây 1042 · hồi 1209 · khiên 0"
+   },
+   "9": {
+    "ok": true,
+    "note": "lệch tư thế–sát thương 16.7 ms / 92 lần đo, đánh 2 lần: 0"
+   },
+   "10": {
+    "ok": true,
+    "note": "máu 0, trạng thái dead, hiệu ứng còn 0, 0 người 0 mẫu máu 0 chưa chết"
+   },
+   "11": {
+    "ok": true,
+    "note": "mọi tướng hiện đủ, máu đầy"
+   },
+   "12": {
+    "ok": true,
+    "note": "đứng yên khi chưa tới tầm lâu nhất 0.02 s"
+   },
+   "13": {
+    "ok": true,
+    "note": "choáng 0.90 s → thoát sau 0.900 s"
+   },
+   "14": {
+    "ok": true,
+    "note": "đổi mục tiêu sau 0.02 s"
+   },
+   "15": {
+    "ok": true,
+    "note": "1 lần tung khi 8 tướng cùng đầy năng lượng, lỗi 0"
+   }
+  }
+ },
+ {
+  "key": "mabinh",
+  "name": "Ma Binh",
+  "cost": 1,
+  "role": "Đấu sĩ",
+  "skill": "Huyết Chiến",
+  "checks": {
+   "1": {
+    "ok": true,
+    "note": "bậc 1"
+   },
+   "2": {
+    "ok": true,
+    "note": "mua 1, bán ★1/★2/★3 1/2/8"
+   },
+   "3": {
+    "ok": true,
+    "note": "máu 640 công 50 giáp 18 kháng 20"
+   },
+   "4": {
+    "ok": true,
+    "note": "máu 640/1152/2048 · công 50/75/125 · AP 100/115/140"
+   },
+   "5": {
+    "ok": true,
+    "note": "18 đòn, xa nhất 2.55 m / tầm 2.2"
+   },
+   "6": {
+    "ok": true,
+    "note": "mọi đòn vào địch còn sống"
+   },
+   "7": {
+    "ok": true,
+    "note": "2 lần huyetChien, thiếu năng lượng: 0"
+   },
+   "8": {
+    "ok": true,
+    "note": "gây 1556 · hồi 0 · khiên 0"
+   },
+   "9": {
+    "ok": true,
+    "note": "lệch tư thế–sát thương 16.7 ms / 52 lần đo, đánh 2 lần: 0"
+   },
+   "10": {
+    "ok": true,
+    "note": "máu 0, trạng thái dead, hiệu ứng còn 0, 0 người 0 mẫu máu 0 chưa chết"
+   },
+   "11": {
+    "ok": true,
+    "note": "mọi tướng hiện đủ, máu đầy"
+   },
+   "12": {
+    "ok": true,
+    "note": "đứng yên khi chưa tới tầm lâu nhất 0.02 s"
+   },
+   "13": {
+    "ok": true,
+    "note": "choáng 0.85 s → thoát sau 0.850 s"
+   },
+   "14": {
+    "ok": true,
+    "note": "đổi mục tiêu sau 0.03 s"
+   },
+   "15": {
+    "ok": true,
+    "note": "2 lần tung khi 8 tướng cùng đầy năng lượng, lỗi 0"
+   }
+  }
+ },
+ {
+  "key": "linhcung",
+  "name": "Linh Cung",
+  "cost": 1,
+  "role": "Xạ thủ",
+  "skill": "Liên Châu Tiễn",
+  "checks": {
+   "1": {
+    "ok": true,
+    "note": "bậc 1"
+   },
+   "2": {
+    "ok": true,
+    "note": "mua 1, bán ★1/★2/★3 1/2/8"
+   },
+   "3": {
+    "ok": true,
+    "note": "máu 520 công 56 giáp 14 kháng 15"
+   },
+   "4": {
+    "ok": true,
+    "note": "máu 520/936/1664 · công 56/84/140 · AP 100/115/140"
+   },
+   "5": {
+    "ok": true,
+    "note": "15 đòn, xa nhất 9.35 m / tầm 9"
+   },
+   "6": {
+    "ok": true,
+    "note": "mọi đòn vào địch còn sống"
+   },
+   "7": {
+    "ok": true,
+    "note": "2 lần lienChau, thiếu năng lượng: 0"
+   },
+   "8": {
+    "ok": true,
+    "note": "gây 1524 · hồi 0 · khiên 0"
+   },
+   "9": {
+    "ok": true,
+    "note": "lệch tư thế–sát thương 16.7 ms / 50 lần đo, đánh 2 lần: 0"
+   },
+   "10": {
+    "ok": true,
+    "note": "máu 0, trạng thái dead, hiệu ứng còn 0, 0 người 0 mẫu máu 0 chưa chết"
+   },
+   "11": {
+    "ok": true,
+    "note": "mọi tướng hiện đủ, máu đầy"
+   },
+   "12": {
+    "ok": true,
+    "note": "đứng yên khi chưa tới tầm lâu nhất 0.02 s"
+   },
+   "13": {
+    "ok": true,
+    "note": "choáng 1.00 s → thoát sau 1.000 s"
+   },
+   "14": {
+    "ok": true,
+    "note": "đổi mục tiêu sau 0.17 s"
+   },
+   "15": {
+    "ok": true,
+    "note": "2 lần tung khi 8 tướng cùng đầy năng lượng, lỗi 0"
+   }
+  }
+ },
+ {
+  "key": "thanhphong",
+  "name": "Thanh Phong Kiếm Khách",
+  "cost": 2,
+  "role": "Đấu sĩ",
+  "skill": "Thanh Phong Liên Trảm",
+  "checks": {
+   "1": {
+    "ok": true,
+    "note": "bậc 2"
+   },
+   "2": {
+    "ok": true,
+    "note": "mua 2, bán ★1/★2/★3 2/5/17"
+   },
+   "3": {
+    "ok": true,
+    "note": "máu 700 công 60 giáp 22 kháng 22"
+   },
+   "4": {
+    "ok": true,
+    "note": "máu 700/1260/2240 · công 60/90/150 · AP 100/115/140"
+   },
+   "5": {
+    "ok": true,
+    "note": "15 đòn, xa nhất 2.55 m / tầm 2.2"
+   },
+   "6": {
+    "ok": true,
+    "note": "mọi đòn vào địch còn sống"
+   },
+   "7": {
+    "ok": true,
+    "note": "2 lần lienTram, thiếu năng lượng: 0"
+   },
+   "8": {
+    "ok": true,
+    "note": "gây 1653 · hồi 0 · khiên 0"
+   },
+   "9": {
+    "ok": true,
+    "note": "lệch tư thế–sát thương 16.7 ms / 49 lần đo, đánh 2 lần: 0"
+   },
+   "10": {
+    "ok": true,
+    "note": "máu 0, trạng thái dead, hiệu ứng còn 0, 0 người 0 mẫu máu 0 chưa chết"
+   },
+   "11": {
+    "ok": true,
+    "note": "mọi tướng hiện đủ, máu đầy"
+   },
+   "12": {
+    "ok": true,
+    "note": "đứng yên khi chưa tới tầm lâu nhất 0.02 s"
+   },
+   "13": {
+    "ok": true,
+    "note": "choáng 0.85 s → thoát sau 0.850 s"
+   },
+   "14": {
+    "ok": true,
+    "note": "đổi mục tiêu sau 0.17 s"
+   },
+   "15": {
+    "ok": true,
+    "note": "2 lần tung khi 8 tướng cùng đầy năng lượng, lỗi 0"
+   }
+  }
+ },
+ {
+  "key": "huyengiap",
+  "name": "Huyền Giáp Vệ",
+  "cost": 2,
+  "role": "Đỡ đòn",
+  "skill": "Hộ Thể Chân Khí",
+  "checks": {
+   "1": {
+    "ok": true,
+    "note": "bậc 2"
+   },
+   "2": {
+    "ok": true,
+    "note": "mua 2, bán ★1/★2/★3 2/5/17"
+   },
+   "3": {
+    "ok": true,
+    "note": "máu 1050 công 42 giáp 45 kháng 35"
+   },
+   "4": {
+    "ok": true,
+    "note": "máu 1050/1890/3360 · công 42/63/105 · AP 100/115/140"
+   },
+   "5": {
+    "ok": true,
+    "note": "22 đòn, xa nhất 2.95 m / tầm 2.6"
+   },
+   "6": {
+    "ok": true,
+    "note": "mọi đòn vào địch còn sống"
+   },
+   "7": {
+    "ok": true,
+    "note": "2 lần hoThe, thiếu năng lượng: 0"
+   },
+   "8": {
+    "ok": true,
+    "note": "gây 1334 · hồi 0 · khiên 1739"
+   },
+   "9": {
+    "ok": true,
+    "note": "lệch tư thế–sát thương 16.7 ms / 75 lần đo, đánh 2 lần: 0"
+   },
+   "10": {
+    "ok": true,
+    "note": "máu 0, trạng thái dead, hiệu ứng còn 0, 0 người 0 mẫu máu 0 chưa chết"
+   },
+   "11": {
+    "ok": true,
+    "note": "mọi tướng hiện đủ, máu đầy"
+   },
+   "12": {
+    "ok": true,
+    "note": "đứng yên khi chưa tới tầm lâu nhất 0.02 s"
+   },
+   "13": {
+    "ok": true,
+    "note": "choáng 0.60 s → thoát sau 0.600 s"
+   },
+   "14": {
+    "ok": true,
+    "note": "đổi mục tiêu sau 0.02 s"
+   },
+   "15": {
+    "ok": true,
+    "note": "1 lần tung khi 8 tướng cùng đầy năng lượng, lỗi 0"
+   }
+  }
+ },
+ {
+  "key": "bangling",
+  "name": "Băng Linh Sư",
+  "cost": 2,
+  "role": "Pháp sư",
+  "skill": "Hàn Băng Tiễn",
+  "checks": {
+   "1": {
+    "ok": true,
+    "note": "bậc 2"
+   },
+   "2": {
+    "ok": true,
+    "note": "mua 2, bán ★1/★2/★3 2/5/17"
+   },
+   "3": {
+    "ok": true,
+    "note": "máu 600 công 48 giáp 15 kháng 22"
+   },
+   "4": {
+    "ok": true,
+    "note": "máu 600/1080/1920 · công 48/72/120 · AP 100/115/140"
+   },
+   "5": {
+    "ok": true,
+    "note": "20 đòn, xa nhất 7.83 m / tầm 7.5"
+   },
+   "6": {
+    "ok": true,
+    "note": "mọi đòn vào địch còn sống"
+   },
+   "7": {
+    "ok": true,
+    "note": "3 lần hanBang, thiếu năng lượng: 0"
+   },
+   "8": {
+    "ok": true,
+    "note": "gây 1737 · hồi 0 · khiên 0"
+   },
+   "9": {
+    "ok": true,
+    "note": "lệch tư thế–sát thương 16.7 ms / 63 lần đo, đánh 2 lần: 0"
+   },
+   "10": {
+    "ok": true,
+    "note": "máu 0, trạng thái dead, hiệu ứng còn 0, 0 người 0 mẫu máu 0 chưa chết"
+   },
+   "11": {
+    "ok": true,
+    "note": "mọi tướng hiện đủ, máu đầy"
+   },
+   "12": {
+    "ok": true,
+    "note": "đứng yên khi chưa tới tầm lâu nhất 0.00 s"
+   },
+   "13": {
+    "ok": true,
+    "note": "choáng 1.00 s → thoát sau 1.000 s"
+   },
+   "14": {
+    "ok": true,
+    "note": "đổi mục tiêu sau 0.03 s"
+   },
+   "15": {
+    "ok": true,
+    "note": "2 lần tung khi 8 tướng cùng đầy năng lượng, lỗi 0"
+   }
+  }
+ },
+ {
+  "key": "huyetma",
+  "name": "Huyết Ma",
+  "cost": 2,
+  "role": "Đấu sĩ",
+  "skill": "Huyết Phệ",
+  "checks": {
+   "1": {
+    "ok": true,
+    "note": "bậc 2"
+   },
+   "2": {
+    "ok": true,
+    "note": "mua 2, bán ★1/★2/★3 2/5/17"
+   },
+   "3": {
+    "ok": true,
+    "note": "máu 800 công 52 giáp 22 kháng 25"
+   },
+   "4": {
+    "ok": true,
+    "note": "máu 800/1440/2560 · công 52/78/130 · AP 100/115/140"
+   },
+   "5": {
+    "ok": true,
+    "note": "18 đòn, xa nhất 2.55 m / tầm 2.2"
+   },
+   "6": {
+    "ok": true,
+    "note": "mọi đòn vào địch còn sống"
+   },
+   "7": {
+    "ok": true,
+    "note": "3 lần huyetPhe, thiếu năng lượng: 0"
+   },
+   "8": {
+    "ok": true,
+    "note": "gây 1602 · hồi 218 · khiên 0"
+   },
+   "9": {
+    "ok": true,
+    "note": "lệch tư thế–sát thương 16.7 ms / 57 lần đo, đánh 2 lần: 0"
+   },
+   "10": {
+    "ok": true,
+    "note": "máu 0, trạng thái dead, hiệu ứng còn 0, 0 người 0 mẫu máu 0 chưa chết"
+   },
+   "11": {
+    "ok": true,
+    "note": "mọi tướng hiện đủ, máu đầy"
+   },
+   "12": {
+    "ok": true,
+    "note": "đứng yên khi chưa tới tầm lâu nhất 0.02 s"
+   },
+   "13": {
+    "ok": true,
+    "note": "choáng 0.85 s → thoát sau 0.850 s"
+   },
+   "14": {
+    "ok": true,
+    "note": "đổi mục tiêu sau 0.02 s"
+   },
+   "15": {
+    "ok": true,
+    "note": "2 lần tung khi 8 tướng cùng đầy năng lượng, lỗi 0"
+   }
+  }
+ },
+ {
+  "key": "loithuong",
+  "name": "Lôi Thương",
+  "cost": 2,
+  "role": "Đấu sĩ",
+  "skill": "Lôi Thương Xuyên Vân",
+  "checks": {
+   "1": {
+    "ok": true,
+    "note": "bậc 2"
+   },
+   "2": {
+    "ok": true,
+    "note": "mua 2, bán ★1/★2/★3 2/5/17"
+   },
+   "3": {
+    "ok": true,
+    "note": "máu 780 công 58 giáp 32 kháng 25"
+   },
+   "4": {
+    "ok": true,
+    "note": "máu 780/1404/2496 · công 58/87/145 · AP 100/115/140"
+   },
+   "5": {
+    "ok": true,
+    "note": "16 đòn, xa nhất 3.14 m / tầm 2.8"
+   },
+   "6": {
+    "ok": true,
+    "note": "mọi đòn vào địch còn sống"
+   },
+   "7": {
+    "ok": true,
+    "note": "2 lần loiThuong, thiếu năng lượng: 0"
+   },
+   "8": {
+    "ok": true,
+    "note": "gây 1847 · hồi 0 · khiên 0"
+   },
+   "9": {
+    "ok": true,
+    "note": "lệch tư thế–sát thương 16.7 ms / 52 lần đo, đánh 2 lần: 0"
+   },
+   "10": {
+    "ok": true,
+    "note": "máu 0, trạng thái dead, hiệu ứng còn 0, 0 người 0 mẫu máu 0 chưa chết"
+   },
+   "11": {
+    "ok": true,
+    "note": "mọi tướng hiện đủ, máu đầy"
+   },
+   "12": {
+    "ok": true,
+    "note": "đứng yên khi chưa tới tầm lâu nhất 0.02 s"
+   },
+   "13": {
+    "ok": true,
+    "note": "choáng 0.85 s → thoát sau 0.850 s"
+   },
+   "14": {
+    "ok": true,
+    "note": "đổi mục tiêu sau 0.03 s"
+   },
+   "15": {
+    "ok": true,
+    "note": "2 lần tung khi 8 tướng cùng đầy năng lượng, lỗi 0"
+   }
+  }
+ },
+ {
+  "key": "linhy",
+  "name": "Linh Y",
+  "cost": 2,
+  "role": "Hỗ trợ",
+  "skill": "Diệu Thủ Hồi Xuân",
+  "checks": {
+   "1": {
+    "ok": true,
+    "note": "bậc 2"
+   },
+   "2": {
+    "ok": true,
+    "note": "mua 2, bán ★1/★2/★3 2/5/17"
+   },
+   "3": {
+    "ok": true,
+    "note": "máu 660 công 36 giáp 18 kháng 28"
+   },
+   "4": {
+    "ok": true,
+    "note": "máu 660/1188/2112 · công 36/54/90 · AP 100/115/140"
+   },
+   "5": {
+    "ok": true,
+    "note": "28 đòn, xa nhất 6.83 m / tầm 6.5"
+   },
+   "6": {
+    "ok": true,
+    "note": "mọi đòn vào địch còn sống"
+   },
+   "7": {
+    "ok": true,
+    "note": "4 lần dieuThu, thiếu năng lượng: 0"
+   },
+   "8": {
+    "ok": true,
+    "note": "gây 1283 · hồi 1234 · khiên 0"
+   },
+   "9": {
+    "ok": true,
+    "note": "lệch tư thế–sát thương 16.7 ms / 92 lần đo, đánh 2 lần: 0"
+   },
+   "10": {
+    "ok": true,
+    "note": "máu 0, trạng thái dead, hiệu ứng còn 0, 0 người 0 mẫu máu 0 chưa chết"
+   },
+   "11": {
+    "ok": true,
+    "note": "mọi tướng hiện đủ, máu đầy"
+   },
+   "12": {
+    "ok": true,
+    "note": "đứng yên khi chưa tới tầm lâu nhất 0.00 s"
+   },
+   "13": {
+    "ok": true,
+    "note": "choáng 0.90 s → thoát sau 0.900 s"
+   },
+   "14": {
+    "ok": true,
+    "note": "đổi mục tiêu sau 0.02 s"
+   },
+   "15": {
+    "ok": true,
+    "note": "1 lần tung khi 8 tướng cùng đầy năng lượng, lỗi 0"
+   }
+  }
+ },
+ {
+  "key": "ngukiem",
+  "name": "Ngự Kiếm Chân Nhân",
+  "cost": 3,
+  "role": "Pháp sư",
+  "skill": "Ngự Kiếm Thuật",
+  "checks": {
+   "1": {
+    "ok": true,
+    "note": "bậc 3"
+   },
+   "2": {
+    "ok": true,
+    "note": "mua 3, bán ★1/★2/★3 3/8/26"
+   },
+   "3": {
+    "ok": true,
+    "note": "máu 760 công 58 giáp 22 kháng 25"
+   },
+   "4": {
+    "ok": true,
+    "note": "máu 760/1368/2432 · công 58/87/145 · AP 100/115/140"
+   },
+   "5": {
+    "ok": true,
+    "note": "15 đòn, xa nhất 5.81 m / tầm 5.5"
+   },
+   "6": {
+    "ok": true,
+    "note": "mọi đòn vào địch còn sống"
+   },
+   "7": {
+    "ok": true,
+    "note": "2 lần nguKiem, thiếu năng lượng: 0"
+   },
+   "8": {
+    "ok": true,
+    "note": "gây 1543 · hồi 0 · khiên 0"
+   },
+   "9": {
+    "ok": true,
+    "note": "lệch tư thế–sát thương 16.7 ms / 49 lần đo, đánh 2 lần: 0"
+   },
+   "10": {
+    "ok": true,
+    "note": "máu 0, trạng thái dead, hiệu ứng còn 0, 0 người 0 mẫu máu 0 chưa chết"
+   },
+   "11": {
+    "ok": true,
+    "note": "mọi tướng hiện đủ, máu đầy"
+   },
+   "12": {
+    "ok": true,
+    "note": "đứng yên khi chưa tới tầm lâu nhất 0.02 s"
+   },
+   "13": {
+    "ok": true,
+    "note": "choáng 1.00 s → thoát sau 1.000 s"
+   },
+   "14": {
+    "ok": true,
+    "note": "đổi mục tiêu sau 0.03 s"
+   },
+   "15": {
+    "ok": true,
+    "note": "2 lần tung khi 8 tướng cùng đầy năng lượng, lỗi 0"
+   }
+  }
+ },
+ {
+  "key": "cuuviem",
+  "name": "Cửu Viêm Pháp Sư",
+  "cost": 3,
+  "role": "Pháp sư",
+  "skill": "Cửu Viêm Hỏa Trận",
+  "checks": {
+   "1": {
+    "ok": true,
+    "note": "bậc 3"
+   },
+   "2": {
+    "ok": true,
+    "note": "mua 3, bán ★1/★2/★3 3/8/26"
+   },
+   "3": {
+    "ok": true,
+    "note": "máu 740 công 60 giáp 18 kháng 22"
+   },
+   "4": {
+    "ok": true,
+    "note": "máu 740/1332/2368 · công 60/90/150 · AP 100/115/140"
+   },
+   "5": {
+    "ok": true,
+    "note": "13 đòn, xa nhất 7.82 m / tầm 7.5"
+   },
+   "6": {
+    "ok": true,
+    "note": "mọi đòn vào địch còn sống"
+   },
+   "7": {
+    "ok": true,
+    "note": "2 lần cuuViem, thiếu năng lượng: 0"
+   },
+   "8": {
+    "ok": true,
+    "note": "gây 1565 · hồi 0 · khiên 0"
+   },
+   "9": {
+    "ok": true,
+    "note": "lệch tư thế–sát thương 16.7 ms / 47 lần đo, đánh 2 lần: 0"
+   },
+   "10": {
+    "ok": true,
+    "note": "máu 0, trạng thái dead, hiệu ứng còn 0, 0 người 0 mẫu máu 0 chưa chết"
+   },
+   "11": {
+    "ok": true,
+    "note": "mọi tướng hiện đủ, máu đầy"
+   },
+   "12": {
+    "ok": true,
+    "note": "đứng yên khi chưa tới tầm lâu nhất 0.02 s"
+   },
+   "13": {
+    "ok": true,
+    "note": "choáng 1.00 s → thoát sau 1.000 s"
+   },
+   "14": {
+    "ok": true,
+    "note": "đổi mục tiêu sau 0.02 s"
+   },
+   "15": {
+    "ok": true,
+    "note": "2 lần tung khi 8 tướng cùng đầy năng lượng, lỗi 0"
+   }
+  }
+ },
+ {
+  "key": "kimcuong",
+  "name": "Kim Cang Hộ Pháp",
+  "cost": 3,
+  "role": "Đỡ đòn",
+  "skill": "Kim Cang Bất Hoại",
+  "checks": {
+   "1": {
+    "ok": true,
+    "note": "bậc 3"
+   },
+   "2": {
+    "ok": true,
+    "note": "mua 3, bán ★1/★2/★3 3/8/26"
+   },
+   "3": {
+    "ok": true,
+    "note": "máu 1300 công 50 giáp 50 kháng 40"
+   },
+   "4": {
+    "ok": true,
+    "note": "máu 1300/2340/4160 · công 50/75/125 · AP 100/115/140"
+   },
+   "5": {
+    "ok": true,
+    "note": "20 đòn, xa nhất 2.93 m / tầm 2.6"
+   },
+   "6": {
+    "ok": true,
+    "note": "mọi đòn vào địch còn sống"
+   },
+   "7": {
+    "ok": true,
+    "note": "2 lần kimCang, thiếu năng lượng: 0"
+   },
+   "8": {
+    "ok": true,
+    "note": "gây 1643 · hồi 0 · khiên 646"
+   },
+   "9": {
+    "ok": true,
+    "note": "lệch tư thế–sát thương 16.7 ms / 65 lần đo, đánh 2 lần: 0"
+   },
+   "10": {
+    "ok": true,
+    "note": "máu 0, trạng thái dead, hiệu ứng còn 0, 0 người 0 mẫu máu 0 chưa chết"
+   },
+   "11": {
+    "ok": true,
+    "note": "mọi tướng hiện đủ, máu đầy"
+   },
+   "12": {
+    "ok": true,
+    "note": "đứng yên khi chưa tới tầm lâu nhất 0.02 s"
+   },
+   "13": {
+    "ok": true,
+    "note": "choáng 0.60 s → thoát sau 0.600 s"
+   },
+   "14": {
+    "ok": true,
+    "note": "đổi mục tiêu sau 0.02 s"
+   },
+   "15": {
+    "ok": true,
+    "note": "1 lần tung khi 8 tướng cùng đầy năng lượng, lỗi 0"
+   }
+  }
+ },
+ {
+  "key": "anhsat",
+  "name": "Ảnh Sát",
+  "cost": 3,
+  "role": "Sát thủ",
+  "skill": "Ảnh Tập",
+  "checks": {
+   "1": {
+    "ok": true,
+    "note": "bậc 3"
+   },
+   "2": {
+    "ok": true,
+    "note": "mua 3, bán ★1/★2/★3 3/8/26"
+   },
+   "3": {
+    "ok": true,
+    "note": "máu 680 công 64 giáp 20 kháng 20"
+   },
+   "4": {
+    "ok": true,
+    "note": "máu 680/1224/2176 · công 64/96/160 · AP 100/115/140"
+   },
+   "5": {
+    "ok": true,
+    "note": "16 đòn, xa nhất 2.53 m / tầm 2.2"
+   },
+   "6": {
+    "ok": true,
+    "note": "mọi đòn vào địch còn sống"
+   },
+   "7": {
+    "ok": true,
+    "note": "2 lần anhTap, thiếu năng lượng: 0"
+   },
+   "8": {
+    "ok": true,
+    "note": "gây 2131 · hồi 0 · khiên 0"
+   },
+   "9": {
+    "ok": true,
+    "note": "lệch tư thế–sát thương 16.7 ms / 52 lần đo, đánh 2 lần: 0"
+   },
+   "10": {
+    "ok": true,
+    "note": "máu 0, trạng thái dead, hiệu ứng còn 0, 0 người 0 mẫu máu 0 chưa chết"
+   },
+   "11": {
+    "ok": true,
+    "note": "mọi tướng hiện đủ, máu đầy"
+   },
+   "12": {
+    "ok": true,
+    "note": "đứng yên khi chưa tới tầm lâu nhất 0.02 s"
+   },
+   "13": {
+    "ok": true,
+    "note": "choáng 1.00 s → thoát sau 1.000 s"
+   },
+   "14": {
+    "ok": true,
+    "note": "đổi mục tiêu sau 0.02 s"
+   },
+   "15": {
+    "ok": true,
+    "note": "2 lần tung khi 8 tướng cùng đầy năng lượng, lỗi 0"
+   }
+  }
+ },
+ {
+  "key": "huyenbang",
+  "name": "Huyền Băng Tiên Tử",
+  "cost": 3,
+  "role": "Pháp sư",
+  "skill": "Huyền Băng Phong Ấn",
+  "checks": {
+   "1": {
+    "ok": true,
+    "note": "bậc 3"
+   },
+   "2": {
+    "ok": true,
+    "note": "mua 3, bán ★1/★2/★3 3/8/26"
+   },
+   "3": {
+    "ok": true,
+    "note": "máu 740 công 56 giáp 18 kháng 28"
+   },
+   "4": {
+    "ok": true,
+    "note": "máu 740/1332/2368 · công 56/84/140 · AP 100/115/140"
+   },
+   "5": {
+    "ok": true,
+    "note": "17 đòn, xa nhất 7.83 m / tầm 7.5"
+   },
+   "6": {
+    "ok": true,
+    "note": "mọi đòn vào địch còn sống"
+   },
+   "7": {
+    "ok": true,
+    "note": "2 lần huyenBang, thiếu năng lượng: 0"
+   },
+   "8": {
+    "ok": true,
+    "note": "gây 1630 · hồi 0 · khiên 0"
+   },
+   "9": {
+    "ok": true,
+    "note": "lệch tư thế–sát thương 16.7 ms / 54 lần đo, đánh 2 lần: 0"
+   },
+   "10": {
+    "ok": true,
+    "note": "máu 0, trạng thái dead, hiệu ứng còn 0, 0 người 0 mẫu máu 0 chưa chết"
+   },
+   "11": {
+    "ok": true,
+    "note": "mọi tướng hiện đủ, máu đầy"
+   },
+   "12": {
+    "ok": true,
+    "note": "đứng yên khi chưa tới tầm lâu nhất 0.00 s"
+   },
+   "13": {
+    "ok": true,
+    "note": "choáng 1.00 s → thoát sau 1.000 s"
+   },
+   "14": {
+    "ok": true,
+    "note": "đổi mục tiêu sau 0.02 s"
+   },
+   "15": {
+    "ok": true,
+    "note": "1 lần tung khi 8 tướng cùng đầy năng lượng, lỗi 0"
+   }
+  }
+ },
+ {
+  "key": "vocuc",
+  "name": "Vô Cực Kiếm Tôn",
+  "cost": 4,
+  "role": "Đấu sĩ",
+  "skill": "Vô Cực Kiếm Khí",
+  "checks": {
+   "1": {
+    "ok": true,
+    "note": "bậc 4"
+   },
+   "2": {
+    "ok": true,
+    "note": "mua 4, bán ★1/★2/★3 4/11/35"
+   },
+   "3": {
+    "ok": true,
+    "note": "máu 1000 công 68 giáp 30 kháng 30"
+   },
+   "4": {
+    "ok": true,
+    "note": "máu 1000/1800/3200 · công 68/102/170 · AP 100/115/140"
+   },
+   "5": {
+    "ok": true,
+    "note": "9 đòn, xa nhất 2.74 m / tầm 2.4"
+   },
+   "6": {
+    "ok": true,
+    "note": "mọi đòn vào địch còn sống"
+   },
+   "7": {
+    "ok": true,
+    "note": "1 lần voCucKiem, thiếu năng lượng: 0"
+   },
+   "8": {
+    "ok": true,
+    "note": "gây 1993 · hồi 0 · khiên 0"
+   },
+   "9": {
+    "ok": true,
+    "note": "lệch tư thế–sát thương 16.7 ms / 35 lần đo, đánh 2 lần: 0"
+   },
+   "10": {
+    "ok": true,
+    "note": "máu 0, trạng thái dead, hiệu ứng còn 0, 0 người 0 mẫu máu 0 chưa chết"
+   },
+   "11": {
+    "ok": true,
+    "note": "mọi tướng hiện đủ, máu đầy"
+   },
+   "12": {
+    "ok": true,
+    "note": "đứng yên khi chưa tới tầm lâu nhất 0.02 s"
+   },
+   "13": {
+    "ok": true,
+    "note": "choáng 0.85 s → thoát sau 0.850 s"
+   },
+   "14": {
+    "ok": true,
+    "note": "đổi mục tiêu sau 0.08 s"
+   },
+   "15": {
+    "ok": true,
+    "note": "2 lần tung khi 8 tướng cùng đầy năng lượng, lỗi 0"
+   }
+  }
+ },
+ {
+  "key": "loiton",
+  "name": "Thiên Lôi Đạo Nhân",
+  "cost": 4,
+  "role": "Pháp sư",
+  "skill": "Cửu Thiên Lôi Kiếp",
+  "checks": {
+   "1": {
+    "ok": true,
+    "note": "bậc 4"
+   },
+   "2": {
+    "ok": true,
+    "note": "mua 4, bán ★1/★2/★3 4/11/35"
+   },
+   "3": {
+    "ok": true,
+    "note": "máu 880 công 66 giáp 22 kháng 30"
+   },
+   "4": {
+    "ok": true,
+    "note": "máu 880/1584/2816 · công 66/99/165 · AP 100/115/140"
+   },
+   "5": {
+    "ok": true,
+    "note": "14 đòn, xa nhất 8.31 m / tầm 8"
+   },
+   "6": {
+    "ok": true,
+    "note": "mọi đòn vào địch còn sống"
+   },
+   "7": {
+    "ok": true,
+    "note": "2 lần cuuThienLoi, thiếu năng lượng: 0"
+   },
+   "8": {
+    "ok": true,
+    "note": "gây 1545 · hồi 0 · khiên 0"
+   },
+   "9": {
+    "ok": true,
+    "note": "lệch tư thế–sát thương 16.7 ms / 48 lần đo, đánh 2 lần: 0"
+   },
+   "10": {
+    "ok": true,
+    "note": "máu 0, trạng thái dead, hiệu ứng còn 0, 0 người 0 mẫu máu 0 chưa chết"
+   },
+   "11": {
+    "ok": true,
+    "note": "mọi tướng hiện đủ, máu đầy"
+   },
+   "12": {
+    "ok": true,
+    "note": "đứng yên khi chưa tới tầm lâu nhất 0.00 s"
+   },
+   "13": {
+    "ok": true,
+    "note": "choáng 1.00 s → thoát sau 1.000 s"
+   },
+   "14": {
+    "ok": true,
+    "note": "đổi mục tiêu sau 0.03 s"
+   },
+   "15": {
+    "ok": true,
+    "note": "1 lần tung khi 8 tướng cùng đầy năng lượng, lỗi 0"
+   }
+  }
+ },
+ {
+  "key": "batdiet",
+  "name": "Bất Diệt Chiến Thần",
+  "cost": 4,
+  "role": "Đỡ đòn",
+  "skill": "Bất Diệt Kim Thân",
+  "checks": {
+   "1": {
+    "ok": true,
+    "note": "bậc 4"
+   },
+   "2": {
+    "ok": true,
+    "note": "mua 4, bán ★1/★2/★3 4/11/35"
+   },
+   "3": {
+    "ok": true,
+    "note": "máu 1400 công 62 giáp 45 kháng 40"
+   },
+   "4": {
+    "ok": true,
+    "note": "máu 1400/2520/4480 · công 62/93/155 · AP 100/115/140"
+   },
+   "5": {
+    "ok": true,
+    "note": "16 đòn, xa nhất 2.75 m / tầm 2.4"
+   },
+   "6": {
+    "ok": true,
+    "note": "mọi đòn vào địch còn sống"
+   },
+   "7": {
+    "ok": true,
+    "note": "2 lần batDiet, thiếu năng lượng: 0"
+   },
+   "8": {
+    "ok": true,
+    "note": "gây 1883 · hồi 345 · khiên 0"
+   },
+   "9": {
+    "ok": true,
+    "note": "lệch tư thế–sát thương 16.7 ms / 52 lần đo, đánh 2 lần: 0"
+   },
+   "10": {
+    "ok": true,
+    "note": "máu 0, trạng thái dead, hiệu ứng còn 0, 0 người 0 mẫu máu 0 chưa chết"
+   },
+   "11": {
+    "ok": true,
+    "note": "mọi tướng hiện đủ, máu đầy"
+   },
+   "12": {
+    "ok": true,
+    "note": "đứng yên khi chưa tới tầm lâu nhất 0.02 s"
+   },
+   "13": {
+    "ok": true,
+    "note": "choáng 0.60 s → thoát sau 0.600 s"
+   },
+   "14": {
+    "ok": true,
+    "note": "đổi mục tiêu sau 0.02 s"
+   },
+   "15": {
+    "ok": true,
+    "note": "1 lần tung khi 8 tướng cùng đầy năng lượng, lỗi 0"
+   }
+  }
+ },
+ {
+  "key": "umaquan",
+  "name": "U Minh Ma Quân",
+  "cost": 4,
+  "role": "Pháp sư",
+  "skill": "U Minh Phệ Hồn",
+  "checks": {
+   "1": {
+    "ok": true,
+    "note": "bậc 4"
+   },
+   "2": {
+    "ok": true,
+    "note": "mua 4, bán ★1/★2/★3 4/11/35"
+   },
+   "3": {
+    "ok": true,
+    "note": "máu 860 công 64 giáp 24 kháng 30"
+   },
+   "4": {
+    "ok": true,
+    "note": "máu 860/1548/2752 · công 64/96/160 · AP 100/115/140"
+   },
+   "5": {
+    "ok": true,
+    "note": "12 đòn, xa nhất 7.34 m / tầm 7"
+   },
+   "6": {
+    "ok": true,
+    "note": "mọi đòn vào địch còn sống"
+   },
+   "7": {
+    "ok": true,
+    "note": "1 lần uMinhPhe, thiếu năng lượng: 0"
+   },
+   "8": {
+    "ok": true,
+    "note": "gây 1626 · hồi 165 · khiên 0"
+   },
+   "9": {
+    "ok": true,
+    "note": "lệch tư thế–sát thương 16.7 ms / 45 lần đo, đánh 2 lần: 0"
+   },
+   "10": {
+    "ok": true,
+    "note": "máu 0, trạng thái dead, hiệu ứng còn 0, 0 người 0 mẫu máu 0 chưa chết"
+   },
+   "11": {
+    "ok": true,
+    "note": "mọi tướng hiện đủ, máu đầy"
+   },
+   "12": {
+    "ok": true,
+    "note": "đứng yên khi chưa tới tầm lâu nhất 0.00 s"
+   },
+   "13": {
+    "ok": true,
+    "note": "choáng 1.00 s → thoát sau 1.000 s"
+   },
+   "14": {
+    "ok": true,
+    "note": "đổi mục tiêu sau 0.02 s"
+   },
+   "15": {
+    "ok": true,
+    "note": "1 lần tung khi 8 tướng cùng đầy năng lượng, lỗi 0"
+   }
+  }
+ },
+ {
+  "key": "kiemtien",
+  "name": "Vạn Kiếm Tiên Đế",
+  "cost": 5,
+  "role": "Đấu sĩ",
+  "skill": "Vạn Kiếm Quy Tông",
+  "checks": {
+   "1": {
+    "ok": true,
+    "note": "bậc 5"
+   },
+   "2": {
+    "ok": true,
+    "note": "mua 5, bán ★1/★2/★3 5/14/44"
+   },
+   "3": {
+    "ok": true,
+    "note": "máu 1000 công 76 giáp 28 kháng 30"
+   },
+   "4": {
+    "ok": true,
+    "note": "máu 1000/1800/3200 · công 76/114/190 · AP 100/115/140"
+   },
+   "5": {
+    "ok": true,
+    "note": "10 đòn, xa nhất 2.55 m / tầm 2.2"
+   },
+   "6": {
+    "ok": true,
+    "note": "mọi đòn vào địch còn sống"
+   },
+   "7": {
+    "ok": true,
+    "note": "1 lần vanKiem, thiếu năng lượng: 0"
+   },
+   "8": {
+    "ok": true,
+    "note": "gây 1627 · hồi 0 · khiên 0"
+   },
+   "9": {
+    "ok": true,
+    "note": "lệch tư thế–sát thương 16.7 ms / 44 lần đo, đánh 2 lần: 0"
+   },
+   "10": {
+    "ok": true,
+    "note": "máu 0, trạng thái dead, hiệu ứng còn 0, 0 người 0 mẫu máu 0 chưa chết"
+   },
+   "11": {
+    "ok": true,
+    "note": "mọi tướng hiện đủ, máu đầy"
+   },
+   "12": {
+    "ok": true,
+    "note": "đứng yên khi chưa tới tầm lâu nhất 0.02 s"
+   },
+   "13": {
+    "ok": true,
+    "note": "choáng 0.85 s → thoát sau 0.850 s"
+   },
+   "14": {
+    "ok": true,
+    "note": "đổi mục tiêu sau 0.15 s"
+   },
+   "15": {
+    "ok": true,
+    "note": "1 lần tung khi 8 tướng cùng đầy năng lượng, lỗi 0"
+   }
+  }
+ },
+ {
+  "key": "thannu",
+  "name": "Cửu Thiên Thần Nữ",
+  "cost": 5,
+  "role": "Hỗ trợ",
+  "skill": "Cửu Thiên Thánh Trận",
+  "checks": {
+   "1": {
+    "ok": true,
+    "note": "bậc 5"
+   },
+   "2": {
+    "ok": true,
+    "note": "mua 5, bán ★1/★2/★3 5/14/44"
+   },
+   "3": {
+    "ok": true,
+    "note": "máu 1050 công 70 giáp 26 kháng 35"
+   },
+   "4": {
+    "ok": true,
+    "note": "máu 1050/1890/3360 · công 70/105/175 · AP 100/115/140"
+   },
+   "5": {
+    "ok": true,
+    "note": "13 đòn, xa nhất 7.82 m / tầm 7.5"
+   },
+   "6": {
+    "ok": true,
+    "note": "mọi đòn vào địch còn sống"
+   },
+   "7": {
+    "ok": true,
+    "note": "1 lần cuuThien, thiếu năng lượng: 0"
+   },
+   "8": {
+    "ok": true,
+    "note": "gây 1565 · hồi 379 · khiên 0"
+   },
+   "9": {
+    "ok": true,
+    "note": "lệch tư thế–sát thương 16.7 ms / 48 lần đo, đánh 2 lần: 0"
+   },
+   "10": {
+    "ok": true,
+    "note": "máu 0, trạng thái dead, hiệu ứng còn 0, 0 người 0 mẫu máu 0 chưa chết"
+   },
+   "11": {
+    "ok": true,
+    "note": "mọi tướng hiện đủ, máu đầy"
+   },
+   "12": {
+    "ok": true,
+    "note": "đứng yên khi chưa tới tầm lâu nhất 0.02 s"
+   },
+   "13": {
+    "ok": true,
+    "note": "choáng 0.90 s → thoát sau 0.900 s"
+   },
+   "14": {
+    "ok": true,
+    "note": "đổi mục tiêu sau 0.02 s"
+   },
+   "15": {
+    "ok": true,
+    "note": "1 lần tung khi 8 tướng cùng đầy năng lượng, lỗi 0"
+   }
+  }
+ },
+ {
+  "key": "hondon",
+  "name": "Hỗn Độn Ma Đế",
+  "cost": 5,
+  "role": "Đấu sĩ",
+  "skill": "Hỗn Độn Diệt Thế",
+  "checks": {
+   "1": {
+    "ok": true,
+    "note": "bậc 5"
+   },
+   "2": {
+    "ok": true,
+    "note": "mua 5, bán ★1/★2/★3 5/14/44"
+   },
+   "3": {
+    "ok": true,
+    "note": "máu 1250 công 76 giáp 34 kháng 30"
+   },
+   "4": {
+    "ok": true,
+    "note": "máu 1250/2250/4000 · công 76/114/190 · AP 100/115/140"
+   },
+   "5": {
+    "ok": true,
+    "note": "14 đòn, xa nhất 2.92 m / tầm 2.6"
+   },
+   "6": {
+    "ok": true,
+    "note": "mọi đòn vào địch còn sống"
+   },
+   "7": {
+    "ok": true,
+    "note": "1 lần honDon, thiếu năng lượng: 0"
+   },
+   "8": {
+    "ok": true,
+    "note": "gây 1712 · hồi 67 · khiên 0"
+   },
+   "9": {
+    "ok": true,
+    "note": "lệch tư thế–sát thương 16.7 ms / 47 lần đo, đánh 2 lần: 0"
+   },
+   "10": {
+    "ok": true,
+    "note": "máu 0, trạng thái dead, hiệu ứng còn 0, 0 người 0 mẫu máu 0 chưa chết"
+   },
+   "11": {
+    "ok": true,
+    "note": "mọi tướng hiện đủ, máu đầy"
+   },
+   "12": {
+    "ok": true,
+    "note": "đứng yên khi chưa tới tầm lâu nhất 0.02 s"
+   },
+   "13": {
+    "ok": true,
+    "note": "choáng 0.85 s → thoát sau 0.850 s"
+   },
+   "14": {
+    "ok": true,
+    "note": "đổi mục tiêu sau 0.03 s"
+   },
+   "15": {
+    "ok": true,
+    "note": "2 lần tung khi 8 tướng cùng đầy năng lượng, lỗi 0"
+   }
+  }
+ }
+]

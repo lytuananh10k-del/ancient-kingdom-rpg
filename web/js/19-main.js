@@ -27,8 +27,26 @@ function simStep(dt) {
   TraitEngine.update(dt);
   checkBattleEnd();
 }
+/** PerfStats: thời gian khung hình (vòng 600 khung), thời gian cập nhật game / render (ms, trung bình trượt), draw call, tam giác.
+ *  Đo bằng performance.now() – rẻ, luôn bật; bảng Debug và tests/perf.js đọc. */
+const PerfStats = {
+  ft: new Float32Array(600), i: 0, n: 0, update: 0, render: 0, calls: 0, tris: 0, lastUpdate: 0, lastRender: 0,
+  push(dtMs, upd, ren) {
+    this.ft[this.i] = dtMs; this.i = (this.i + 1) % this.ft.length; this.n = Math.min(this.n + 1, this.ft.length);
+    this.lastUpdate = upd; this.lastRender = ren; this.update += (upd - this.update) * 0.05; this.render += (ren - this.render) * 0.05;
+    this.calls = renderer.info.render.calls; this.tris = renderer.info.render.triangles;
+  },
+  reset() { this.n = 0; this.i = 0; },
+  /** FPS trung bình, 1% thấp (FPS ở khung chậm thứ 99 phần trăm), thời gian khung TB / p99 (ms). */
+  summary() {
+    const a = Array.from(this.ft.subarray(0, this.n)).sort((x, y) => x - y); if (!a.length) return null;
+    const avg = a.reduce((s, v) => s + v, 0) / a.length, p99 = a[Math.min(a.length - 1, Math.floor(a.length * 0.99))];
+    return { frames: a.length, fps: +(1000 / avg).toFixed(1), low1: +(1000 / p99).toFixed(1), frameMs: +avg.toFixed(2), p99Ms: +p99.toFixed(2), updateMs: +this.update.toFixed(2), renderMs: +this.render.toFixed(2) };
+  }
+};
 function frame(now) {
   requestAnimationFrame(frame);
+  const tf0 = performance.now(), rawDt = now - last;
   let dt = Math.min(0.1, (now - last) / 1000); last = now;
   QualityManager.sample(dt);
   fpsAcc += dt; fpsFrames++; if (fpsAcc > 0.5) { $('fps').textContent = Math.round(fpsFrames / fpsAcc) + ' fps'; fpsAcc = 0; fpsFrames = 0; }
@@ -60,8 +78,11 @@ function frame(now) {
   tickPrepTimer(dt);
   ui.tick(dt);
   renderer.info.reset();
+  const tr0 = performance.now();
   try { bloom.render(scene, camera); } catch (e) { console.error('[Bloom] tắt bloom do lỗi', e); bloom.setLevel(0, window.innerWidth, window.innerHeight); renderer.setRenderTarget(null); renderer.render(scene, camera); }
+  const tr1 = performance.now();
   draw2D(dt);
+  PerfStats.push(rawDt, tr0 - tf0, tr1 - tr0);
 }
 
 (function boot() {
@@ -87,7 +108,7 @@ window.__vkkt = { units, battle, timelines, QualityManager, startBattle, forceUl
   buyShop, reroll, buyXP, nextRound, newGame, moveTo, sellSrc, benchToBoard, mergeAll, traitCounts, traitLevel, applyTraits, boardAllies, boardCap, benchUnits, benchSlotPos, tileCenter,
   snapshotGame, enemyLineup, sellPrice, combatCam, camera, prepFit, simulate, UNIT_DEFS, XP_NEED, MAX_LEVEL, BENCH_SIZE, STAR, STAR_SCALE,
   CHAMPIONS, CHAMPION_KEYS, championsByCost, validateChampions, migrateChampionKey, LEGACY_MAP, SKILL_SPECS, SKILL_META, TRAITS, ORIGINS, SUBCLASSES, TraitRegistry, TraitCounter, TraitEvents, TraitEngine, TraitSwords, TraitVFX, defaultBonus, afterRosterChange, moveToBench, ui, addMana,
-  CombatRNG, crand, CombatAudit, DamageCalculator, defenseFactor, DAMAGE, BATTLE_RULES, STATUS, applyBurn, SimTasks, DangerZones, NavGrid, Projectiles, checkBattleEnd, STEP, simStep, RARITY, RIG_FACTORIES, GLB_LOADED, replaceChampionRig, applyStun, dealDamage, healUnit, giveShield, applySlow,
+  PerfStats, CombatRNG, crand, CombatAudit, DamageCalculator, defenseFactor, DAMAGE, BATTLE_RULES, STATUS, applyBurn, SimTasks, DangerZones, NavGrid, Projectiles, checkBattleEnd, STEP, simStep, RARITY, RIG_FACTORIES, GLB_LOADED, replaceChampionRig, applyStun, dealDamage, healUnit, giveShield, applySlow,
   combatLog, ROLES, SKILLS, placeUnit, removeUnit, setupRound, BOARD,
   cameraSettled: () => Math.abs(combatCam.dist - combatCam.tDist) < 0.05 && Math.abs(combatCam.target.z - prepFit.tz) < 0.05 && Math.abs(lens.x - prepFit.shiftX) + Math.abs(lens.y - prepFit.shiftY) < 1,
   poolLeft, poolOwned, POOL_SIZE, SHOP_POOL, SHOP_ODDS, rollShop, rivalsDraft, ITEMS, equipItem, isMonsterRound, interestOf, streakBonusOf, autoFillBoard };

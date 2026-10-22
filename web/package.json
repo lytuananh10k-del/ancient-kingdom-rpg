@@ -10,7 +10,9 @@
     "test:champions": "node tests/champions.js",
     "test:traits": "node tests/traits.js",
     "test:combat3": "node tests/combat3.js",
-    "balance": "node tests/balance.js"
+    "balance": "node tests/balance.js",
+    "test:audit": "node tests/audit.js",
+    "simulate": "node tests/simulate.js"
   },
   "devDependencies": {
     "playwright": "^1.47.0",

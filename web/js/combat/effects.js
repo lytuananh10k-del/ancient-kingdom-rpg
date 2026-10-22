@@ -104,6 +104,7 @@ class StatusEffectManager {
     const now = simNow();
     for (let i = this.list.length - 1; i >= 0; i--) {
       const e = this.list[i];
+      if (!e) continue;   // danh sách bị xoá giữa vòng lặp (nhịp DoT giết tướng → fx.clear() khi chết)
       if (e.dot || e.hot) {
         while (now >= e.nextTick - 1e-9 && e.nextTick <= e.end + 1e-9 && this.u.alive) {
           e.nextTick += e.tick;

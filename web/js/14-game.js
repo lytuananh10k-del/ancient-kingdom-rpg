@@ -292,10 +292,12 @@ function snapshotGame(roundOverride) {
     rivals: Object.assign({}, game.rivals), items: game.items.slice(),
     board: boardAllies().map(u => ({ key: u.key, star: u.star, c: u.homeTile.c, r: u.homeTile.r, items: (u.items || []).slice() })) };
 }
-function saveGame(roundOverride) { if (!battle.bench) store.set('save', snapshotGame(roundOverride)); }
+/** battle.sandbox: trận thử / mô phỏng (CombatTestRunner, BalanceSimulator, bảng Debug) KHÔNG được ghi đè bản lưu thật. */
+function saveGame(roundOverride) { if (!battle.bench && !battle.sandbox) store.set('save', snapshotGame(roundOverride)); }
 const newGameState = () => ({ v: 1, hp: START_HP, gold: 6, level: 3, xp: 0, streak: 0, round: 1, bench: new Array(BENCH_SIZE).fill(null), shop: null, over: false,
   rivals: {}, items: [], board: [{ key: 'kiemdong', star: 1, c: 4, r: 3 }, { key: 'thietve', star: 1, c: 3, r: 3 }] });
 function restoreGame(st) {
+  battle.sandbox = false;   // tải ván (thật hoặc phục hồi sau thử nghiệm) → lưu bình thường trở lại
   for (const u of boardAllies()) removeUnit(u);
   if (drag.src) cancelDrag();
   Object.assign(game, { hp: st.hp, gold: st.gold, level: Math.min(MAX_LEVEL, st.level), xp: st.xp, streak: st.streak, over: !!st.over, sel: null, lastSummary: '', selItem: -1, lastRewards: null });

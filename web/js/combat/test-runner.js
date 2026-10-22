@@ -9,6 +9,7 @@ const CombatTestRunner = {
    *  Trả về: { result, time, steps, seed, allies[], enemies[] (thống kê từng tướng), anomalies[], log } */
   run(cfg) {
     const snap = cfg.keepState ? null : snapshotGame();
+    battle.sandbox = true;   // không ghi bản lưu thật trong lúc thử (restoreGame / newGame tắt lại)
     const g = game; g.level = cfg.level || 9; g.over = false; battle.bench = false;
     for (const u of boardAllies()) removeUnit(u);
     (cfg.allies || []).forEach(([k, s, c, r]) => placeUnit(k, s || 1, c, r));
@@ -23,7 +24,7 @@ const CombatTestRunner = {
     battle.seedOverride = cfg.seed !== undefined ? cfg.seed : 1;
     startBattle();
     battle.seedOverride = null; battle.enemyTraits = false;
-    const anomalies = [], maxT = (cfg.maxTime || BATTLE_RULES.limit) + 1, sampleEvery = Math.round((cfg.sample || 0.1) / STEP);
+    const anomalies = [], maxT = cfg.maxTime !== undefined ? cfg.maxTime : BATTLE_RULES.limit + 1, sampleEvery = Math.round((cfg.sample || 0.1) / STEP);
     const track = new Map(units.map(u => [u, { lastX: u.pos.x, lastZ: u.pos.z, still: 0, maxStill: 0 }]));
     let steps = 0, overlap = 0, samples = 0;
     while (battle.phase === 'fight' && steps * STEP < maxT) {
@@ -39,6 +40,8 @@ const CombatTestRunner = {
         const far = u.target && u.target.alive && Math.hypot(u.target.pos.x - u.pos.x, u.target.pos.z - u.pos.z) > u.def.range + 0.45;
         if (u.fsm.name === 'move' && far && moved < 0.03) tr.still += sampleEvery * STEP; else tr.still = 0;
         tr.maxStill = Math.max(tr.maxStill, tr.still); tr.lastX = u.pos.x; tr.lastZ = u.pos.z;
+        // phát hiện cộng dồn bất thường: số trạng thái cùng lúc và hệ số công / tốc đánh lớn nhất
+        u.cs.maxStatus = Math.max(u.cs.maxStatus, u.fx.list.length); u.cs.maxAtkMul = Math.max(u.cs.maxAtkMul, u.fx.mul('atk') * u.fx.mul('aspd'));
       }
       if (anomalies.length > 20) break;
     }
@@ -47,7 +50,8 @@ const CombatTestRunner = {
     if (CombatAudit.doubleHits) anomalies.push(`đòn thường gây sát thương 2 lần: ${CombatAudit.doubleHits}`);
     if (CombatAudit.badCasts) anomalies.push(`tung chiêu khi thiếu năng lượng: ${CombatAudit.badCasts}`);
     if (CombatAudit.nonFinite) anomalies.push(`chỉ số NaN / Infinity: ${CombatAudit.nonFinite}`);
-    const pack = u => ({ key: u.key, star: u.star, alive: u.alive, hp: Math.round(u.hp), maxHp: u.maxHp, ...Object.fromEntries(Object.entries(u.cs).map(([k, v]) => [k, Math.round(v)])) });
+    const pack = u => ({ key: u.key, star: u.star, alive: u.alive, hp: Math.round(u.hp), maxHp: u.maxHp, ...Object.fromEntries(Object.entries(u.cs).map(([k, v]) => [k, Math.round(v * 100) / 100])),
+      survival: +(u.cs.deathT >= 0 ? u.cs.deathT : battle.time).toFixed(2), ehp: Math.round(u.maxHp / defenseFactor((u.def_ + u.mr_) / 2)) });
     const out = { result: battle.result, time: +battle.time.toFixed(3), steps, seed: battle.seed, overlap: samples ? overlap / samples : 0,
       allies: units.filter(u => u.team === 'ally').map(pack), enemies: units.filter(u => u.team === 'enemy').map(pack), anomalies,
       leftovers: { projectiles: Projectiles.list.length, tasks: SimTasks.list.length, timelines: timelines.filter(t => !t.done).length },
