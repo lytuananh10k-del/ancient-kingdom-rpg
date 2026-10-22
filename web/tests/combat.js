@@ -19,22 +19,23 @@ const check = (cond, msg, extra) => { if (!cond) { failures.push(msg); console.l
 
 // [key, c, r] – phe ta đứng hàng 0–3, phe địch hàng 4–7
 const SCENARIOS = [
-  { name: 'Đội hình hỗn hợp vs địch mặc định vòng 6', round: 6, allies: [['hophap', 3, 3], ['thietve', 4, 3], ['kiemtien', 5, 3], ['anhkiem', 2, 2], ['loi', 3, 1], ['hoa', 5, 1]] },
-  { name: 'Cận chiến dồn lên vs tuyến sau đánh xa', round: 6, allies: [['kiemdong', 2, 3], ['kiemdong', 3, 3], ['thietve', 4, 3], ['kiemtien', 5, 3], ['anhkiem', 6, 3]],
-    enemies: [['mathu', 3, 4], ['mathu', 4, 4], ['uminh', 2, 6], ['uminh', 4, 7], ['uhon', 6, 6]] },
-  { name: 'Đội đánh xa bị cận chiến lao vào (thả diều)', round: 5, allies: [['loi', 2, 1], ['hoa', 4, 1], ['uhon', 6, 1], ['loi', 3, 0], ['hophap', 4, 3]],
+  { name: 'Đội hình hỗn hợp vs địch mặc định vòng 6', round: 6, allies: [['kimcuong', 3, 3], ['thietve', 4, 3], ['kiemtien', 5, 3], ['anhsat', 2, 2], ['bangling', 3, 1], ['hoa', 5, 1]] },
+  { name: 'Cận chiến dồn lên vs tuyến sau đánh xa', round: 6, allies: [['kiemdong', 2, 3], ['kiemdong', 3, 3], ['thietve', 4, 3], ['kiemtien', 5, 3], ['anhsat', 6, 3]],
+    enemies: [['mathu', 3, 4], ['mathu', 4, 4], ['uminh', 2, 6], ['uminh', 4, 7], ['huyenbang', 6, 6]] },
+  { name: 'Đội đánh xa bị cận chiến lao vào (thả diều)', round: 5, allies: [['bangling', 2, 1], ['hoa', 4, 1], ['huyenbang', 6, 1], ['bangling', 3, 0], ['kimcuong', 4, 3]],
     enemies: [['huyetkiem', 2, 4], ['huyetkiem', 4, 4], ['huyetkiem', 6, 4], ['mathu', 3, 5], ['mathu', 5, 5]] },
-  { name: 'Đông người 8 đấu 8', round: 9, allies: [['hophap', 1, 3], ['thietve', 3, 3], ['kiemtien', 4, 3], ['kiemdong', 6, 3], ['anhkiem', 0, 2], ['anhkiem', 7, 2], ['loi', 2, 1], ['uhon', 5, 1]] },
+  { name: 'Đông người 8 đấu 8', round: 9, allies: [['kimcuong', 1, 3], ['thietve', 3, 3], ['kiemtien', 4, 3], ['kiemdong', 6, 3], ['anhsat', 0, 2], ['anhsat', 7, 2], ['bangling', 2, 1], ['huyenbang', 5, 1]] },
   { name: 'Bảy cận chiến vây một tướng đỡ đòn (tìm chỗ quanh mục tiêu)', round: 14, allies: [['kiemdong', 0, 3], ['kiemdong', 1, 3], ['thietve', 2, 3], ['kiemtien', 3, 3], ['kiemdong', 5, 3], ['thietve', 6, 3], ['kiemtien', 7, 3]],
     enemies: [['mathu', 3, 7]] },
-  { name: 'Hàng dọc: người sau phải lách qua người trước', round: 8, allies: [['thietve', 3, 3], ['kiemdong', 3, 2], ['kiemtien', 3, 1], ['kiemdong', 3, 0], ['anhkiem', 4, 0]],
+  { name: 'Hàng dọc: người sau phải lách qua người trước', round: 8, allies: [['thietve', 3, 3], ['kiemdong', 3, 2], ['kiemtien', 3, 1], ['kiemdong', 3, 0], ['anhsat', 4, 0]],
     enemies: [['mathu', 0, 7], ['uminh', 7, 7]] },
   // Tự kiểm tra thước đo: cố tình làm một tướng không di chuyển được (ở xa mục tiêu) → thước đo PHẢI báo kẹt.
   { name: 'Tự kiểm tra thước đo kẹt (cố tình đóng băng 1 tướng)', round: 3, freeze: 'kiemdong', expectStuck: true, allies: [['thietve', 3, 3], ['kiemdong', 0, 0]], enemies: [['mathu', 7, 7]] },
-  { name: 'Sát thủ vs tuyến sau', round: 5, allies: [['anhkiem', 1, 3], ['anhkiem', 6, 3], ['thietve', 3, 3], ['hophap', 4, 3]],
+  { name: 'Sát thủ vs tuyến sau', round: 5, allies: [['anhsat', 1, 3], ['anhsat', 6, 3], ['thietve', 3, 3], ['kimcuong', 4, 3]],
     enemies: [['mathu', 3, 4], ['mathu', 4, 4], ['uminh', 1, 7], ['uminh', 6, 7]] }
 ];
-const KEYS = ['kiemtien', 'loi', 'hoa', 'hophap', 'huyetkiem', 'uminh', 'mathu', 'kiemdong', 'thietve', 'anhkiem', 'uhon'];
+const KEYS = ['kiemdong', 'thietve', 'hoa', 'thanhmoc', 'mabinh', 'linhcung', 'thanhphong', 'huyengiap', 'bangling', 'huyetma', 'loithuong', 'linhy',
+  'ngukiem', 'cuuviem', 'kimcuong', 'anhsat', 'huyenbang', 'vocuc', 'loiton', 'batdiet', 'umaquan', 'kiemtien', 'thannu', 'hondon', 'huyetkiem', 'uminh', 'mathu'];
 function randomLineup(n, rows) {
   const used = new Set(), out = [];
   while (out.length < n) { const c = Math.floor(Math.random() * 8), r = rows[Math.floor(Math.random() * rows.length)], k = c + ',' + r; if (used.has(k)) continue; used.add(k); out.push([KEYS[Math.floor(Math.random() * KEYS.length)], c, r]); }

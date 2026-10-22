@@ -87,6 +87,7 @@ const ACT = {
     Parry: [pose({ rArm: [-80, 40, 0], rFore: [-60], chest: [0, 20, 0] }), pose({ rArm: [-120, -30, 0], rFore: [-20], chest: [-5, -20, 0] })]
   }
 };
+ACT.bow = ACT.staff;   // cung: dùng tư thế phóng về phía trước của pháp trượng
 
 /** Dựng geometry kiếm (lưỡi thuôn nhọn + chắn + chuôi) – dùng cho tay cầm, phi kiếm, cự kiếm. */
 function buildSwordGeometry(bladeLen = 0.9, width = 0.06) {
@@ -137,6 +138,13 @@ class VerletChain {
   reset() { this.init = false; }
 }
 
+/** Geometry dùng chung cho mọi nhân vật thủ tục (cùng tham số → cùng 1 geometry trên GPU); không bị dispose theo từng rig. */
+const RIG_GEO = new Map();
+function sharedGeo(key, make) {
+  let g = RIG_GEO.get(key);
+  if (!g) { g = make(); g.userData.shared = true; RIG_GEO.set(key, g); }
+  return g;
+}
 class CharacterRig {
   constructor(look, U) {
     this.look = look; this.U = U; this.weaponType = look.weapon;
@@ -166,14 +174,14 @@ class CharacterRig {
   build() {
     const L = this.look, s = L.bulk || 1;
     const robe = this.mat(L.robe), trim = this.mat(L.trim), skin = this.mat(L.skin), hair = this.mat(L.hair), inner = this.mat(L.inner || L.trim), dark = this.mat(0x1a1c22);
-    const sph = new THREE.SphereGeometry(1, 16, 12), cyl = new THREE.CylinderGeometry(1, 1, 1, 12), box = new THREE.BoxGeometry(1, 1, 1);
-    this.geos = [sph, cyl, box];
+    const sph = sharedGeo('sph', () => new THREE.SphereGeometry(1, 16, 12)), cyl = sharedGeo('cyl', () => new THREE.CylinderGeometry(1, 1, 1, 12)), box = sharedGeo('box', () => new THREE.BoxGeometry(1, 1, 1));
+    this.geos = [];
     const hips = this.group('hips', this.body, 0, 0.95, 0);
     this.part(cyl, robe, hips, 0, -0.02, 0, 0.17 * s, 0.16, 0.13 * s);
     this.part(cyl, trim, hips, 0, 0.07, 0, 0.175 * s, 0.05, 0.135 * s, false);
     // Váy áo bào: 8 tấm có lò xo (secondary motion).
     this.skirt = [];
-    const panelGeo = new THREE.BoxGeometry(1, 1, 1); this.geos.push(panelGeo);
+    const panelGeo = box;
     for (let i = 0; i < 8; i++) {
       const a = i / 8 * TAU, piv = new THREE.Group();
       piv.position.set(Math.sin(a) * 0.15 * s, -0.02, Math.cos(a) * 0.12 * s); piv.rotation.y = a; hips.add(piv);
@@ -207,10 +215,10 @@ class CharacterRig {
       const pre = side > 0 ? 'l' : 'r';
       const sh = this.group(pre + 'Arm', chest, 0.22 * side * s, 0.13, 0);
       sh.rotation.z = 0.1 * side;
-      const sleeveG = new THREE.CylinderGeometry(0.06, 0.085, 1, 10); this.geos.push(sleeveG);
+      const sleeveG = sharedGeo('sleeve', () => new THREE.CylinderGeometry(0.06, 0.085, 1, 10));
       this.part(sleeveG, robe, sh, 0, -0.14, 0, s, 0.28, s);
       const fore = this.group(pre + 'Fore', sh, 0, -0.28, 0);
-      const cuffG = new THREE.CylinderGeometry(0.075, 0.1, 1, 10); this.geos.push(cuffG);
+      const cuffG = sharedGeo('cuff', () => new THREE.CylinderGeometry(0.075, 0.1, 1, 10));
       this.part(cuffG, robe, fore, 0, -0.11, 0, s, 0.22, s);
       this.part(cyl, trim, fore, 0, -0.225, 0, 0.1 * s, 0.025, 0.1 * s, false);
       this.part(sph, skin, fore, 0, -0.27, 0, 0.045 * s, 0.05, 0.045 * s);
@@ -230,8 +238,8 @@ class CharacterRig {
     leg(1); leg(-1);
     this.buildWeapon();
     // Bóng tròn dưới chân (luôn có, nhẹ hơn shadow map).
-    const blob = new THREE.Mesh(new THREE.PlaneGeometry(1.4 * s, 1.4 * s).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: vfx.blobTex, transparent: true, depthWrite: false }));
-    blob.position.y = 0.085; blob.renderOrder = 0; this.root.add(blob); this.blob = blob; this.geos.push(blob.geometry);
+    const blob = new THREE.Mesh(sharedGeo('blob' + s.toFixed(2), () => new THREE.PlaneGeometry(1.4 * s, 1.4 * s).rotateX(-Math.PI / 2)), new THREE.MeshBasicMaterial({ map: vfx.blobTex, transparent: true, depthWrite: false }));
+    blob.position.y = 0.085; blob.renderOrder = 0; this.root.add(blob); this.blob = blob;
     this.setOutline(Q().outline);
   }
   buildWeapon() {
@@ -243,23 +251,31 @@ class CharacterRig {
       this.base.position.set(0, 0.2, 0); this.tip.position.set(0, 1.02, 0);
       w.rotation.set(Math.PI * 0.88, 0, 0);
     } else if (L.weapon === 'spear') {
-      const shaft = new THREE.CylinderGeometry(0.02, 0.022, 2.0, 8); this.geos.push(shaft);
+      const shaft = sharedGeo('spearShaft', () => new THREE.CylinderGeometry(0.02, 0.022, 2.0, 8));
       this.part(shaft, this.mat(0x4a3220), w, 0, 0.4, 0, 1, 1, 1);
-      const head = new THREE.ConeGeometry(0.05, 0.32, 6); this.geos.push(head);
+      const head = sharedGeo('spearHead', () => new THREE.ConeGeometry(0.05, 0.32, 6));
       this.part(head, this.mat(0xd8e6f2), w, 0, 1.55, 0, 1, 1, 1);
-      this.part(new THREE.SphereGeometry(0.06, 8, 6), this.mat(L.trim), w, 0, 1.35, 0, 1, 1.3, 1, false);
+      this.part(sharedGeo('spearTassel', () => new THREE.SphereGeometry(0.06, 8, 6)), this.mat(L.trim), w, 0, 1.35, 0, 1, 1.3, 1, false);
       this.base.position.set(0, 0.9, 0); this.tip.position.set(0, 1.7, 0);
       w.rotation.set(Math.PI * 0.92, 0, 0);
     } else if (L.weapon === 'staff') {
-      const shaft = new THREE.CylinderGeometry(0.022, 0.025, 1.7, 8); this.geos.push(shaft);
+      const shaft = sharedGeo('staffShaft', () => new THREE.CylinderGeometry(0.022, 0.025, 1.7, 8));
       this.part(shaft, this.mat(0x3b2a1e), w, 0, 0.1, 0, 1, 1, 1);
       const orbMat = ShaderLibrary.glow(L.orb || 0x9fd0ff, 0.85);
-      const orb = new THREE.Mesh(new THREE.IcosahedronGeometry(0.09, 1), orbMat); orb.position.y = 1.02; w.add(orb); this.orb = orb;
-      this.part(new THREE.TorusGeometry(0.11, 0.012, 6, 16), this.mat(L.accent), w, 0, 1.02, 0, 1, 1, 1, false);
+      const orb = new THREE.Mesh(sharedGeo('staffOrb', () => new THREE.IcosahedronGeometry(0.09, 1)), orbMat); orb.position.y = 1.02; w.add(orb); this.orb = orb;
+      this.part(sharedGeo('staffRing', () => new THREE.TorusGeometry(0.11, 0.012, 6, 16)), this.mat(L.accent), w, 0, 1.02, 0, 1, 1, 1, false);
       this.base.position.set(0, 0.8, 0); this.tip.position.set(0, 1.02, 0);
       w.rotation.set(0.12, 0, 0);
+    } else if (L.weapon === 'bow') { // cung: cánh cung (nửa vòng xuyến) + dây cung
+      // Nửa vòng xuyến bán kính 0,5 xoay 90° → cánh cung đứng, hai đầu ở x = 0,5; tay cầm (giữa cánh cung) nằm tại gốc tay.
+      const limb = this.part(sharedGeo('bowLimb', () => new THREE.TorusGeometry(0.5, 0.022, 6, 18, Math.PI)), this.mat(0x6a4a2a), w, 0.5, 0, 0, 1, 1, 1);
+      limb.rotation.z = Math.PI / 2; if (limb.userData.outline) limb.userData.outline.rotation.z = Math.PI / 2;
+      this.part(sharedGeo('bowString', () => new THREE.CylinderGeometry(0.004, 0.004, 1.0, 4)), this.mat(0xf0e8d0), w, 0.5, 0, 0, 1, 1, 1, false);
+      this.part(sharedGeo('bowGrip', () => new THREE.CylinderGeometry(0.03, 0.03, 0.14, 8)), this.mat(L.accent), w, 0, 0, 0, 1, 1, 1, false);
+      this.base.position.set(0, 0, 0); this.tip.position.set(0.1, 0, 0.15);
+      w.rotation.set(0, Math.PI / 2, 0.15);
     } else { // claws – găng vuốt
-      const claw = new THREE.ConeGeometry(0.02, 0.14, 4); this.geos.push(claw);
+      const claw = sharedGeo('claw', () => new THREE.ConeGeometry(0.02, 0.14, 4));
       for (let i = -1; i <= 1; i++) { const c = this.part(claw, this.mat(0xd0c8c0), w, i * 0.03, -0.08, 0.02, 1, 1, 1, false); c.rotation.x = Math.PI; }
       this.base.position.set(0, 0, 0); this.tip.position.set(0, -0.15, 0);
     }
@@ -461,9 +477,9 @@ class CharacterRig {
     const geos = new Set(this.geos);
     this.root.traverse(o => {
       if (o.material) { (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => m.dispose && m.dispose()); }
-      if (o.geometry && o.geometry !== SWORD_GEO) geos.add(o.geometry);
+      if (o.geometry && o.geometry !== SWORD_GEO && !o.geometry.userData.shared) geos.add(o.geometry);
     });
-    geos.forEach(g => g.dispose());
+    geos.forEach(g => { if (!g.userData.shared) g.dispose(); });
     if (this.root.parent) this.root.parent.remove(this.root);
   }
 }

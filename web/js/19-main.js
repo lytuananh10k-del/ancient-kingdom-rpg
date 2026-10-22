@@ -58,6 +58,8 @@ function frame(now) {
 }
 
 (function boot() {
+  const bad = validateChampions();
+  if (bad.length) console.error('[Vạn Kiếm] Dữ liệu tướng lỗi:\n' + bad.join('\n'));
   const saved = store.get('save', null);
   const ok = saved && saved.v === 1 && saved.hp > 0 && !saved.over;
   restoreGame(ok ? saved : newGameState());
@@ -76,7 +78,8 @@ function simulate(seconds) {
 }
 window.__vkkt = { units, battle, timelines, QualityManager, startBattle, forceUltimate, vfx, renderer, scene, loadGlbBuffer, solveTwoBoneIK, options, game, store,
   buyShop, reroll, buyXP, nextRound, newGame, moveTo, sellSrc, benchToBoard, mergeAll, traitCounts, traitLevel, applyTraits, boardAllies, boardCap, benchUnits, benchSlotPos, tileCenter,
-  snapshotGame, enemyLineup, sellPrice, combatCam, camera, prepFit, simulate, UNIT_DEFS, XP_NEED, MAX_LEVEL, BENCH_SIZE, STAR_MUL,
+  snapshotGame, enemyLineup, sellPrice, combatCam, camera, prepFit, simulate, UNIT_DEFS, XP_NEED, MAX_LEVEL, BENCH_SIZE, STAR, STAR_SCALE,
+  CHAMPIONS, CHAMPION_KEYS, championsByCost, validateChampions, migrateChampionKey, LEGACY_MAP, SKILL_SPECS, SKILL_META, TRAITS, ORIGINS, RARITY, RIG_FACTORIES, GLB_LOADED, replaceChampionRig, applyStun, dealDamage, healUnit, giveShield, applySlow,
   combatLog, ROLES, SKILLS, placeUnit, removeUnit, setupRound, BOARD,
   cameraSettled: () => Math.abs(combatCam.dist - combatCam.tDist) < 0.05 && Math.abs(combatCam.target.z - prepFit.tz) < 0.05 && Math.abs(lens.x - prepFit.shiftX) + Math.abs(lens.y - prepFit.shiftY) < 1,
   poolLeft, poolOwned, POOL_SIZE, SHOP_POOL, SHOP_ODDS, rollShop, rivalsDraft, ITEMS, equipItem, isMonsterRound, interestOf, streakBonusOf, autoFillBoard };

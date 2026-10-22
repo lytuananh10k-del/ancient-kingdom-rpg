@@ -13,7 +13,7 @@ $('btn-bench').addEventListener('click', () => {
   QualityManager.auto = false;
   battle.bench = true;
   for (const u of boardAllies()) removeUnit(u);
-  [['hophap', 3, 3], ['kiemtien', 4, 3], ['anhkiem', 5, 3], ['loi', 2, 1], ['hoa', 5, 1]].forEach(([k, c, r]) => placeUnit(k, 1, c, r));
+  [['huyengiap', 3, 3], ['kiemtien', 4, 3], ['anhsat', 5, 3], ['loiton', 2, 1], ['cuuviem', 5, 1]].forEach(([k, c, r]) => placeUnit(k, 1, c, r));
   battle.round = 5; setupRound(); game.over = false; startBattle();
   ui.toast('Đang kiểm tra hiệu năng 15 giây…');
 });

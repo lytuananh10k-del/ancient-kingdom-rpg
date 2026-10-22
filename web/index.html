@@ -127,6 +127,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 #traits { display: flex; flex-direction: column; gap: 4px; pointer-events: none; }
 .trait { background: var(--panel); border: 1px solid var(--panel-line); border-left: 3px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 4px 8px; font-size: 0.74rem; color: var(--muted); }
 .trait.on { border-left-color: var(--c); color: var(--paper); }
+.trait.soon { opacity: 0.6; }
 .trait b { color: var(--c); } .trait .cnt { font-variant-numeric: tabular-nums; }
 .trait .fx { display: block; font-size: 0.7rem; color: var(--muted); }
 
@@ -349,7 +350,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
   <div id="bench-out" hidden></div>
   <button class="btn" id="btn-bench-copy" hidden>Sao chép kết quả</button>
   <h3>Mô hình GLB / GLTF</h3>
-  <p class="note">Thay nhân vật thủ tục của Kiếm Tiên bằng mô hình có xương. Clip được nhận theo tên: Idle, Walk, Run, Dash, Attack01–03, HeavyAttack, SkillCast, UltimateCast, Hit, Stun, Knockback, Death, Victory.</p>
+  <p class="note">Thay nhân vật thủ tục của một tướng bằng mô hình có xương (mỗi tướng một file riêng). Clip được nhận theo tên: Idle, Walk, Run, Dash, Attack01–03, HeavyAttack, SkillCast, UltimateCast, Hit, Stun, Knockback, Death, Victory.</p>
+  <div class="row"><label for="glb-target">Tướng nhận mô hình</label><select id="glb-target"></select></div>
   <label class="btn" for="glb-file">Chọn file .glb</label>
   <input type="file" id="glb-file" accept=".glb,.gltf,model/gltf-binary" hidden>
   <button class="btn" id="btn-glb-reset">Dùng lại mô hình thủ tục</button>
@@ -392,9 +394,14 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 <script src="js/08-audio.js"></script>
 <script src="js/09-camera.js"></script>
 <script src="js/10-world.js"></script>
+<script src="js/data/champions.js"></script>
+<script src="js/combat/effects.js"></script>
 <script src="js/11-units.js"></script>
 <script src="js/12-combat.js"></script>
 <script src="js/13-skills.js"></script>
+<script src="js/combat/skill-executor.js"></script>
+<script src="js/data/skills.js"></script>
+<script src="js/data/traits.js"></script>
 <script src="js/14-game.js"></script>
 <script src="js/15-input.js"></script>
 <script src="js/16-ui.js"></script>

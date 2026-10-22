@@ -127,6 +127,33 @@ function shieldSkill(cfg) {
   };
 }
 
+/** Kiếm khí bán nguyệt bay thẳng xuyên mọi kẻ địch trên đường (Kiếm Khí Trảm, Vô Cực Kiếm Khí): waves đợt, xuyên giáp pen. */
+function slashWaveSkill(cfg) {
+  return {
+    name: cfg.name, desc: cfg.desc,
+    pick: c => SkillAI.line(c, 12, 1.4),
+    build(caster, target, release) {
+      const tl = new SkillTimeline(cfg.name, caster);
+      const col = caster.team === 'ally' ? COLORS.allyA : COLORS.enemyA;
+      tl.at(0, 'AnimationEvent', () => { caster.snapFace(target.pos); caster.anim.play('Attack03', { dur: 0.75, windup: 0.28, active: 0.36 }); });
+      tl.at(0, 'SpawnVFX', () => vfx.magicCircle(caster.pos, 1.2, col, COLORS.allyB, { reveal: 0.25, life: 0.6, spin: 2 }));
+      for (let w = 0; w < cfg.waves; w++) tl.at(0.32 + w * 0.22, 'LaunchProjectile', () => {
+        const dir = new V3(Math.sin(caster.yaw), 0, Math.cos(caster.yaw)), side = new V3(-dir.z, 0, dir.x);
+        Sfx.whoosh();
+        vfx.slash(caster.pos, caster.yaw, col, 2.2, Math.PI / 2, 0.25, 1.1);
+        Projectiles.spawn({ src: caster, target: null, pierce: true, hitSet: new Set(), pos: caster.pos.clone().setY(1.1).addScaledVector(dir, 0.8),
+          vel: dir.clone().multiplyScalar(17), speed: 17, color: col, size: 0.45, life: 0.75, radius: 1.4,
+          update: (p) => { for (let k = -3; k <= 3; k++) { const w = k / 3; // hình bán nguyệt
+            vfx.particles.emit(p.pos.x + side.x * w * 1.3 - dir.x * Math.abs(w) * 0.55, p.pos.y + w * 0.12, p.pos.z + side.z * w * 1.3 - dir.z * Math.abs(w) * 0.55, 0, 0, 0, 0.12, 0.38 * (1 - Math.abs(w) * 0.5), 0.05, col, 0.9, 0); } },
+          onHit: (p, u) => { dealDamage(caster, u, cfg.mult, { skill: true, color: col, pen: cfg.pen }); hitStop(0.03); combatCam.shake(0.08); } });
+      });
+      tl.at(0.75 + (cfg.waves - 1) * 0.22, 'Cleanup', () => release());
+      tl.onCleanup(c => { if (c) release(); });
+      return tl;
+    }
+  };
+}
+
 const SKILLS = {
   /* -------- VẠN KIẾM QUY TÔNG (kỹ năng mẫu đầy đủ 5 giai đoạn) -------- */
   vanKiem: {
@@ -293,30 +320,10 @@ const SKILLS = {
   },
 
   /* -------- KIẾM KHÍ TRẢM (Kiếm Đồng): lưỡi kiếm khí bán nguyệt bay thẳng, xuyên mục tiêu -------- */
-  kiemKhi: {
-    name: 'Kiếm Khí Trảm',
-    desc: 'Chém một đạo kiếm khí bán nguyệt bay thẳng, xuyên qua mọi kẻ địch trên đường, gây 190% công.',
-    pick: c => SkillAI.line(c, 12, 1.4),
-    build(caster, target, release) {
-      const tl = new SkillTimeline('Kiếm Khí Trảm', caster);
-      const col = caster.team === 'ally' ? COLORS.allyA : COLORS.enemyA;
-      tl.at(0, 'AnimationEvent', () => { caster.snapFace(target.pos); caster.anim.play('Attack03', { dur: 0.75, windup: 0.28, active: 0.36 }); });
-      tl.at(0, 'SpawnVFX', () => vfx.magicCircle(caster.pos, 1.2, col, COLORS.allyB, { reveal: 0.25, life: 0.6, spin: 2 }));
-      tl.at(0.32, 'LaunchProjectile', () => {
-        const dir = new V3(Math.sin(caster.yaw), 0, Math.cos(caster.yaw)), side = new V3(-dir.z, 0, dir.x);
-        Sfx.whoosh();
-        vfx.slash(caster.pos, caster.yaw, col, 2.2, Math.PI / 2, 0.25, 1.1);
-        Projectiles.spawn({ src: caster, target: null, pierce: true, hitSet: new Set(), pos: caster.pos.clone().setY(1.1).addScaledVector(dir, 0.8),
-          vel: dir.clone().multiplyScalar(17), speed: 17, color: col, size: 0.45, life: 0.75, radius: 1.4,
-          update: (p) => { for (let k = -3; k <= 3; k++) { const w = k / 3; // hình bán nguyệt
-            vfx.particles.emit(p.pos.x + side.x * w * 1.3 - dir.x * Math.abs(w) * 0.55, p.pos.y + w * 0.12, p.pos.z + side.z * w * 1.3 - dir.z * Math.abs(w) * 0.55, 0, 0, 0, 0.12, 0.38 * (1 - Math.abs(w) * 0.5), 0.05, col, 0.9, 0); } },
-          onHit: (p, u) => { dealDamage(caster, u, 1.9, { skill: true, color: col }); hitStop(0.03); combatCam.shake(0.08); } });
-      });
-      tl.at(0.75, 'Cleanup', () => release());
-      tl.onCleanup(c => { if (c) release(); });
-      return tl;
-    }
-  },
+  kiemKhi: slashWaveSkill({ name: 'Kiếm Khí Trảm', mult: 1.9, pen: 0, waves: 1,
+    desc: 'Chém một đạo kiếm khí bán nguyệt bay thẳng, xuyên qua mọi kẻ địch trên đường, gây 190% công.' }),
+  voCucKiem: slashWaveSkill({ name: 'Vô Cực Kiếm Khí', mult: 2.4, pen: 0.5, waves: 2,
+    desc: 'Chém 2 đạo kiếm khí bán nguyệt liên tiếp theo hướng trúng nhiều địch nhất: mỗi đạo 240% công, xuyên mọi kẻ địch và bỏ qua 50% giáp.' }),
 
   /* -------- THIÊN LÔI QUYẾT: 3 đạo sét thủ tục -------- */
   thienLoi: thunderSkill({ name: 'Thiên Lôi Quyết', strikes: 3, gap: 0.25, radius: 2.4, mult: 1.6, stun: 0.8,
@@ -325,6 +332,8 @@ const SKILLS = {
     desc: 'Gọi 6 tia sét giáng xuống các kẻ địch quanh vùng đông nhất: mỗi tia gây 180% công trong bán kính 2,6 m và choáng 1 giây.' }),
 
   /* -------- HỎA PHƯỢNG PHẦN THIÊN: cầu lửa lớn → nổ + thiêu đốt -------- */
+  hoaCau: phoenixSkill({ name: 'Hỏa Cầu Thuật', count: 1, mult: 1.5, burn: 0.12,
+    desc: 'Phóng hỏa cầu truy đuổi mục tiêu, nổ gây 150% công trong bán kính 3 m và thiêu đốt.' }),
   hoaPhuong: phoenixSkill({ name: 'Hỏa Phượng Phần Thiên', count: 1, mult: 2.0, burn: 0.18,
     desc: 'Phóng hỏa phượng truy đuổi mục tiêu, nổ gây 200% công trong bán kính 3 m và thiêu đốt theo thời gian.' }),
   songPhuong: phoenixSkill({ name: 'Song Phượng Diệt Thế', count: 2, mult: 2.6, burn: 0.25,

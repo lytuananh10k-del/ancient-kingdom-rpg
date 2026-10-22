@@ -92,16 +92,18 @@ function renderUnitInfo() {
   const d = UNIT_DEFS[info.key], star = info.star, enemy = !!u && u.team === 'enemy', onBench = !!u && benchUnits.includes(u);
   let hp, maxHp, atk, def, aspd, mana, maxMana, shield = 0;
   if (u) { hp = Math.max(0, u.hp); maxHp = u.maxHp; atk = u.atk; def = u.def_; aspd = d.aspd * u.bonus.aspd; mana = u.mana; maxMana = u.maxMana; shield = u.shield; }
-  else { maxHp = Math.round(d.hp * STAR_MUL[star]); hp = maxHp; atk = d.atk * STAR_MUL[star]; def = d.def; aspd = d.aspd; mana = d.mana0; maxMana = d.mana; }
+  else { maxHp = Math.round(d.hp * STAR.hp[star]); hp = maxHp; atk = d.atk * STAR.atk[star]; def = d.def; aspd = d.aspd; mana = d.mana0; maxMana = d.mana; }
+  if (u) { atk = u.atkNow(); def = u.defNow(); aspd = u.aspdNow(); }   // chỉ số hiện hành (gồm buff / debuff đang có)
   const box = $('unit-info'); box.classList.toggle('enemy', enemy);
   $('ui-name').textContent = d.name; $('ui-stars').textContent = '★'.repeat(star);
   const counts = traitCounts(), tags = [];
   if (enemy) tags.push('<span class="ui-tag foe">Phe địch</span>');
   if (ROLES[d.role]) tags.push(`<span class="ui-tag role">${ROLES[d.role].name}</span>`);
-  if (d.cost) tags.push(`<span class="ui-tag cost">◆ ${d.cost}</span>`);
+  if (d.cost) tags.push(`<span class="ui-tag cost" style="color:${RARITY_COLOR[d.cost]};border-color:${RARITY_COLOR[d.cost]}">◆ ${d.cost} · ${RARITY[d.cost]}</span>`);
+  if (ORIGINS[d.origin]) tags.push(`<span class="ui-tag">${ORIGINS[d.origin]}</span>`);
   (d.traits || []).forEach(t => {
     const T = TRAITS[t], n = enemy ? 0 : counts[t] || 0, lv = !enemy && !onBench && u ? traitLevel(t, n) : 0;
-    tags.push(`<span class="ui-tag${lv ? ' on' : ''}" style="--c:${T.color}">${T.name}${!enemy ? ` ${n}/${T.tiers.find(m => m > n) || T.tiers[T.tiers.length - 1]}` : ''}</span>`);
+    tags.push(`<span class="ui-tag${lv && T.active ? ' on' : ''}" style="--c:${T.color}">${T.name}${!enemy ? ` ${n}/${T.tiers.find(m => m > n) || T.tiers[T.tiers.length - 1]}` : ''}${T.active ? '' : ' (tuần 2)'}</span>`);
   });
   $('ui-tags').innerHTML = tags.join('');
   const its = u ? u.items || [] : [];
@@ -115,7 +117,7 @@ function renderUnitInfo() {
     `<dt>Né</dt><dd>${Math.round((d.dodge || 0) * 100)}%</dd><dt>Kháng choáng</dt><dd>${Math.round((1 - (ROLES[d.role] ? ROLES[d.role].tenacity : 1)) * 100)}%</dd>`;
   const sk = SKILLS[d.skill];
   $('ui-skill-name').textContent = (!enemy && sk.allyName) || sk.name;
-  $('ui-skill-mana').textContent = 'Cần ' + d.mana + ' linh lực';
+  $('ui-skill-mana').textContent = 'Cần ' + d.mana + ' linh lực' + (sk.meta ? ' · ' + sk.meta.type + ' · ' + sk.meta.target : '');
   $('ui-skill-desc').textContent = sk.desc || '';
   let foot = '';
   const poolTxt = d.cost ? ` · bể chung còn ${poolLeft(info.key)}/${POOL_SIZE[d.cost]}` + (game.rivals[info.key] ? ` (đối thủ giữ ${game.rivals[info.key]})` : '') : '';
@@ -204,9 +206,9 @@ function renderSelActions() {
 function renderTraits() {
   const counts = traitCounts(), el = $('traits'); el.textContent = '';
   Object.keys(TRAITS).filter(t => counts[t]).sort((a, b) => traitLevel(b, counts[b]) - traitLevel(a, counts[a]) || counts[b] - counts[a]).forEach(t => {
-    const T = TRAITS[t], n = counts[t], lv = traitLevel(t, n), div = document.createElement('div');
-    div.className = 'trait' + (lv ? ' on' : ''); div.style.setProperty('--c', T.color);
-    div.innerHTML = `<b>${T.name}</b> <span class="cnt">${n}/${T.tiers.find(m => m > n) || T.tiers[T.tiers.length - 1]}</span>${lv ? `<span class="fx">${T.desc[lv - 1]}</span>` : ''}`;
+    const T = TRAITS[t], n = counts[t], lv = T.active ? traitLevel(t, n) : 0, div = document.createElement('div');
+    div.className = 'trait' + (lv ? ' on' : '') + (T.active ? '' : ' soon'); div.style.setProperty('--c', T.color);
+    div.innerHTML = `<b>${T.name}</b> <span class="cnt">${n}/${T.tiers.find(m => m > n) || T.tiers[T.tiers.length - 1]}</span>${lv ? `<span class="fx">${T.desc[lv - 1]}</span>` : T.active ? '' : '<span class="fx">cộng hưởng mở ở tuần 2</span>'}`;
     el.appendChild(div);
   });
 }
@@ -218,8 +220,8 @@ function nextRound() {
 function forceUltimate() {
   if (battle.phase !== 'fight') { ui.toast('Bắt đầu giao chiến trước, rồi thi triển'); return; }
   const k = units.find(u => u.key === 'kiemtien' && u.team === 'ally' && u.alive);
-  if (!k) { ui.toast('Chưa có Kiếm Tiên trên bàn – mua ở cửa hàng (3 linh thạch)'); return; }
-  if (k.fsm.name === 'cast') { ui.toast('Kiếm Tiên đang thi triển'); return; }
+  if (!k) { ui.toast('Chưa có Vạn Kiếm Tiên Đế trên bàn – tướng bậc 5 (5 linh thạch), mở khóa từ cấp 7'); return; }
+  if (k.fsm.name === 'cast') { ui.toast('Kiếm Đế đang thi triển'); return; }
   k.mana = k.maxMana; if (k.fsm.name !== 'dead' && k.fsm.name !== 'stun') k.fsm.set('move');
 }
 function togglePause() { battle.paused = !battle.paused; $('btn-pause').setAttribute('aria-pressed', battle.paused); $('btn-pause').textContent = battle.paused ? 'Tiếp tục' : 'Tạm dừng'; timelines.forEach(t => (battle.paused ? t.pause() : t.resume())); }

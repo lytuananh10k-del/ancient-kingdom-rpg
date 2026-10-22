@@ -6,12 +6,7 @@
  * 20. Trận đấu: vòng, đội hình, thắng / thua
  * ===================================================================*/
 /* ---------- Tộc / hệ ---------- */
-const TRAITS = {
-  kiemtu: { name: 'Kiếm Tu', tiers: [2, 4], color: '#7cc4ff', desc: ['+20% công', '+50% công, +20% tốc đánh'] },
-  phaptu: { name: 'Pháp Tu', tiers: [2, 4], color: '#c9a0ff', desc: ['Tuyệt kỹ +25%, linh lực đầu +20', 'Tuyệt kỹ +60%, linh lực đầu +40'] },
-  hophap: { name: 'Hộ Pháp', tiers: [2, 4], color: '#e9c46a', desc: ['+30% máu, +20 giáp', '+60% máu, +45 giáp'] },
-  matu: { name: 'Ma Tu', tiers: [2, 4], color: '#ff8a7a', desc: ['Hút máu 20% sát thương gây ra', 'Hút máu 40%, +15% công'] }
-};
+/* TRAITS: xem js/data/traits.js */
 const defaultBonus = () => ({ atk: 1, hp: 1, hpAdd: 0, skill: 1, mana0: 0, ls: 0, aspd: 1, def: 0 });
 
 /* ---------- Trang bị (rơi ở vòng yêu thú; tối đa 3 món mỗi tướng, gắn rồi không tháo – bán tướng thì trả về túi) ---------- */
@@ -25,10 +20,10 @@ const ITEMS = {
 };
 const ITEM_KEYS = Object.keys(ITEMS), MAX_ITEMS_PER_UNIT = 3, MAX_INVENTORY = 10;
 const entryOf = u => ({ key: u.key, star: u.star, items: (u.items || []).slice() });
-const STAR_MUL = [0, 1, 1.8, 3.24], STAR_SCALE = [0, 1, 1.12, 1.24];
 
 /* ---------- Kinh tế & cửa hàng ---------- */
-const SHOP_POOL = { 1: ['kiemdong', 'hophap', 'thietve'], 2: ['loi', 'hoa', 'anhkiem', 'uminh'], 3: ['uhon', 'huyetkiem', 'mathu'], 4: ['loiton', 'kimcuong'], 5: ['kiemtien', 'hoaton'] };
+/** Tướng bán ở cửa hàng theo bậc – lấy thẳng từ danh sách 24 tướng (js/data/champions.js). */
+const SHOP_POOL = { 1: championsByCost(1), 2: championsByCost(2), 3: championsByCost(3), 4: championsByCost(4), 5: championsByCost(5) };
 /** % xuất hiện bậc 1–5 theo cấp người chơi (hàng = cấp). */
 const SHOP_ODDS = [null,
   [100, 0, 0, 0, 0], [100, 0, 0, 0, 0], [75, 25, 0, 0, 0], [55, 30, 15, 0, 0], [45, 33, 20, 2, 0],
@@ -40,7 +35,6 @@ const MAX_LEVEL = 9, BENCH_SIZE = BENCH.slots, SHOP_SIZE = 5, REROLL_COST = 2, X
 const sellPrice = (key, star) => UNIT_DEFS[key].cost * Math.pow(3, star - 1) - (star > 1 ? 1 : 0);
 const game = { hp: START_HP, gold: 6, level: 3, xp: 0, streak: 0, bench: new Array(BENCH_SIZE).fill(null), shop: [], over: false, sel: null, lastSummary: '',
   rivals: {}, items: [], selItem: -1, lastRewards: null, prepT: 0 };
-let customRigFactory = null;
 
 const boardAllies = () => units.filter(u => u.team === 'ally');
 const boardCap = () => game.level;
@@ -315,20 +309,22 @@ function snapshotGame(roundOverride) {
 }
 function saveGame(roundOverride) { if (!battle.bench) store.set('save', snapshotGame(roundOverride)); }
 const newGameState = () => ({ v: 1, hp: START_HP, gold: 6, level: 3, xp: 0, streak: 0, round: 1, bench: new Array(BENCH_SIZE).fill(null), shop: null, over: false,
-  rivals: {}, items: [], board: [{ key: 'kiemdong', star: 1, c: 4, r: 3 }, { key: 'hophap', star: 1, c: 3, r: 3 }] });
+  rivals: {}, items: [], board: [{ key: 'kiemdong', star: 1, c: 4, r: 3 }, { key: 'thietve', star: 1, c: 3, r: 3 }] });
 function restoreGame(st) {
   for (const u of boardAllies()) removeUnit(u);
   if (drag.src) cancelDrag();
   Object.assign(game, { hp: st.hp, gold: st.gold, level: Math.min(MAX_LEVEL, st.level), xp: st.xp, streak: st.streak, over: !!st.over, sel: null, lastSummary: '', selItem: -1, lastRewards: null });
   const okItems = a => (Array.isArray(a) ? a.filter(k => ITEMS[k]).slice(0, MAX_ITEMS_PER_UNIT) : []);
   game.items = Array.isArray(st.items) ? st.items.filter(k => ITEMS[k]).slice(0, MAX_INVENTORY) : [];
-  game.rivals = {}; for (const k in st.rivals || {}) if (UNIT_DEFS[k] && UNIT_DEFS[k].cost && st.rivals[k] > 0) game.rivals[k] = st.rivals[k] | 0;
-  game.bench = (st.bench || []).slice(0, BENCH_SIZE).map(e => (e && UNIT_DEFS[e.key] && UNIT_DEFS[e.key].cost ? { key: e.key, star: e.star, items: okItems(e.items) } : null));
+  // Bản lưu cũ (trước V1.5): id tướng đã đổi / gỡ được chuyển sang tướng mới cùng bậc (migrateChampionKey), giữ sao & trang bị.
+  game.rivals = {}; for (const k in st.rivals || {}) { const m = migrateChampionKey(k); if (m && st.rivals[k] > 0) game.rivals[m] = (game.rivals[m] || 0) + (st.rivals[k] | 0); }
+  game.bench = (st.bench || []).slice(0, BENCH_SIZE).map(e => { const m = e && migrateChampionKey(e.key); return m && e.star >= 1 && e.star <= 3 ? { key: m, star: e.star, items: okItems(e.items) } : null; });
   while (game.bench.length < BENCH_SIZE) game.bench.push(null);
   // Bản lưu hỏng / cũ: bỏ ô trùng hoặc ngoài nửa bàn phe ta, quân vượt giới hạn cấp → về hàng chờ (đầy thì hoàn linh thạch).
   const used = new Set();
   (st.board || []).forEach(b => {
-    if (!UNIT_DEFS[b.key] || !UNIT_DEFS[b.key].cost || !(b.star >= 1 && b.star <= 3)) return;
+    b = Object.assign({}, b, { key: migrateChampionKey(b.key) });
+    if (!b.key || !(b.star >= 1 && b.star <= 3)) return;
     const k = b.c + ',' + b.r, okTile = b.c >= 0 && b.c < 8 && b.r >= 0 && b.r < 4 && !used.has(k);
     if (okTile && boardAllies().length < game.level) { used.add(k); placeUnit(b.key, b.star, b.c, b.r, okItems(b.items)); return; }
     const slot = game.bench.indexOf(null);
@@ -336,7 +332,8 @@ function restoreGame(st) {
   });
   battle.round = st.round || 1;
   for (const k in game.rivals) { const over = -poolLeft(k); if (over > 0) game.rivals[k] = Math.max(0, game.rivals[k] - over); }
-  if (st.shop && st.shop.length === SHOP_SIZE) game.shop = st.shop.map(k => (k && UNIT_DEFS[k] ? k : null)); else rollShop();
+  if (st.shop && st.shop.length === SHOP_SIZE) game.shop = st.shop.map(k => (k ? migrateChampionKey(k) : null)); else rollShop();
+  mergeAll();   // bản lưu cũ: nhiều id cũ có thể gộp về cùng một tướng mới → đủ 3 bản thì lên sao luôn
   setupRound();
 }
 function newGame() { restoreGame(newGameState()); ui.toast('Ván mới – mua tu sĩ rồi kéo từ hàng chờ lên ô xanh'); }

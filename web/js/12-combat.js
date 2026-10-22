@@ -20,16 +20,25 @@ function floatText(pos, text, color, size = 1, crit = false) {
 }
 
 /** Thống kê giao chiến (cộng dồn) – dùng cho bài kiểm thử AI và để soi cân bằng. */
+/** Màu VFX theo hệ nguyên tố (đạn đánh thường và kỹ năng). */
+const SKILL_COLORS = {
+  fire: COLORS.fire, thunder: COLORS.thunder, nether: COLORS.enemyB, ice: new THREE.Color(0xbfe8ff), wood: new THREE.Color(0x9fe08a),
+  arrow: new THREE.Color(0xffe8a8), light: new THREE.Color(0xfff0b0), sword: new THREE.Color(0xb8d0ff), blood: COLORS.blood, shadow: new THREE.Color(0x9a7aff), chaos: new THREE.Color(0xff3a7a), earth: new THREE.Color(0xffc070)
+};
 const combatLog = { dodges: 0, crits: 0, stuns: 0, resisted: 0, kites: 0, unstuck: 0, syncChecks: 0, syncMaxErr: 0, casts: {}, badCasts: 0 };
 
 /** Khống chế: thời gian choáng nhân theo vai trò (tướng đỡ đòn kháng 40%), và sau khi hết choáng được miễn
  *  khống chế 0,8 giây để không bị khoá choáng liên hoàn. Tướng đang tung chiêu có giáp chiêu (không bị ngắt). */
-function applyStun(u, dur) {
+/** kind = 'freeze': đóng băng – giống choáng về luật (không hành động, có kháng / miễn khống chế) nhưng nhân vật đứng im phủ băng. */
+function applyStun(u, dur, kind = 'stun') {
   if (!u || !u.alive || dur <= 0) return false;
   if (u.ccImmune > 0) { combatLog.resisted++; floatText(u.chest(_v2.clone()), 'Kháng', '#c9d6df', 0.75); return false; }
   const d = dur * (ROLES[u.def.role] ? ROLES[u.def.role].tenacity : 1);
-  if (u.status.stun <= 0) floatText(u.chest(_v2.clone()), 'Choáng', '#ffe08a', 0.8);
-  u.status.stun = Math.max(u.status.stun, d); combatLog.stuns++;
+  const freeze = kind === 'freeze';
+  if (u.status.stun <= 0 || (freeze && u.status.frozen <= 0)) floatText(u.chest(_v2.clone()), freeze ? 'Đóng băng' : 'Choáng', freeze ? '#cfeeff' : '#ffe08a', 0.8);
+  u.status.stun = Math.max(u.status.stun, d);
+  if (freeze) { u.status.frozen = Math.max(u.status.frozen, d); combatLog.freezes = (combatLog.freezes || 0) + 1; vfx.particles.burst(u.chest(_v2.clone()), SKILL_COLORS.ice, 24, 3, 0.7, 0.3, { drag: 3 }); }
+  else combatLog.stuns++;
   return true;
 }
 
@@ -45,15 +54,21 @@ function dealDamage(src, dst, mult, opts = {}) {
   }
   const crit = opts.crit !== undefined ? opts.crit : Math.random() < src.def.crit;
   if (crit && !opts.dot) combatLog.crits++;
-  const mitig = dst.def_ / (dst.def_ + 100);
-  let dmg = Math.round(src.atk * mult * (1 - mitig) * (crit ? src.def.critDmg : 1) * rand(0.95, 1.05) * overtimeMul());
-  if (opts.skill && src.bonus) dmg = Math.round(dmg * src.bonus.skill);
+  // Giáp sau xuyên giáp (opts.pen = tỉ lệ giáp bị bỏ qua); dst.fx 'dmgTaken' = giảm / tăng sát thương nhận vào.
+  const armor = (dst.defNow ? dst.defNow() : dst.def_) * (1 - clamp(opts.pen || 0, 0, 1));
+  const mitig = armor / (armor + 100);
+  let dmg = (src.atkNow ? src.atkNow() : src.atk) * mult * (1 - mitig) * (crit ? src.def.critDmg : 1) * rand(0.95, 1.05) * overtimeMul();
+  if (dst.fx) dmg *= dst.fx.mul('dmgTaken');
+  if (opts.skill && src.bonus) dmg *= src.bonus.skill * (STAR.skill[src.star] || 1);   // sức mạnh kỹ năng: tộc/hệ × sao
+  dmg = Math.round(dmg);
   dmg = Math.max(1, dmg);
   if (battle.bench) { dst.hp = dst.maxHp; }
   let absorbed = 0;
   if (dst.shield > 0) { absorbed = Math.min(dst.shield, dmg); dst.shield -= absorbed; dmg -= absorbed; if (dst.shieldFx) dst.shieldFx.hit(); if (dst.shield <= 0 && dst.shieldFx) { dst.shieldFx.shatter(); dst.shieldFx = null; } }
   dst.hp = Math.max(0, dst.hp - dmg);
-  if (src.bonus && src.bonus.ls > 0 && src.alive && !opts.dot) src.hp = Math.min(src.maxHp, src.hp + dmg * src.bonus.ls);
+  const ls = (src.bonus ? src.bonus.ls : 0) + (src.fx ? src.fx.sum('ls') : 0);
+  if (ls > 0 && src.alive && !opts.dot) src.hp = Math.min(src.maxHp, src.hp + dmg * ls);
+  combatLog.dealt = (combatLog.dealt || 0) + dmg;
   if (!dst.manaLock) dst.mana = Math.min(dst.maxMana, dst.mana + Math.min(12, (dmg + absorbed) * 0.04 + 2));
   if (!opts.dot && !src.manaLock && src.alive) src.mana = Math.min(src.maxMana, src.mana + (opts.skill ? 0 : 10));
   dst.flash = Math.max(dst.flash, opts.dot ? 0.25 : opts.skill ? 0.55 : 1);
@@ -90,9 +105,9 @@ const Projectiles = {
   basic(src, target, heavy) {
     const kind = src.def.ranged;
     const tip = src.rig.getSocket('weaponTip').getWorldPosition(new V3());
-    const col = kind === 'fire' ? COLORS.fire : kind === 'nether' ? COLORS.enemyB : COLORS.thunder;
+    const col = SKILL_COLORS[kind] || COLORS.thunder, arrow = kind === 'arrow';
     Sfx.whoosh();
-    this.spawn({ src, target, pos: tip, speed: heavy ? 15 : 18, homing: true, color: col, size: heavy ? 0.6 : 0.42, life: 2,
+    this.spawn({ src, target, pos: tip, speed: arrow ? 26 : heavy ? 15 : 18, homing: true, color: col, size: arrow ? 0.3 : heavy ? 0.6 : 0.42, life: 2,
       onHit: (p, u) => { dealDamage(src, u, heavy ? 1.5 : 1, { heavy, color: col, burn: kind === 'fire' && heavy ? 0.15 : 0 }); vfx.particles.burst(p.pos, col, heavy ? 22 : 12, 6, 0.4, 0.3, { drag: 3 }); if (heavy) { vfx.shockwave(new V3(u.pos.x, 0, u.pos.z), 1.6, col, 0.4); hitStop(0.05); } } });
   },
   update(dt) {

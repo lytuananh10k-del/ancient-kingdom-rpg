@@ -6,7 +6,8 @@
     "test": "node tests/playtest.js",
     "test:portrait": "VIEW=400x820 node tests/playtest.js",
     "test:combat": "node tests/combat.js",
-    "test:economy": "node tests/economy.js"
+    "test:economy": "node tests/economy.js",
+    "test:champions": "node tests/champions.js"
   },
   "devDependencies": {
     "playwright": "^1.47.0",

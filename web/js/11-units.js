@@ -5,52 +5,9 @@
 /* =====================================================================
  * 14. Định nghĩa đơn vị & kỹ năng (SkillDefinitions)
  * ===================================================================*/
-const LOOKS = {
-  kiemtien: { robe: 0xeef2f6, trim: 0x3d7fc4, inner: 0x2b4d78, hair: 0x15181f, skin: 0xf2d3bd, accent: 0xe2c06a, weapon: 'sword', hairLen: 8, trailColor: new THREE.Color(0x9fd8ff), crown: true },
-  loi: { robe: 0x2c3a6b, trim: 0x9fc7ff, inner: 0x1d2647, hair: 0xd8dde8, skin: 0xf0d0b8, accent: 0x9fc7ff, weapon: 'staff', orb: 0x9fd0ff, hairLen: 7, trailColor: new THREE.Color(0x9fd0ff) },
-  hoa: { robe: 0x8e2b24, trim: 0xffb347, inner: 0x4a1612, hair: 0x2a0f0b, skin: 0xf3d2bc, accent: 0xffb347, weapon: 'staff', orb: 0xff9a4a, hairLen: 8, trailColor: new THREE.Color(0xffa055) },
-  hophap: { robe: 0x5b6b4a, trim: 0xd9b45a, inner: 0x343d2a, hair: 0x1a1612, skin: 0xe6c3a5, accent: 0xd9b45a, weapon: 'spear', bulk: 1.12, hairLen: 5, trailColor: new THREE.Color(0xe9d58a) },
-  huyetkiem: { robe: 0x2a1216, trim: 0xc2302a, inner: 0x1a0a0c, hair: 0x0a0a0c, skin: 0xd8b8a8, accent: 0xc2302a, weapon: 'blade', hairLen: 8, trailColor: new THREE.Color(0xff4a3a), mask: 0x1a1a1a },
-  uminh: { robe: 0x3a2350, trim: 0xb07cff, inner: 0x22143a, hair: 0x6a4a8a, skin: 0xcfc0d8, accent: 0xb07cff, weapon: 'staff', orb: 0xb07cff, hairLen: 7, trailColor: new THREE.Color(0xc08cff) },
-  mathu: { robe: 0x4a3a2c, trim: 0xa83a2a, inner: 0x2a1f18, hair: 0x2a1a10, skin: 0xb88a70, accent: 0xa83a2a, weapon: 'claws', bulk: 1.3, hairLen: 5, trailColor: new THREE.Color(0xff5a3a) },
-  kiemdong: { robe: 0xd6e4f0, trim: 0x5b9bd5, inner: 0x3b5f86, hair: 0x2a1d14, skin: 0xf2d6c2, accent: 0xc0c8d0, weapon: 'sword', hairLen: 6, trailColor: new THREE.Color(0x9fd8ff) },
-  thietve: { robe: 0x4f5560, trim: 0xb0b8c0, inner: 0x2c3038, hair: 0x141414, skin: 0xe2c0a2, accent: 0xb0b8c0, weapon: 'spear', bulk: 1.15, hairLen: 4, crown: true, trailColor: new THREE.Color(0xd8e0e8) },
-  anhkiem: { robe: 0x1d2433, trim: 0x6fb7ff, inner: 0x101522, hair: 0x0c0c10, skin: 0xe8cdb8, accent: 0x6fb7ff, weapon: 'blade', hairLen: 8, mask: 0x2a3550, trailColor: new THREE.Color(0x8fc8ff) },
-  uhon: { robe: 0x2c2448, trim: 0x9fa8ff, inner: 0x1a1630, hair: 0xe8e8f0, skin: 0xe6d6e6, accent: 0x9fa8ff, weapon: 'staff', orb: 0x9fa8ff, hairLen: 8, trailColor: new THREE.Color(0xa8b0ff) },
-  loiton: { robe: 0x1b2350, trim: 0xffe08a, inner: 0x101633, hair: 0xf0f0f8, skin: 0xf0d6c4, accent: 0xffe08a, weapon: 'staff', orb: 0xfff2a8, hairLen: 9, crown: true, trailColor: new THREE.Color(0xfff0a0) },
-  kimcuong: { robe: 0x8a6a2a, trim: 0xfff0c0, inner: 0x4a3818, hair: 0x101010, skin: 0xd8b090, accent: 0xffe08a, weapon: 'spear', bulk: 1.25, hairLen: 3, crown: true, trailColor: new THREE.Color(0xffe8a0) },
-  hoaton: { robe: 0xb8321e, trim: 0xffd27a, inner: 0x5a120c, hair: 0xf8f0e8, skin: 0xf3d2bc, accent: 0xffd27a, weapon: 'staff', orb: 0xffc04a, hairLen: 9, crown: true, trailColor: new THREE.Color(0xffc060) },
-  // Yêu thú (chỉ xuất hiện ở vòng yêu thú)
-  yeulang: { robe: 0x3c4048, trim: 0x8fb8d8, inner: 0x24272e, hair: 0x9aa4b0, skin: 0x8a8f98, accent: 0x8fb8d8, weapon: 'claws', bulk: 1.05, hairLen: 3, mask: 0x1c1f26, trailColor: new THREE.Color(0xa8c8e8) },
-  yeuvuong: { robe: 0x24382a, trim: 0x7fe08a, inner: 0x16241a, hair: 0x3a5a3a, skin: 0x7a8a6a, accent: 0x7fe08a, weapon: 'claws', bulk: 1.45, hairLen: 4, crown: true, mask: 0x101810, trailColor: new THREE.Color(0x9fffa0) }
-};
-
-/* cost: giá ở cửa hàng (bậc hiếm 1–5); traits: tộc/hệ. Yêu thú không có cost (không bán ở cửa hàng). */
-/** Vai trò quyết định cách chọn mục tiêu & giữ vị trí; tenacity nhân thời gian bị choáng. */
-const ROLES = {
-  tank: { name: 'Đỡ đòn', tenacity: 0.6 },
-  fighter: { name: 'Đấu sĩ', tenacity: 0.85 },
-  assassin: { name: 'Sát thủ', tenacity: 1 },
-  mage: { name: 'Pháp sư', tenacity: 1 }
-};
-const UNIT_DEFS = {
-  kiemtien: { name: 'Kiếm Tiên', cost: 5, traits: ['kiemtu'], look: 'kiemtien', hp: 1000, atk: 76, def: 28, aspd: 1.0, range: 2.2, speed: 4.6, mana: 100, mana0: 45, dodge: 0.1, crit: 0.15, critDmg: 1.7, skill: 'vanKiem', dash: true, poise: 50, role: 'fighter' },
-  loi: { name: 'Lôi Pháp Sư', short: 'Lôi Pháp', cost: 2, traits: ['phaptu'], look: 'loi', hp: 560, atk: 50, def: 16, aspd: 0.8, range: 8, speed: 3.6, mana: 80, mana0: 20, dodge: 0.03, crit: 0.08, critDmg: 1.5, skill: 'thienLoi', ranged: 'thunder', poise: 30, role: 'mage' },
-  hoa: { name: 'Hỏa Linh', cost: 2, traits: ['phaptu'], look: 'hoa', hp: 540, atk: 54, def: 15, aspd: 0.75, range: 7.5, speed: 3.6, mana: 90, mana0: 30, dodge: 0.03, crit: 0.08, critDmg: 1.5, skill: 'hoaPhuong', ranged: 'fire', poise: 30, role: 'mage' },
-  hophap: { name: 'Hộ Pháp', cost: 1, traits: ['hophap'], look: 'hophap', hp: 1100, atk: 42, def: 45, aspd: 0.85, range: 2.6, speed: 3.8, mana: 70, mana0: 30, dodge: 0, crit: 0.05, critDmg: 1.5, skill: 'hoThe', poise: 80, role: 'tank' },
-  huyetkiem: { name: 'Huyết Ảnh Kiếm Khách', short: 'Huyết Ảnh', cost: 3, traits: ['kiemtu', 'matu'], look: 'huyetkiem', hp: 700, atk: 58, def: 22, aspd: 1.05, range: 2.2, speed: 4.8, mana: 80, mana0: 20, dodge: 0.15, crit: 0.15, critDmg: 1.6, skill: 'huyetAnh', dash: true, poise: 45, role: 'assassin' },
-  uminh: { name: 'U Minh Ma Tu', short: 'U Minh', cost: 2, traits: ['phaptu', 'matu'], look: 'uminh', hp: 520, atk: 48, def: 14, aspd: 0.8, range: 7.5, speed: 3.5, mana: 80, mana0: 20, dodge: 0.03, crit: 0.08, critDmg: 1.5, skill: 'uMinh', ranged: 'nether', poise: 30, role: 'mage' },
-  mathu: { name: 'Ma Thú Hống', short: 'Ma Thú', cost: 3, traits: ['hophap', 'matu'], look: 'mathu', hp: 1250, atk: 46, def: 38, aspd: 0.75, range: 2.4, speed: 3.6, mana: 90, mana0: 25, dodge: 0, crit: 0.05, critDmg: 1.5, skill: 'phaDia', poise: 90, role: 'tank' },
-  kiemdong: { name: 'Kiếm Đồng', cost: 1, traits: ['kiemtu'], look: 'kiemdong', hp: 600, atk: 48, def: 20, aspd: 0.95, range: 2.2, speed: 4.4, mana: 60, mana0: 20, dodge: 0.08, crit: 0.1, critDmg: 1.5, skill: 'kiemKhi', poise: 40, role: 'fighter' },
-  thietve: { name: 'Thiết Vệ', cost: 1, traits: ['hophap'], look: 'thietve', hp: 920, atk: 40, def: 40, aspd: 0.8, range: 2.6, speed: 3.8, mana: 80, mana0: 30, dodge: 0, crit: 0.05, critDmg: 1.5, skill: 'phaDia', poise: 80, role: 'tank' },
-  anhkiem: { name: 'Ảnh Kiếm', cost: 2, traits: ['kiemtu', 'matu'], look: 'anhkiem', hp: 640, atk: 56, def: 20, aspd: 1.05, range: 2.2, speed: 4.8, mana: 70, mana0: 20, dodge: 0.18, crit: 0.18, critDmg: 1.6, skill: 'huyetAnh', dash: true, poise: 45, role: 'assassin' },
-  uhon: { name: 'U Hồn Sư', short: 'U Hồn', cost: 3, traits: ['phaptu', 'matu'], look: 'uhon', hp: 600, atk: 56, def: 16, aspd: 0.8, range: 7.5, speed: 3.5, mana: 80, mana0: 30, dodge: 0.05, crit: 0.1, critDmg: 1.5, skill: 'uMinh', ranged: 'nether', poise: 30, role: 'mage' },
-  loiton: { name: 'Lôi Tôn', cost: 4, traits: ['phaptu'], look: 'loiton', hp: 760, atk: 62, def: 22, aspd: 0.8, range: 8, speed: 3.6, mana: 100, mana0: 30, dodge: 0.03, crit: 0.1, critDmg: 1.5, skill: 'cuuThienLoi', ranged: 'thunder', poise: 40, role: 'mage' },
-  kimcuong: { name: 'Kim Cương Hộ Pháp', short: 'Kim Cương', cost: 4, traits: ['hophap'], look: 'kimcuong', hp: 1500, atk: 58, def: 60, aspd: 0.8, range: 2.6, speed: 3.8, mana: 90, mana0: 40, dodge: 0, crit: 0.05, critDmg: 1.5, skill: 'kimCuong', poise: 95, role: 'tank' },
-  hoaton: { name: 'Hỏa Tôn', cost: 5, traits: ['phaptu'], look: 'hoaton', hp: 860, atk: 72, def: 24, aspd: 0.8, range: 7.5, speed: 3.6, mana: 100, mana0: 30, dodge: 0.03, crit: 0.1, critDmg: 1.6, skill: 'songPhuong', ranged: 'fire', poise: 40, role: 'mage' },
-  yeulang: { name: 'Yêu Lang', look: 'yeulang', hp: 520, atk: 40, def: 12, aspd: 1.0, range: 2.2, speed: 4.8, mana: 60, mana0: 0, dodge: 0.1, crit: 0.1, critDmg: 1.5, skill: 'huyetAnh', dash: true, poise: 30, role: 'assassin', monster: true },
-  yeuvuong: { name: 'Yêu Thú Vương', look: 'yeuvuong', hp: 1400, atk: 55, def: 30, aspd: 0.8, range: 2.4, speed: 3.8, mana: 90, mana0: 20, dodge: 0, crit: 0.08, critDmg: 1.5, skill: 'phaDia', poise: 90, role: 'tank', monster: true }
-};
+/* LOOKS, ROLES, UNIT_DEFS, STAR: xem js/data/champions.js (nạp trước file này). */
+/** Nhà máy rig riêng theo tướng (vd. mô hình GLB nhập cho một tướng): RIG_FACTORIES[id] = () => rig. Không có thì dùng rig thủ tục. */
+const RIG_FACTORIES = {};
 
 /* =====================================================================
  * 15. Đơn vị chiến đấu (Unit) – logic + AnimationController
@@ -87,9 +44,10 @@ class Unit {
     this.star = star; this.bonus = defaultBonus();
     this.U = ShaderLibrary.makeUnitUniforms(team === 'ally' ? 0x9fd8ff : 0xff6a50);
     this.U.uEdgeColor.value.set(team === 'ally' ? 0x9fd8ff : 0xff5030);
-    this.rig = customRigFactory && key === 'kiemtien' && team === 'ally' ? customRigFactory() : new CharacterRig(LOOKS[d.look], this.U);
+    this.rig = RIG_FACTORIES[key] && team === 'ally' ? RIG_FACTORIES[key]() : new CharacterRig(LOOKS[d.look], this.U);
     scene.add(this.rig.root);
-    this.rig.root.scale.setScalar(STAR_SCALE[star]);
+    this.rig.root.scale.setScalar(this.modelScale());
+    this.fx = new EffectSet(this);
     this.anim = new AnimationController(this);
     this.pos = tileCenter(c, r); this.yaw = team === 'ally' ? 0 : Math.PI; this.vel = new V3();
     this.fsm = new AnimationStateMachine(this);
@@ -97,11 +55,18 @@ class Unit {
     this.reset(1);
   }
   get alive() { return this.hp > 0; }
+  modelScale() { return STAR.scale[this.star] * ((this.def.model && this.def.model.scale) || 1); }
+  /* Chỉ số hiện hành = chỉ số gốc (đã nhân sao, tộc/hệ, trang bị) × hiệu ứng đang có (EffectSet) × nội tại. */
+  atkNow() { const p = this.def.passive; return this.atk * this.fx.mul('atk') * (p && p.lowHpAtk ? 1 + p.lowHpAtk * (1 - this.hp / this.maxHp) : 1); }
+  defNow() { return Math.max(0, this.def_ * this.fx.mul('def') + this.fx.sum('def')); }
+  aspdNow() { return this.def.aspd * this.bonus.aspd * this.fx.mul('aspd'); }
+  speedNow() { return this.def.speed * this.fx.mul('speed'); }
   reset(scale) {
-    const d = this.def, b = this.bonus, sm = STAR_MUL[this.star];
-    this.maxHp = Math.round((d.hp * scale * sm + (b.hpAdd || 0)) * b.hp); this.hp = this.maxHp; this.atk = d.atk * scale * sm * b.atk; this.def_ = d.def * Math.sqrt(scale) + b.def;
+    const d = this.def, b = this.bonus, s = this.star;
+    this.maxHp = Math.round((d.hp * scale * STAR.hp[s] + (b.hpAdd || 0)) * b.hp); this.hp = this.maxHp; this.atk = d.atk * scale * STAR.atk[s] * b.atk; this.def_ = d.def * Math.sqrt(scale) + b.def;
     this.mana = Math.min(d.mana, d.mana0 + b.mana0); this.maxMana = d.mana; this.shield = 0; this.shieldTime = 0;
-    this.status = { stun: 0, burn: 0, burnTick: 0, burnDmg: 0 };
+    this.status = { stun: 0, frozen: 0, burn: 0, burnTick: 0, burnDmg: 0 };
+    this.fx.clear();
     this.target = null; this.retarget = 0; this.atkCd = rand(0, 0.4); this.attackIdx = 0; this.dashCd = 0;
     this.ccImmune = 0; this.avoid = null; this.stuckT = 0; this.progT = 0; this.progD = Infinity; this.fullManaT = 0;
     this.knock = new V3(); this.deathT = 0; this.casting = null; this.flash = 0; this.manaLock = false;
@@ -230,7 +195,7 @@ class Unit {
     let th = null, td = 2.4;
     for (const u of units) if (u.team !== this.team && u.alive && !u.def.ranged) { const d = Math.hypot(u.pos.x - this.pos.x, u.pos.z - this.pos.z); if (d < td) { td = d; th = u; } }
     if (!th) return false;
-    const ax = this.pos.x - th.pos.x, az = this.pos.z - th.pos.z, l = Math.hypot(ax, az) || 1, sp = this.def.speed * 0.75;
+    const ax = this.pos.x - th.pos.x, az = this.pos.z - th.pos.z, l = Math.hypot(ax, az) || 1, sp = this.speedNow() * 0.75;
     const nx = this.pos.x + ax / l * sp * dt, nz = this.pos.z + az / l * sp * dt, lim = BOARD.tile * 4 - 0.4;
     if (Math.abs(nx) > lim || Math.abs(nz) > lim) return false;                       // sát mép đài: đứng lại đánh
     const t = this.target;
@@ -264,7 +229,7 @@ class Unit {
       sx += -vz * sgn * w; sz += vx * sgn * w;   // vuông góc hướng đi, về phía không có đồng đội
     }
     vx += sx * 1.4; vz += sz * 1.4; const l2 = Math.hypot(vx, vz) || 1;
-    const sp = this.def.speed;
+    const sp = this.speedNow();
     this.vel.set(vx / l2 * sp, 0, vz / l2 * sp); this.pos.addScaledVector(this.vel, dt); this.anim.locomotion(sp);
   }
   /** Kẹt đường: 1,2 s mà khoảng cách tới mục tiêu không giảm được 0,2 m mỗi nửa giây → bỏ qua mục tiêu đó 2,5 s. */
@@ -285,13 +250,13 @@ class Unit {
     const t = this.findTarget(); if (!t) { this.fsm.set('move'); return; }
     this.snapFace(t.pos);
     const ranged = !!this.def.ranged;
-    const seq = ['Attack01', 'Attack02', 'Attack03'];
-    const name = this.attackIdx % 4 === 3 ? 'HeavyAttack' : seq[this.attackIdx % 4];
+    const seq = (this.def.animSet && this.def.animSet.attack) || ['Attack01', 'Attack02', 'Attack03', 'HeavyAttack'];
+    const name = seq[this.attackIdx % seq.length];
     this.attackIdx++;
     const tim = ATTACK_TIMING[ranged ? 'ranged' : 'melee'][name];
     const heavy = name === 'HeavyAttack';
     this.anim.play(name, tim);
-    this.atkCd = 1 / (this.def.aspd * this.bonus.aspd);
+    this.atkCd = 1 / this.aspdNow();
     const act = this.rig.action || null;   // rig thủ tục: đo độ lệch giữa tư thế va chạm và lúc gây sát thương
     const tl = new SkillTimeline(name, this);
     tl.at(tim.windup, 'AnimationEvent', () => { if (!ranged) { this.anim.trail(true); Sfx.whoosh(); } });
@@ -334,6 +299,12 @@ class Unit {
       if (this.status.burn > 0) { this.status.burn -= dt; this.status.burnTick -= dt; if (this.status.burnTick <= 0) { this.status.burnTick = 0.5; dealDamage(this.status.burnSrc, this, this.status.burnDmg, { dot: true }); }
         if (Math.random() < 0.5) vfx.particles.emit(this.pos.x + rand(-0.3, 0.3), rand(0.3, 1.6), this.pos.z + rand(-0.3, 0.3), 0, rand(1, 2), 0, 0.5, 0.25, 0.05, COLORS.fire, 0.8, 1); }
       if (this.shieldTime > 0) { this.shieldTime -= dt; if (this.shieldTime <= 0) this.shield = 0; }
+      if (this.status.frozen > 0) this.status.frozen -= dt;
+      if (battle.phase === 'fight') {
+        this.fx.update(dt);   // buff / debuff / chậm / sát thương & hồi máu theo thời gian
+        const p = this.def.passive;
+        if (p && p.regen && this.alive) this.hp = Math.min(this.maxHp, this.hp + this.maxHp * p.regen * dt);   // nội tại tự hồi phục
+      }
     }
     this.fsm.update(dt);
     // Tách đơn vị chồng lấn + giữ trong đài.
@@ -349,9 +320,10 @@ class Unit {
     this.flash = Math.max(0, this.flash - dt * 6);
   }
   renderUpdate(dt) {
-    const f = this.flash;
-    this.U.uFlash.value.setRGB(f * 0.42, f * 0.42, f * 0.45);
-    this.rig.update(dt, this.pos, this.yaw);
+    const f = this.flash, ice = this.status.frozen > 0 && this.alive;
+    if (ice) this.U.uFlash.value.setRGB(0.12 + f * 0.3, 0.3 + f * 0.3, 0.5 + f * 0.3);   // đóng băng: phủ màu băng
+    else this.U.uFlash.value.setRGB(f * 0.42, f * 0.42, f * 0.45);
+    this.rig.update(ice ? 0 : dt, this.pos, this.yaw);   // đóng băng: đứng im đúng tư thế bị đóng băng
     if (this.shieldFx) this.shieldFx.follow(this);
   }
   dispose() { this.rig.dispose(); }
