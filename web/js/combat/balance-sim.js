@@ -47,7 +47,7 @@ const BalanceSimulator = {
   run(opts = {}) {
     const n = opts.n || 100, T = Object.assign({}, this.THRESHOLDS, opts.thresholds || {}), t0 = performance.now();
     let s = (opts.seed || 2024) >>> 0; const rnd = () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; };
-    const snap = snapshotGame(); battle.sandbox = true;
+    const snap = snapshotGame(), sb0 = !!battle.sandbox; battle.sandbox = true;
     const fights = [], champ = {}, role = {}, cost = {}, star = {}, trait = {};
     const add = (m, k, win, extra) => { const a = m[k] || (m[k] = { n: 0, w: 0, dealt: 0, physical: 0, magic: 0, true: 0, taken: 0, healed: 0, shielded: 0, cc: 0, casts: 0, survival: 0, ehp: 0, dps: 0 }); a.n++; a.w += win; if (extra) for (const f in extra) a[f] += extra[f]; };
     const anomalies = [];
@@ -81,7 +81,7 @@ const BalanceSimulator = {
       nextRound();
       if (opts.onProgress) opts.onProgress(i + 1, n);
     }
-    restoreGame(snap);
+    restoreGame(snap, sb0);
     // tổng hợp + cờ mạnh / yếu bất thường (Wilson 95%)
     const wilson = (w, k) => { if (!k) return [0, 1]; const z = 1.96, p = w / k, d = 1 + z * z / k, c = (p + z * z / (2 * k)) / d, h = z * Math.sqrt(p * (1 - p) / k + z * z / (4 * k * k)) / d; return [c - h, c + h]; };
     const fin = m => Object.fromEntries(Object.entries(m).map(([k, a]) => { const avg = f => +(a[f] / a.n).toFixed(1), ci = wilson(a.w, a.n);

@@ -38,11 +38,13 @@ const ShaderLibrary = {
 
   /** Toon + cel shading (gradient 3 bậc) + rim light + dissolve + flash. */
   toon(color, U, opts = {}) {
-    const m = new THREE.MeshToonMaterial(Object.assign({ color, gradientMap: this.gradientMap }, opts));
+    // batched: lưới gộp của CharacterRig.batch() – toạ độ gốc từng phần nằm ở thuộc tính dpos (giữ nguyên hoa văn tan biến)
+    const { batched, ...mo } = opts;
+    const m = new THREE.MeshToonMaterial(Object.assign({ color, gradientMap: this.gradientMap }, mo));
     m.userData.u = U;
     m.onBeforeCompile = function (sh) {
       Object.assign(sh.uniforms, this.userData.u);
-      sh.vertexShader = 'varying vec3 vDPos;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n vDPos = position;');
+      sh.vertexShader = (batched ? 'attribute vec3 dpos;\n' : '') + 'varying vec3 vDPos;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n vDPos = ' + (batched ? 'dpos' : 'position') + ';');
       sh.fragmentShader = 'uniform vec3 uFlash; uniform vec3 uRimColor; uniform float uRimStrength; uniform float uDissolve; uniform vec3 uEdgeColor; varying vec3 vDPos;\n' + GLSL_NOISE +
         sh.fragmentShader.replace('#include <dithering_fragment>', `#include <dithering_fragment>
           float rim = pow(1.0 - clamp(dot(normalize(normal), normalize(vViewPosition)), 0.0, 1.0), 3.0);
@@ -51,7 +53,7 @@ const ShaderLibrary = {
           if (dn < uDissolve) discard;
           gl_FragColor.rgb += uEdgeColor * smoothstep(uDissolve + 0.08, uDissolve, dn) * step(0.0001, uDissolve) * 3.0;`);
     };
-    m.customProgramCacheKey = () => 'vkkt_toon';
+    m.customProgramCacheKey = () => (batched ? 'vkkt_toon_b' : 'vkkt_toon');
     return m;
   },
 
@@ -75,6 +77,29 @@ const ShaderLibrary = {
     });
   },
   linkOutline(mat, U) { mat.uniforms.uDissolve = U.uDissolve; return mat; },
+  /** Viền cho lưới gộp có xương (CharacterRig.batch): độ dày từng phần đã nướng sẵn vào thuộc tính off (vector đẩy theo pháp tuyến). */
+  outlineBatched(U) {
+    const m = new THREE.ShaderMaterial({
+      uniforms: THREE.UniformsUtils.merge([THREE.UniformsLib.fog, { uColor: { value: new THREE.Color(0x0b0d12) } }]),
+      vertexShader: `attribute vec3 off; attribute vec3 dpos; varying vec3 vDPos;
+        #include <skinning_pars_vertex>
+        #include <fog_pars_vertex>
+        void main(){ vDPos = dpos; vec3 transformed = position + off;
+          #include <skinbase_vertex>
+          #include <skinning_vertex>
+          vec4 mvPosition = modelViewMatrix * vec4(transformed, 1.0); gl_Position = projectionMatrix * mvPosition;
+          #include <fog_vertex>
+        }`,
+      fragmentShader: `uniform vec3 uColor; uniform float uDissolve; varying vec3 vDPos;
+        #include <fog_pars_fragment>
+        ${GLSL_NOISE}
+        void main(){ if (vnoise3(vDPos * 9.0) < uDissolve) discard; gl_FragColor = vec4(uColor, 1.0);
+          #include <fog_fragment>
+        }`,
+      side: THREE.BackSide, fog: true, skinning: true
+    });
+    return this.linkOutline(m, U);
+  },
 
   /** Hạt billboard GPU: kích thước theo khoảng cách, lõi trắng, cộng sáng. */
   particles() {

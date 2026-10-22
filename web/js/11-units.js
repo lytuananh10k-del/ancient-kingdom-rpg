@@ -346,6 +346,8 @@ class Unit {
     const skill = SKILLS[this.def.skill], t = skill && (skill.pick ? skill.pick(this) : this.findTarget());
     if (!skill || !t) { this.fsm.set('move'); return; }
     combatLog.casts[this.def.skill] = (combatLog.casts[this.def.skill] || 0) + 1;
+    const rec = combatLog.recent || (combatLog.recent = []);   // nhật ký kỹ năng gần nhất (bảng Debug) – vòng 60 mục
+    rec.push({ t: battle.time, team: this.team, key: this.key, skill: this.def.skill, target: t.key }); if (rec.length > 60) rec.shift();
     if (skill.ready && !skill.ready(this)) combatLog.forcedCasts = (combatLog.forcedCasts || 0) + 1;
     if (this.mana < this.maxMana - 1e-6) { combatLog.badCasts++; CombatAudit.badCasts++; }
     this.cs.casts++;   // không bao giờ được tung khi thiếu năng lượng (bài kiểm thử đếm)

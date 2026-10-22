@@ -286,18 +286,52 @@ function enemyLineup(round) {
 }
 
 /* ---------- Lưu / tải ván ---------- */
+/** Phiên bản cấu trúc bản lưu. Tăng khi đổi cấu trúc, kèm một bước trong SAVE_MIGRATIONS (vN → vN+1).
+ *  Bản lưu CHỈ chứa dữ liệu thuần (số, chuỗi, mảng) – không chứa đối tượng Three.js. Ghi khi đổi đội hình / mua bán / sang vòng, không ghi mỗi khung hình.
+ *  Tùy chọn đồ họa lưu riêng (vkkt_quality, vkkt_autoQuality, vkkt_options…) nên đổi ván / bản lưu hỏng không làm mất cài đặt. */
+const SAVE_VERSION = 2;
+const SAVE_MIGRATIONS = {
+  // v1 (V1.0–V1.5 tuần 3) → v2: thêm dấu thời gian và tên bản dựng; các trường cũ giữ nguyên, trường thiếu nhận mặc định khi làm sạch.
+  1: s => Object.assign({}, s, { v: 2, savedAt: s.savedAt || 0, build: s.build || 'V1.5' })
+};
+/** Đọc bản lưu từ chuỗi JSON (hoặc đối tượng). Trả về { status, state?, reason? }:
+ *  ok – tải được (đã chuyển phiên bản + làm sạch) · none – chưa có · over – ván đã kết thúc · bad – hỏng · newer – bản lưu của phiên bản mới hơn.
+ *  KHÔNG ghi gì vào bộ nhớ – nơi gọi quyết định sao lưu (xem boot trong 19-main.js). */
+function parseSave(raw) {
+  if (raw === null || raw === undefined || raw === '') return { status: 'none' };
+  let s = raw;
+  if (typeof raw === 'string') { try { s = JSON.parse(raw); } catch (e) { return { status: 'bad', reason: 'JSON hỏng' }; } }
+  if (!s || typeof s !== 'object' || Array.isArray(s)) return { status: 'bad', reason: 'không phải đối tượng' };
+  let v = s.v | 0;
+  if (v > SAVE_VERSION) return { status: 'newer', reason: 'bản lưu v' + v + ' (bản này đọc tới v' + SAVE_VERSION + ')' };
+  if (v < 1) return { status: 'bad', reason: 'thiếu phiên bản' };
+  try { while (v < SAVE_VERSION) { s = SAVE_MIGRATIONS[v](s); v = s.v; } } catch (e) { return { status: 'bad', reason: 'chuyển phiên bản lỗi: ' + e.message }; }
+  const num = (x, d, lo, hi) => (Number.isFinite(+x) && x !== null && x !== '' ? Math.min(hi, Math.max(lo, Math.floor(+x))) : d);
+  const unit = e => (e && typeof e === 'object' && typeof e.key === 'string' && [1, 2, 3].includes(+e.star) ? { key: e.key, star: +e.star, items: Array.isArray(e.items) ? e.items.filter(k => typeof k === 'string') : [] } : null);
+  const st = {
+    v: SAVE_VERSION, savedAt: num(s.savedAt, 0, 0, 1e15), build: typeof s.build === 'string' ? s.build : 'V1.5',
+    hp: num(s.hp, START_HP, 0, START_HP), gold: num(s.gold, 0, 0, 999), level: num(s.level, 3, 1, MAX_LEVEL), xp: num(s.xp, 0, 0, 999), streak: num(s.streak, 0, -99, 99), round: num(s.round, 1, 1, 999),
+    over: !!s.over, bench: Array.isArray(s.bench) ? s.bench.slice(0, BENCH_SIZE).map(unit) : [],
+    shop: Array.isArray(s.shop) && s.shop.length === SHOP_SIZE ? s.shop.map(k => (typeof k === 'string' ? k : null)) : null,
+    rivals: s.rivals && typeof s.rivals === 'object' && !Array.isArray(s.rivals) ? Object.fromEntries(Object.entries(s.rivals).map(([k, n]) => [k, num(n, 0, 0, 99)])) : {},
+    items: Array.isArray(s.items) ? s.items.filter(k => typeof k === 'string') : [],
+    board: Array.isArray(s.board) ? s.board.map(b => { const u = unit(b); return u && Object.assign(u, { c: num(b.c, -1, -1, 99), r: num(b.r, -1, -1, 99) }); }).filter(Boolean) : []
+  };
+  if (st.over || st.hp <= 0) return { status: 'over', state: st };
+  return { status: 'ok', state: st };
+}
 function snapshotGame(roundOverride) {
-  return { v: 1, hp: game.hp, gold: game.gold, level: game.level, xp: game.xp, streak: game.streak, round: roundOverride || battle.round,
+  return { v: SAVE_VERSION, savedAt: Date.now(), build: 'V1.5', hp: game.hp, gold: game.gold, level: game.level, xp: game.xp, streak: game.streak, round: roundOverride || battle.round,
     bench: game.bench.slice(0, BENCH_SIZE).map(e => (e ? { key: e.key, star: e.star, items: (e.items || []).slice() } : null)), shop: game.shop.slice(), over: game.over,
     rivals: Object.assign({}, game.rivals), items: game.items.slice(),
     board: boardAllies().map(u => ({ key: u.key, star: u.star, c: u.homeTile.c, r: u.homeTile.r, items: (u.items || []).slice() })) };
 }
 /** battle.sandbox: trận thử / mô phỏng (CombatTestRunner, BalanceSimulator, bảng Debug) KHÔNG được ghi đè bản lưu thật. */
 function saveGame(roundOverride) { if (!battle.bench && !battle.sandbox) store.set('save', snapshotGame(roundOverride)); }
-const newGameState = () => ({ v: 1, hp: START_HP, gold: 6, level: 3, xp: 0, streak: 0, round: 1, bench: new Array(BENCH_SIZE).fill(null), shop: null, over: false,
+const newGameState = () => ({ v: SAVE_VERSION, hp: START_HP, gold: 6, level: 3, xp: 0, streak: 0, round: 1, bench: new Array(BENCH_SIZE).fill(null), shop: null, over: false,
   rivals: {}, items: [], board: [{ key: 'kiemdong', star: 1, c: 4, r: 3 }, { key: 'thietve', star: 1, c: 3, r: 3 }] });
-function restoreGame(st) {
-  battle.sandbox = false;   // tải ván (thật hoặc phục hồi sau thử nghiệm) → lưu bình thường trở lại
+function restoreGame(st, sandbox = false) {
+  battle.sandbox = sandbox;   // tải ván (thật hoặc phục hồi sau thử nghiệm) → lưu bình thường trở lại; true = vẫn trong chế độ thử (bảng Debug)
   for (const u of boardAllies()) removeUnit(u);
   if (drag.src) cancelDrag();
   Object.assign(game, { hp: st.hp, gold: st.gold, level: Math.min(MAX_LEVEL, st.level), xp: st.xp, streak: st.streak, over: !!st.over, sel: null, lastSummary: '', selItem: -1, lastRewards: null });
@@ -371,7 +405,7 @@ function startBattle() {
   applyTraits(); boardAllies().forEach(u => u.reset(1));
   // RNG có seed cho logic trận (tái hiện được): battle.seedOverride (kiểm thử) hoặc seed ngẫu nhiên, lưu ở battle.seed.
   battle.seed = CombatRNG.seed(battle.seedOverride != null ? battle.seedOverride : (Math.random() * 4294967296) >>> 0);
-  battle.step = 0; CombatAudit.reset();
+  battle.step = 0; CombatAudit.reset(); combatLog.recent = [];
   for (const u of units) u.atkCd = crand() * 0.4;   // lệch nhịp đánh đầu trận (sau khi đặt seed → giống nhau giữa các lần chạy cùng seed)
   battle.phase = 'fight';
   TraitEngine.battleStart(); battle.time = 0; battle.loot = { gold: 0, items: [] }; battle.otShown = false; select(null); ui.update();

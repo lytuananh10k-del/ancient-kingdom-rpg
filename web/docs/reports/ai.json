@@ -1,0 +1,136 @@
+{
+ "date": "2026-10-22T19:45:47.515Z",
+ "fights": 80,
+ "stats": {
+  "fights": 80,
+  "searchesPerUnitSec": 0.172,
+  "maxSearch1s": 4,
+  "sharedStillRate": 0.009,
+  "closePairRate": 0,
+  "reversalsPerMoveSec": 0.038,
+  "maxStuck": 0.05,
+  "rangedAtkDist": {
+   "avg": 5.84,
+   "p05": 2.5
+  },
+  "meleeAtkDist": {
+   "avg": 2.63,
+   "p95": 3.12
+  },
+  "heals": 1716,
+  "badHeals": 0,
+  "deadHeals": 0,
+  "deadDmg": 0,
+  "maxCastT": 4.22,
+  "maxCastOther": 2.02,
+  "badCasts": 0
+ },
+ "scenarios": {
+  "detour": {
+   "t": 1.68,
+   "minDistToWall": 0.88,
+   "reached": true,
+   "wallsMoved": false
+  },
+  "corner": {
+   "t": 2.72,
+   "reached": true
+  },
+  "assassin": {
+   "target": "hoa"
+  },
+  "interrupt": {
+   "inCast": true,
+   "afterCast": "stun",
+   "tCastEnd": 1,
+   "tStunEnd": 0.48,
+   "final": "move",
+   "casts": 1,
+   "mana": 3
+  },
+  "removed": {
+   "backToNormal": 0.02,
+   "state": "victory",
+   "phase": "end"
+  },
+  "multi": {
+   "casts": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "overlap": 0,
+   "phase": "fight"
+  }
+ },
+ "results": [
+  {
+   "name": "Dẫn đường: không chạy A* mỗi khung (TB 0.172 lần / tướng / giây, tối đa 4 lần trong 1 s; mỗi khung = 60)",
+   "ok": true
+  },
+  {
+   "name": "Dẫn đường: không đứng chồng / xuyên qua nhau (cặp tâm < 0,35 m ở 0.00% mẫu)",
+   "ok": true
+  },
+  {
+   "name": "Dẫn đường: hai tướng đứng yên không chung một ô (0.90% mẫu)",
+   "ok": true
+  },
+  {
+   "name": "Dẫn đường: không giật qua lại (0.038 lần đảo chiều gắt / giây di chuyển)",
+   "ok": true
+  },
+  {
+   "name": "Dẫn đường: không kẹt (đứng yên lâu nhất khi cần đi: 0.05 s)",
+   "ok": true
+  },
+  {
+   "name": "Mục tiêu: đánh xa giữ khoảng cách (TB 5.84 m, 5% gần nhất 2.5 m), cận chiến đánh ở tầm gần (TB 2.63 m)",
+   "ok": true
+  },
+  {
+   "name": "Mục tiêu: hỗ trợ chỉ hồi đồng minh còn sống (1716 lần hồi, sai phe 0, lên xác 0)",
+   "ok": true
+  },
+  {
+   "name": "Mục tiêu: không gây sát thương lên mục tiêu đã chết (0)",
+   "ok": true
+  },
+  {
+   "name": "Kỹ năng: không bị kẹt ở CAST (lâu nhất 4.22 s – Vạn Kiếm Quy Tông kênh tới 5,1 s theo thiết kế, chiêu khác 2.02 s), không tung khi thiếu năng lượng (0)",
+   "ok": true
+  },
+  {
+   "name": "Đường bị chặn: đi vòng / lách khe giữa hàng đồng minh đứng yên (không lại gần quá 0.88 m – không xuyên qua) và tới đánh sau 1.68 s",
+   "ok": true
+  },
+  {
+   "name": "Góc bàn: từ góc (0,0) tới đánh địch ở góc đối diện sau 2.72 s",
+   "ok": true
+  },
+  {
+   "name": "Sát thủ nhắm tuyến sau: Ảnh Sát chọn hoa (pháp sư hàng cuối) thay vì đỡ đòn hàng đầu",
+   "ok": true
+  },
+  {
+   "name": "Khống chế lúc thi triển: thi triển xong (1 s) rồi mới choáng (stun), hết choáng sau 0.48 s, 1 lần tung",
+   "ok": true
+  },
+  {
+   "name": "Mục tiêu biến mất giữa chiêu: không lỗi, rời CAST sau 0.02 s",
+   "ok": true
+  },
+  {
+   "name": "Nhiều chiêu cùng lúc: mỗi tướng tung đúng 1 lần (1,1,1,1,1,1), không chiêu chồng trên cùng tướng (0)",
+   "ok": true
+  },
+  {
+   "name": "không lỗi console",
+   "ok": true,
+   "detail": ""
+  }
+ ]
+}

@@ -340,8 +340,8 @@ const SKILLS = {
     desc: 'Phóng 2 hỏa phượng vào 2 cụm địch khác nhau, mỗi con nổ gây 260% công trong bán kính 3 m và thiêu đốt mạnh.' }),
 
   /* -------- HỘ THỂ CHÂN KHÍ: khiên Fresnel cho đồng đội yếu nhất -------- */
-  hoThe: shieldSkill({ name: 'Hộ Thể Chân Khí', count: 3, pct: 0.2,
-    desc: 'Tạo khiên bằng 20% máu tối đa của bản thân (× sức mạnh phép thuật) cho 3 đồng minh đang yếu nhất (luôn gồm bản thân), giữ 6 giây.' }),
+  hoThe: shieldSkill({ name: 'Hộ Thể Chân Khí', count: 3, pct: 0.15,   // V1.5 FINAL: 0,2 → 0,15 (mô phỏng 1200 trận: thắng 72,4%, KTC 68,5–76,0%)
+    desc: 'Tạo khiên bằng 15% máu tối đa của bản thân (× sức mạnh phép thuật) cho 3 đồng minh đang yếu nhất (luôn gồm bản thân), giữ 6 giây.' }),
   kimCuong: shieldSkill({ name: 'Kim Cương Bất Hoại', count: 5, pct: 0.4,
     desc: 'Tạo khiên bằng 40% máu tối đa của bản thân cho 5 đồng minh đang yếu nhất (luôn gồm bản thân), giữ 6 giây.' }),
 

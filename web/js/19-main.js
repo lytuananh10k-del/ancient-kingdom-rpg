@@ -46,6 +46,7 @@ const PerfStats = {
 };
 function frame(now) {
   requestAnimationFrame(frame);
+  if (appState.glLost) { last = now; return; }   // mất ngữ cảnh WebGL: không vẽ, không chạy logic cho tới khi khôi phục
   const tf0 = performance.now(), rawDt = now - last;
   let dt = Math.min(0.1, (now - last) / 1000); last = now;
   QualityManager.sample(dt);
@@ -83,14 +84,48 @@ function frame(now) {
   const tr1 = performance.now();
   draw2D(dt);
   PerfStats.push(rawDt, tr0 - tf0, tr1 - tr0);
+  if (typeof DebugPanel !== 'undefined') DebugPanel.tick(dt);
 }
+
+/* ---------- Vòng đời ứng dụng (Android / trình duyệt): ẩn app → tạm dừng; mất ngữ cảnh WebGL → chờ khôi phục ---------- */
+const appState = { glLost: false, autoPaused: false, lostCount: 0 };
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    // chuyển app / tắt màn hình: dừng trận và đồng hồ chuẩn bị (tickPrepTimer bỏ qua khi battle.paused) để không thua oan, bớt nóng máy
+    if (!battle.paused && $('intro').hidden && !battle.bench) { togglePause(); appState.autoPaused = true; }
+  } else {
+    last = performance.now();   // khung đầu sau khi quay lại không mang dt khổng lồ
+    if (appState.autoPaused) { appState.autoPaused = false; ui.toast('Đã tạm dừng khi rời ứng dụng – bấm ☰ → Tiếp tục'); }
+  }
+});
+renderer.domElement.addEventListener('webglcontextlost', e => {
+  e.preventDefault();   // cho phép trình duyệt khôi phục ngữ cảnh
+  appState.glLost = true; appState.lostCount++;
+  if (!battle.paused && $('intro').hidden) { togglePause(); appState.autoPaused = true; }
+  console.warn('[WebGL] mất ngữ cảnh – đang chờ khôi phục');
+}, false);
+renderer.domElement.addEventListener('webglcontextrestored', () => {
+  // three.js tự khởi tạo lại trạng thái GL; hình học / vật liệu / texture tải lại GPU khi vẽ lần tới. Dựng lại bóng đổ + bloom theo mức hiện tại.
+  appState.glLost = false; last = performance.now();
+  if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; }
+  scene.traverse(o => { if (o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => (m.needsUpdate = true)); });
+  applyQuality(Q(), 'restore');
+  ui.toast('Đã khôi phục đồ hoạ' + (battle.paused ? ' – bấm ☰ → Tiếp tục' : ''));
+}, false);
 
 (function boot() {
   const bad = validateChampions();
   if (bad.length) console.error('[Vạn Kiếm] Dữ liệu tướng lỗi:\n' + bad.join('\n'));
-  const saved = store.get('save', null);
-  const ok = saved && saved.v === 1 && saved.hp > 0 && !saved.over;
-  restoreGame(ok ? saved : newGameState());
+  // Bản lưu: chuyển phiên bản cũ + làm sạch (parseSave). Hỏng / của bản mới hơn → SAO LƯU nguyên văn sang vkkt_save_backup
+  // trước khi ván mới ghi đè, để không bao giờ mất dữ liệu có thể còn cứu được.
+  let raw = null; try { raw = localStorage.getItem('vkkt_save'); } catch (e) { /* bộ nhớ bị chặn */ }
+  const ld = parseSave(raw), ok = ld.status === 'ok';
+  if (ld.status === 'bad' || ld.status === 'newer') {
+    try { localStorage.setItem('vkkt_save_backup', raw); } catch (e) { /* đầy / bị chặn */ }
+    console.warn('[Lưu] Không tải được bản lưu (' + ld.reason + ') – đã sao lưu sang vkkt_save_backup, bắt đầu ván mới');
+    setTimeout(() => ui.toast('Bản lưu không đọc được (' + ld.reason + ') – đã giữ bản sao, bắt đầu ván mới'), 600);
+  }
+  restoreGame(ok ? ld.state : newGameState());
   if (ok) { $('btn-enter').textContent = 'Tiếp tục – Vòng ' + battle.round; $('btn-newgame').hidden = false; }
 })();
 applyQuality(Q(), 'init');
@@ -106,9 +141,9 @@ function simulate(seconds) {
 }
 window.__vkkt = { units, battle, timelines, QualityManager, startBattle, forceUltimate, vfx, renderer, scene, loadGlbBuffer, solveTwoBoneIK, options, game, store,
   buyShop, reroll, buyXP, nextRound, newGame, moveTo, sellSrc, benchToBoard, mergeAll, traitCounts, traitLevel, applyTraits, boardAllies, boardCap, benchUnits, benchSlotPos, tileCenter,
-  snapshotGame, enemyLineup, sellPrice, combatCam, camera, prepFit, simulate, UNIT_DEFS, XP_NEED, MAX_LEVEL, BENCH_SIZE, STAR, STAR_SCALE,
+  snapshotGame, parseSave, SAVE_VERSION, restoreGame, enemyLineup, sellPrice, combatCam, camera, prepFit, simulate, UNIT_DEFS, XP_NEED, MAX_LEVEL, BENCH_SIZE, STAR, STAR_SCALE,
   CHAMPIONS, CHAMPION_KEYS, championsByCost, validateChampions, migrateChampionKey, LEGACY_MAP, SKILL_SPECS, SKILL_META, TRAITS, ORIGINS, SUBCLASSES, TraitRegistry, TraitCounter, TraitEvents, TraitEngine, TraitSwords, TraitVFX, defaultBonus, afterRosterChange, moveToBench, ui, addMana,
-  PerfStats, CombatRNG, crand, CombatAudit, DamageCalculator, defenseFactor, DAMAGE, BATTLE_RULES, STATUS, applyBurn, SimTasks, DangerZones, NavGrid, Projectiles, checkBattleEnd, STEP, simStep, RARITY, RIG_FACTORIES, GLB_LOADED, replaceChampionRig, applyStun, dealDamage, healUnit, giveShield, applySlow,
+  PerfStats, appState, CombatRNG, crand, CombatAudit, DamageCalculator, defenseFactor, DAMAGE, BATTLE_RULES, STATUS, applyBurn, SimTasks, DangerZones, NavGrid, Projectiles, checkBattleEnd, STEP, simStep, RARITY, RIG_FACTORIES, GLB_LOADED, replaceChampionRig, applyStun, dealDamage, healUnit, giveShield, applySlow,
   combatLog, ROLES, SKILLS, placeUnit, removeUnit, setupRound, BOARD,
   cameraSettled: () => Math.abs(combatCam.dist - combatCam.tDist) < 0.05 && Math.abs(combatCam.target.z - prepFit.tz) < 0.05 && Math.abs(lens.x - prepFit.shiftX) + Math.abs(lens.y - prepFit.shiftY) < 1,
   poolLeft, poolOwned, POOL_SIZE, SHOP_POOL, SHOP_ODDS, rollShop, rivalsDraft, ITEMS, equipItem, isMonsterRound, interestOf, streakBonusOf, autoFillBoard };

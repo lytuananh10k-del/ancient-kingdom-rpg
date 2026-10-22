@@ -8,7 +8,7 @@ const CombatTestRunner = {
    *        enemyScale (ghi đè hệ số), maxTime (mặc định theo BATTLE_RULES.limit), level, sample: số giây giữa 2 lần lấy mẫu kẹt / chồng (0.1) }
    *  Trả về: { result, time, steps, seed, allies[], enemies[] (thống kê từng tướng), anomalies[], log } */
   run(cfg) {
-    const snap = cfg.keepState ? null : snapshotGame();
+    const snap = cfg.keepState ? null : snapshotGame(), sb0 = !!battle.sandbox;
     battle.sandbox = true;   // không ghi bản lưu thật trong lúc thử (restoreGame / newGame tắt lại)
     const g = game; g.level = cfg.level || 9; g.over = false; battle.bench = false;
     for (const u of boardAllies()) removeUnit(u);
@@ -56,7 +56,7 @@ const CombatTestRunner = {
       allies: units.filter(u => u.team === 'ally').map(pack), enemies: units.filter(u => u.team === 'enemy').map(pack), anomalies,
       leftovers: { projectiles: Projectiles.list.length, tasks: SimTasks.list.length, timelines: timelines.filter(t => !t.done).length },
       fingerprint: units.map(u => u.key + ':' + Math.round(u.hp * 1000)).join('|') + '@' + steps };
-    if (snap) restoreGame(snap);
+    if (snap) restoreGame(snap, sb0);
     return out;
   },
   /** Chạy nhiều seed; trả về tỉ lệ thắng (hoà tính 0,5), thời lượng TB, sát thương TB mỗi tướng. */

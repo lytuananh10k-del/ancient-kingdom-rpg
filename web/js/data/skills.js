@@ -61,8 +61,9 @@ const SKILL_SPECS = {
   // ---- Bậc 4
   batDiet: { name: 'Bất Diệt Kim Thân', type: 'area', center: 'self', radius: 3.2, target: 'nearest', ready: 'hurtOrNear', color: 'earth', anim: 'HeavyAttack', timing: { windup: 0.3, impact: 0.42, end: 0.85 },
     effects: [{ kind: 'damage', mult: 1.2, knock: 2 }],
-    ally: [{ kind: 'heal', pct: 0.1 }, { kind: 'hot', pct: 0.12, dur: 3 }, { kind: 'buff', stat: 'dmgTaken', mul: 0.7, dur: 4, label: '−30% sát thương nhận' }],
-    desc: 'Chấn 120% công và hất lùi địch trong 3,2 m; hồi ngay 10% máu tối đa, thêm 12% trong 3 giây và giảm 30% sát thương nhận trong 4 giây. Nội tại: hồi 0,6% máu mỗi giây.' },
+    // V1.5 FINAL: hồi theo thời gian 12% → 6%, giảm sát thương nhận 30% → 20% (mô phỏng 1200 trận: thắng 74,0%, KTC 69,4–78,2%)
+    ally: [{ kind: 'heal', pct: 0.1 }, { kind: 'hot', pct: 0.06, dur: 3 }, { kind: 'buff', stat: 'dmgTaken', mul: 0.8, dur: 4, label: '−20% sát thương nhận' }],
+    desc: 'Chấn 120% công và hất lùi địch trong 3,2 m; hồi ngay 10% máu tối đa, thêm 6% trong 3 giây và giảm 20% sát thương nhận trong 4 giây. Nội tại: hồi 0,6% máu mỗi giây.' },
   uMinhPhe: { name: 'U Minh Phệ Hồn', type: 'volley', count: 4, gap: 0.1, speed: 12, size: 0.55, target: 'weakest', color: 'nether', timing: { windup: 0.35, impact: 0.5, end: 1.0 },
     effects: [{ kind: 'damage', mult: 1.4, lifesteal: 0.35 }],
     desc: 'Phóng 4 u hồn hút sinh lực vào các kẻ địch yếu nhất: mỗi hồn 140% công (phép), hồi cho bản thân 35% sát thương thực gây ra.' },

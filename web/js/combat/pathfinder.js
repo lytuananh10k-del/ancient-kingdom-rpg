@@ -101,6 +101,9 @@ function navSteer(u, t, reach, dt, out) {
   const wp = g.center(nav.path[nav.k], _v3);
   let dx = wp.x - u.pos.x, dz = wp.z - u.pos.z, d = Math.hypot(dx, dz);
   if (d < NAV.arrive && nav.k < nav.path.length - 1) { nav.k++; g.center(nav.path[nav.k], wp); dx = wp.x - u.pos.x; dz = wp.z - u.pos.z; d = Math.hypot(dx, dz); }
+  // Tới ô đích mà vẫn đang MOVE (mục tiêu đã chạy khỏi tầm): coi như hết đường → bước sau chọn lại ô đích theo vị trí mới.
+  // (V1.5 FINAL – trước đây tướng lắc qua lại quanh tâm ô mỗi bước tới lần tính lại 0,6 s; tests/ai.js đo 1,3 lần đảo chiều / giây.)
+  if (d < NAV.arrive && nav.k >= nav.path.length - 1) { nav.k = nav.path.length; return null; }
   if (d < 1e-3) return null;
   return out.set(dx / d, 0, dz / d);
 }

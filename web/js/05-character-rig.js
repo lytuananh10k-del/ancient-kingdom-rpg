@@ -145,6 +145,10 @@ function sharedGeo(key, make) {
   if (!g) { g = make(); g.userData.shared = true; RIG_GEO.set(key, g); }
   return g;
 }
+/** Lưới gộp theo look (mọi bản sao của cùng một tướng – ta, địch, hàng chờ – dùng chung 1 geometry thân + 1 viền trên GPU). */
+const RIG_BATCH = new WeakMap();
+/** Vật liệu bóng tròn dưới chân: một vật liệu cho mọi nhân vật (không dispose theo rig). */
+let RIG_BLOB_MAT = null;
 class CharacterRig {
   constructor(look, U) {
     this.look = look; this.U = U; this.weaponType = look.weapon;
@@ -238,9 +242,83 @@ class CharacterRig {
     leg(1); leg(-1);
     this.buildWeapon();
     // Bóng tròn dưới chân (luôn có, nhẹ hơn shadow map).
-    const blob = new THREE.Mesh(sharedGeo('blob' + s.toFixed(2), () => new THREE.PlaneGeometry(1.4 * s, 1.4 * s).rotateX(-Math.PI / 2)), new THREE.MeshBasicMaterial({ map: vfx.blobTex, transparent: true, depthWrite: false }));
+    if (!RIG_BLOB_MAT) { RIG_BLOB_MAT = new THREE.MeshBasicMaterial({ map: vfx.blobTex, transparent: true, depthWrite: false }); RIG_BLOB_MAT.userData.shared = true; }
+    const blob = new THREE.Mesh(sharedGeo('blob' + s.toFixed(2), () => new THREE.PlaneGeometry(1.4 * s, 1.4 * s).rotateX(-Math.PI / 2)), RIG_BLOB_MAT);
     blob.position.y = 0.085; blob.renderOrder = 0; this.root.add(blob); this.blob = blob;
+    this.batch();
     this.setOutline(Q().outline);
+  }
+  /** Tối ưu draw call (V1.5 FINAL, đo trong docs/PERF.md): gộp mọi phần tĩnh dùng vật liệu toon thường thành 1 SkinnedMesh thân
+   *  (màu từng phần → màu đỉnh) + 1 SkinnedMesh viền, chung 1 Skeleton mà XƯƠNG CHÍNH LÀ CÁC KHỚP SẴN CÓ (hông, ngực, tay, váy…).
+   *  Animation, IK, socket không đổi – vẫn xoay các khớp như cũ; mỗi phần gắn cứng (trọng số 1) vào khớp cha của nó.
+   *  Bỏ qua: phần phát sáng (emissive – lưỡi kiếm), ngọc trượng (shader riêng). Bàn chân (IK xoay riêng) thành xương của chính nó.
+   *  ~62 draw call / tướng → ~6. Chỉ đổi cách vẽ – không ảnh hưởng logic trận. */
+  batch() {
+    const emis = m => m.emissive && m.emissive.r + m.emissive.g + m.emissive.b > 0;
+    if (/[?&]nobatch=1/.test(location.search)) return;   // ?nobatch=1: tắt gộp để so sánh hình ảnh / hiệu năng
+    const parts = this.meshes.filter(m => m.material.isMeshToonMaterial && !m.material.map && !emis(m.material));
+    if (parts.length < 2) return;
+    const feet = new Set(Object.values(this.feet));
+    this.root.updateMatrixWorld(true);
+    const entries = [], bones = [], boneIdx = new Map(), I = new THREE.Matrix4();
+    for (const m of parts) {
+      let bone = m.parent, local;
+      if (feet.has(m)) {   // bàn chân: thay mesh bằng Object3D cùng biến đổi → làm xương; solveFootIK vẫn xoay feet[k].rotation.x
+        const fb = new THREE.Object3D(); fb.position.copy(m.position); fb.rotation.copy(m.rotation); fb.scale.copy(m.scale);
+        m.parent.add(fb); fb.updateMatrixWorld(true);
+        for (const k in this.feet) if (this.feet[k] === m) this.feet[k] = fb;
+        bone = fb; local = I;
+      } else { m.updateMatrix(); local = m.matrix; }
+      if (!boneIdx.has(bone)) { boneIdx.set(bone, bones.length); bones.push(bone); }
+      const o = m.userData.outline;
+      entries.push({ geo: m.geometry, color: m.material.color, bi: boneIdx.get(bone), bone, local, thick: o ? o.material.uniforms.uThick.value : 0 });
+    }
+    let cache = RIG_BATCH.get(this.look);
+    if (!cache || cache.bones !== bones.length) { cache = this.bakeBatch(entries); cache.bones = bones.length; RIG_BATCH.set(this.look, cache); }
+    // gỡ các phần lẻ (và viền của chúng) khỏi cây cảnh
+    const gone = new Set(parts);
+    for (const m of parts) { const o = m.userData.outline; if (o) { o.parent.remove(o); o.material.dispose(); } m.parent.remove(m); }
+    this.meshes = this.meshes.filter(m => !gone.has(m)); this.outlines = this.outlines.filter(o => o.parent);
+    const skel = this.skeleton = new THREE.Skeleton(bones);   // nghịch đảo xương = tư thế lúc dựng (giống lúc nướng geometry)
+    const body = new THREE.SkinnedMesh(cache.geo, this.mat(0xffffff, { vertexColors: true, skinning: true, batched: true }));
+    const line = new THREE.SkinnedMesh(cache.ogeo, ShaderLibrary.outlineBatched(this.U));
+    for (const sm of [body, line]) { this.root.add(sm); sm.bind(skel, new THREE.Matrix4()); sm.frustumCulled = false; }
+    body.castShadow = true; line.castShadow = false;
+    this.meshes.push(body); this.outlines.push(line); this.batched = { body, line };
+  }
+  /** Nướng geometry gộp ở không gian gốc rig (tư thế dựng). Thuộc tính: position, normal, color, dpos (toạ độ gốc của phần – hoa văn tan biến),
+   *  skinIndex / skinWeight (1 xương, trọng số 1); viền thêm off = pháp tuyến × độ dày viền của phần đó (đúng như shader viền cũ). */
+  bakeBatch(entries) {
+    const inv = new THREE.Matrix4().copy(this.root.matrixWorld).invert(), M = new THREE.Matrix4(), N = new THREE.Matrix3(), M3 = new THREE.Matrix3(), v = new V3(), n = new V3();
+    const build = (list, outline) => {
+      let nv = 0, ni = 0; for (const e of list) { nv += e.geo.attributes.position.count; ni += e.geo.index ? e.geo.index.count : e.geo.attributes.position.count; }
+      const pos = new Float32Array(nv * 3), nor = new Float32Array(nv * 3), dpos = new Float32Array(nv * 3), si = new Uint16Array(nv * 4), sw = new Float32Array(nv * 4);
+      const col = outline ? null : new Float32Array(nv * 3), off = outline ? new Float32Array(nv * 3) : null, idx = new (nv > 65535 ? Uint32Array : Uint16Array)(ni);
+      let vo = 0, io = 0;
+      for (const e of list) {
+        M.multiplyMatrices(inv, e.bone.matrixWorld).multiply(e.local); N.getNormalMatrix(M); M3.setFromMatrix4(M);
+        const P = e.geo.attributes.position, NO = e.geo.attributes.normal, c = e.geo.attributes.position.count;
+        for (let i = 0; i < c; i++) {
+          const k = (vo + i) * 3;
+          v.fromBufferAttribute(P, i); dpos[k] = v.x; dpos[k + 1] = v.y; dpos[k + 2] = v.z;
+          n.fromBufferAttribute(NO, i);
+          if (outline) { _v1.copy(n).multiplyScalar(e.thick).applyMatrix3(M3); off[k] = _v1.x; off[k + 1] = _v1.y; off[k + 2] = _v1.z; }   // = M·(p + n·dày) − M·p
+          v.applyMatrix4(M); pos[k] = v.x; pos[k + 1] = v.y; pos[k + 2] = v.z;
+          n.applyMatrix3(N).normalize(); nor[k] = n.x; nor[k + 1] = n.y; nor[k + 2] = n.z;
+          if (col) { col[k] = e.color.r; col[k + 1] = e.color.g; col[k + 2] = e.color.b; }
+          si[(vo + i) * 4] = e.bi; sw[(vo + i) * 4] = 1;
+        }
+        if (e.geo.index) { const a = e.geo.index.array; for (let i = 0; i < a.length; i++) idx[io++] = a[i] + vo; } else for (let i = 0; i < c; i++) idx[io++] = vo + i;
+        vo += c;
+      }
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); g.setAttribute('dpos', new THREE.BufferAttribute(dpos, 3));
+      g.setAttribute('skinIndex', new THREE.BufferAttribute(si, 4)); g.setAttribute('skinWeight', new THREE.BufferAttribute(sw, 4));
+      if (col) g.setAttribute('color', new THREE.BufferAttribute(col, 3)); if (off) g.setAttribute('off', new THREE.BufferAttribute(off, 3));
+      g.setIndex(new THREE.BufferAttribute(idx, 1)); g.computeBoundingSphere(); g.userData.shared = true;
+      return g;
+    };
+    return { geo: build(entries, false), ogeo: build(entries.filter(e => e.thick > 0), true) };
   }
   buildWeapon() {
     const L = this.look, hand = this.sockets.handR, w = new THREE.Group();
@@ -299,7 +377,7 @@ class CharacterRig {
   stopAction() { this.action = null; }
   hold(name, on) { this.holds[name] = on; if (!(name in this.holdW)) this.holdW[name] = 0; }
   hitReact(dirLocalX, dirLocalZ, strength) { this.hitVel.x += dirLocalX * strength * 9; this.hitVel.y += dirLocalZ * strength * 9; }
-  setTrail(on) { if (on && !this.trailOn) this.trail.length = 0; this.trailOn = on; }
+  setTrail(on) { if (on && !this.trailOn) { if (this.trailSpare) this.trailSpare.push(...this.trail); this.trail.length = 0; } this.trailOn = on; }
 
   locomotionPose(out, dt) {
     const sp = this.speed, k = clamp(sp / 4.5, 0, 1), m = clamp(sp / 0.6, 0, 1);
@@ -454,32 +532,37 @@ class CharacterRig {
     this.sashAnchors.forEach((o, i) => { o.getWorldPosition(_v1); this.sashes[i].update(_v1, vdt, 9, wind, push); });
     this.pushHairJobs(hc, tc);
   }
+  /** Job vẽ tóc / dải lụa: tạo MỘT lần cho mỗi rig rồi dùng lại mỗi khung (trước đây mỗi khung tạo 3 đối tượng + 6 hàm mới / tướng). */
   pushHairJobs(hc, tc) {
     if (!this.hair.init) return;
-    vfx.hairJobs.push({ points: this.hair.p, n: this.hair.n, width: t => lerp(0.13, 0.03, t), color: (t, c) => { c.copy(hc); c.a = 1; } });
-    this.sashes.forEach(s => vfx.hairJobs.push({ points: s.p, n: s.n, width: t => lerp(0.06, 0.035, t), color: (t, c) => { c.copy(tc); c.a = 1; } }));
+    if (!this.hairJobsCache) {
+      const hw = t => lerp(0.13, 0.03, t), sw = t => lerp(0.06, 0.035, t), hcol = (t, c) => { c.copy(this.hairColor); c.a = 1; }, scol = (t, c) => { c.copy(this.trimColor); c.a = 1; };
+      this.hairJobsCache = [{ points: this.hair.p, n: this.hair.n, width: hw, color: hcol }].concat(this.sashes.map(s => ({ points: s.p, n: s.n, width: sw, color: scol })));
+    }
+    for (const j of this.hairJobsCache) vfx.hairJobs.push(j);
   }
   updateTrail() {
     if (!this.trailOn && this.trail.length === 0) return;
     const max = Q().trail;
-    if (this.trailOn) {
-      const tip = this.tip.getWorldPosition(new V3());
-      this.trail.unshift(tip);
-    } else this.trail.pop();
-    while (this.trail.length > max) this.trail.pop();
+    const spare = this.trailSpare || (this.trailSpare = []);   // điểm vệt bỏ đi được dùng lại – không cấp phát mỗi khung
+    if (this.trailOn) this.trail.unshift(this.tip.getWorldPosition(spare.pop() || new V3()));
+    else if (this.trail.length) spare.push(this.trail.pop());
+    while (this.trail.length > max) spare.push(this.trail.pop());
     if (this.trail.length > 1) {
       const col = this.look.trailColor;
-      vfx.trailJobs.push({ points: this.trail, n: this.trail.length, width: t => lerp(0.42, 0.02, t), color: (t, c) => { c.copy(col); c.a = (1 - t) * 0.9; } });
+      const job = this.trailJob || (this.trailJob = { points: this.trail, n: 0, width: t => lerp(0.42, 0.02, t), color: (t, c) => { c.copy(col); c.a = (1 - t) * 0.9; } });
+      job.n = this.trail.length; vfx.trailJobs.push(job);
     }
   }
   dispose() {
     // Giải phóng mọi geometry riêng của rig (kể cả loại tạo ngay trong dòng như ngọc trượng), trừ geometry dùng chung toàn cục.
     const geos = new Set(this.geos);
     this.root.traverse(o => {
-      if (o.material) { (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => m.dispose && m.dispose()); }
+      if (o.material) { (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => m.dispose && !m.userData.shared && m.dispose()); }
       if (o.geometry && o.geometry !== SWORD_GEO && !o.geometry.userData.shared) geos.add(o.geometry);
     });
     geos.forEach(g => { if (!g.userData.shared) g.dispose(); });
+    if (this.skeleton) { this.skeleton.dispose(); this.skeleton = null; }   // texture xương của rig (geometry gộp dùng chung – không dispose)
     if (this.root.parent) this.root.parent.remove(this.root);
   }
 }

@@ -177,6 +177,7 @@ function onTap(x, y) {
 }
 window.addEventListener('keydown', e => {
   if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT')) return;
+  if (e.ctrlKey || e.metaKey || e.altKey) return;   // tổ hợp phím (Ctrl+Shift+D = bảng Debug, Ctrl+R…) không được kích hoạt phím tắt game
   if (e.code === 'Space') { e.preventDefault(); if (game.over) newGame(); else if (battle.phase === 'prep') startBattle(); else if (battle.phase === 'end') nextRound(); }
   if (battle.phase === 'prep' && (e.key === 'd' || e.key === 'D')) reroll();
   if (battle.phase === 'prep' && (e.key === 'f' || e.key === 'F')) buyXP();
