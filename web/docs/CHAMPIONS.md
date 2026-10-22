@@ -1,0 +1,128 @@
+# 24 tướng Tu Tiên – bảng chỉ số (V1.5 tuần 1)
+
+> Sinh tự động bởi `node tools/gen-docs.js` từ `js/data/champions.js`, `js/data/skills.js`, `js/data/traits.js`. Đừng sửa tay.
+
+Nâng sao (cấu hình `STAR`): máu ×1 / 1.8 / 3.2 · công ×1 / 1.5 / 2.5 · sức mạnh kỹ năng ×1 / 1.15 / 1.4 · kích thước mô hình ×1 / 1.12 / 1.24. 3 bản ★1 → ★2, 3 bản ★2 → ★3, tối đa ★3.
+
+DPS ★1 = công × tốc đánh × (1 + chí mạng × (ST chí mạng − 1)). Máu hiệu dụng ★1 = máu × (1 + giáp/100) (giảm sát thương = giáp / (giáp + 100)).
+
+| # | id | Tên | Bậc | Phẩm | Tộc | Hệ | Vai trò | Máu | Công | Giáp | Tốc đánh | Tầm | Tốc chạy | Năng lượng | Chí mạng | Né | DPS ★1 | Máu hiệu dụng ★1 | Máu ★2/★3 | Công ★2/★3 | Kỹ năng |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | `kiemdong` | Kiếm Đồng | 1 | Phàm phẩm | Nhân tộc | Kiếm Tu | Đấu sĩ | 600 | 48 | 20 | 0,95 | 2,2 | 4,4 | 20/60 | 10% ×1,5 | 8% | 48 | 720 | 1080/1920 | 72/120 | Nhất Kiếm Đoạn Thủy |
+| 2 | `thietve` | Thiết Vệ | 1 | Phàm phẩm | Nhân tộc | Hộ Pháp | Đỡ đòn | 920 | 40 | 40 | 0,8 | 2,6 | 3,8 | 30/80 | 5% ×1,5 | 0% | 33 | 1288 | 1656/2944 | 60/100 | Thiết Bích |
+| 3 | `hoa` | Hỏa Linh | 1 | Phàm phẩm | Linh tộc | Pháp Tu | Pháp sư | 500 | 46 | 14 | 0,75 | 7,5 | 3,6 | 30/80 | 8% ×1,5 | 3% | 36 | 570 | 900/1600 | 69/115 | Hỏa Cầu Thuật |
+| 4 | `thanhmoc` | Thanh Mộc | 1 | Phàm phẩm | Linh tộc | Đan Tu* | Hỗ trợ | 560 | 32 | 18 | 0,75 | 6,5 | 3,6 | 20/70 | 5% ×1,5 | 3% | 25 | 661 | 1008/1792 | 48/80 | Mộc Linh Hồi Xuân |
+| 5 | `mabinh` | Ma Binh | 1 | Phàm phẩm | Ma tộc | Ma Tu | Đấu sĩ | 640 | 50 | 18 | 1 | 2,2 | 4,4 | 10/60 | 12% ×1,5 | 5% | 53 | 755 | 1152/2048 | 75/125 | Huyết Chiến |
+| 6 | `linhcung` | Linh Cung | 1 | Phàm phẩm | Nhân tộc | Xạ Tu* | Xạ thủ | 520 | 52 | 14 | 0,95 | 9 | 3,8 | 0/70 | 15% ×1,6 | 5% | 54 | 593 | 936/1664 | 78/130 | Liên Châu Tiễn |
+| 7 | `thanhphong` | Thanh Phong Kiếm Khách | 2 | Linh phẩm | Nhân tộc | Kiếm Tu | Đấu sĩ | 700 | 56 | 22 | 1,05 | 2,2 | 4,6 | 20/70 | 15% ×1,6 | 10% | 64 | 854 | 1260/2240 | 84/140 | Thanh Phong Liên Trảm |
+| 8 | `huyengiap` | Huyền Giáp Vệ | 2 | Linh phẩm | Nhân tộc | Hộ Pháp | Đỡ đòn | 1050 | 42 | 45 | 0,8 | 2,6 | 3,8 | 30/70 | 5% ×1,5 | 0% | 34 | 1523 | 1890/3360 | 63/105 | Hộ Thể Chân Khí |
+| 9 | `bangling` | Băng Linh Sư | 2 | Linh phẩm | Linh tộc | Pháp Tu | Pháp sư | 540 | 48 | 15 | 0,8 | 7,5 | 3,6 | 20/80 | 8% ×1,5 | 3% | 40 | 621 | 972/1728 | 72/120 | Hàn Băng Tiễn |
+| 10 | `huyetma` | Huyết Ma | 2 | Linh phẩm | Ma tộc | Ma Tu | Đấu sĩ | 760 | 52 | 22 | 0,9 | 2,2 | 4,2 | 20/70 | 10% ×1,5 | 5% | 49 | 927 | 1368/2432 | 78/130 | Huyết Phệ |
+| 11 | `loithuong` | Lôi Thương | 2 | Linh phẩm | Nhân tộc | Thương Tu* | Đấu sĩ | 720 | 54 | 26 | 0,85 | 2,8 | 4,2 | 20/70 | 10% ×1,5 | 5% | 48 | 907 | 1296/2304 | 81/135 | Lôi Thương Xuyên Vân |
+| 12 | `linhy` | Linh Y | 2 | Linh phẩm | Nhân tộc | Đan Tu* | Hỗ trợ | 600 | 36 | 18 | 0,75 | 6,5 | 3,6 | 30/80 | 5% ×1,5 | 3% | 28 | 708 | 1080/1920 | 54/90 | Diệu Thủ Hồi Xuân |
+| 13 | `ngukiem` | Ngự Kiếm Chân Nhân | 3 | Huyền phẩm | Tiên tộc | Kiếm Tu | Pháp sư | 760 | 58 | 22 | 0,85 | 5,5 | 3,8 | 30/90 | 12% ×1,6 | 5% | 53 | 927 | 1368/2432 | 87/145 | Ngự Kiếm Thuật |
+| 14 | `cuuviem` | Cửu Viêm Pháp Sư | 3 | Huyền phẩm | Linh tộc | Pháp Tu | Pháp sư | 700 | 60 | 18 | 0,8 | 7,5 | 3,6 | 30/90 | 10% ×1,5 | 3% | 50 | 826 | 1260/2240 | 90/150 | Cửu Viêm Hỏa Trận |
+| 15 | `kimcuong` | Kim Cang Hộ Pháp | 3 | Huyền phẩm | Tiên tộc | Hộ Pháp | Đỡ đòn | 1300 | 50 | 50 | 0,8 | 2,6 | 3,8 | 40/90 | 5% ×1,5 | 0% | 41 | 1950 | 2340/4160 | 75/125 | Kim Cang Bất Hoại |
+| 16 | `anhsat` | Ảnh Sát | 3 | Huyền phẩm | Ma tộc | Sát Tu* | Sát thủ | 680 | 64 | 20 | 1,1 | 2,2 | 5 | 10/70 | 25% ×1,7 | 20% | 83 | 816 | 1224/2176 | 96/160 | Ảnh Tập |
+| 17 | `huyenbang` | Huyền Băng Tiên Tử | 3 | Huyền phẩm | Tiên tộc | Pháp Tu | Pháp sư | 680 | 56 | 18 | 0,8 | 7,5 | 3,6 | 30/100 | 8% ×1,5 | 3% | 47 | 802 | 1224/2176 | 84/140 | Huyền Băng Phong Ấn |
+| 18 | `vocuc` | Vô Cực Kiếm Tôn | 4 | Địa phẩm | Tiên tộc | Kiếm Tu | Đấu sĩ | 1000 | 74 | 30 | 1 | 2,4 | 4,6 | 30/80 | 20% ×1,7 | 10% | 84 | 1300 | 1800/3200 | 111/185 | Vô Cực Kiếm Khí |
+| 19 | `loiton` | Thiên Lôi Đạo Nhân | 4 | Địa phẩm | Tiên tộc | Pháp Tu | Pháp sư | 820 | 66 | 22 | 0,8 | 8 | 3,6 | 30/100 | 10% ×1,5 | 3% | 55 | 1000 | 1476/2624 | 99/165 | Cửu Thiên Lôi Kiếp |
+| 20 | `batdiet` | Bất Diệt Chiến Thần | 4 | Địa phẩm | Nhân tộc | Thể Tu* | Đỡ đòn | 1500 | 62 | 45 | 0,85 | 2,4 | 4 | 40/100 | 8% ×1,5 | 0% | 55 | 2175 | 2700/4800 | 93/155 | Bất Diệt Kim Thân |
+| 21 | `umaquan` | U Minh Ma Quân | 4 | Địa phẩm | Ma tộc | Ma Tu | Pháp sư | 860 | 64 | 24 | 0,8 | 7 | 3,6 | 30/90 | 10% ×1,5 | 3% | 54 | 1066 | 1548/2752 | 96/160 | U Minh Phệ Hồn |
+| 22 | `kiemtien` | Vạn Kiếm Tiên Đế | 5 | Thiên phẩm | Tiên tộc | Kiếm Tu | Đấu sĩ | 1000 | 76 | 28 | 1 | 2,2 | 4,6 | 45/100 | 15% ×1,7 | 10% | 84 | 1280 | 1800/3200 | 114/190 | Vạn Kiếm Quy Tông |
+| 23 | `thannu` | Cửu Thiên Thần Nữ | 5 | Thiên phẩm | Tiên tộc | Pháp Tu, Đan Tu* | Hỗ trợ | 950 | 70 | 26 | 0,8 | 7,5 | 3,6 | 40/110 | 10% ×1,5 | 3% | 59 | 1197 | 1710/3040 | 105/175 | Cửu Thiên Thánh Trận |
+| 24 | `hondon` | Hỗn Độn Ma Đế | 5 | Thiên phẩm | Ma tộc | Ma Tu | Đấu sĩ | 1400 | 82 | 34 | 0,9 | 2,6 | 4,4 | 30/100 | 15% ×1,7 | 5% | 82 | 1876 | 2520/4480 | 123/205 | Hỗn Độn Diệt Thế |
+
+\* hệ mới chỉ có dữ liệu, chưa có cộng hưởng (tuần 2).
+
+## Đường cong sức mạnh theo bậc (trung bình ★1)
+
+| Bậc | Số tướng | Máu | Công | DPS | Máu hiệu dụng | DPS × máu hiệu dụng (tương đối bậc 1) |
+|---|---|---|---|---|---|---|
+| 1 | 6 | 623 | 45 | 41 | 764 | ×1 |
+| 2 | 6 | 728 | 48 | 44 | 923 | ×1,28 |
+| 3 | 5 | 824 | 58 | 55 | 1064 | ×1,84 |
+| 4 | 4 | 1045 | 67 | 62 | 1385 | ×2,72 |
+| 5 | 3 | 1117 | 76 | 75 | 1451 | ×3,43 |
+
+## Kỹ năng
+
+| Tướng | Kỹ năng (id) | Loại | Mục tiêu | Điều kiện | Thời gian (vung / trúng / xong) | Hiệu ứng (hệ số công) | Mô tả |
+|---|---|---|---|---|---|---|---|
+| Kiếm Đồng | Nhất Kiếm Đoạn Thủy (`nhatKiem`) | Đơn mục tiêu | Gần nhất | đầy năng lượng | 0,25 / 0,32 / 0,7 s | damage 260% xuyên 30% | Chém một nhát dứt khoát vào mục tiêu: 260% công, bỏ qua 30% giáp. |
+| Thiết Vệ | Thiết Bích (`thietBich`) | Diện rộng quanh mình r=3 | Gần nhất | địch trong tầm nổ | 0,3 / 0,4 / 0,8 s | damage 80% · ally:buff def +35 5s · ally:buff dmgTaken ×0,85 5s | Dựng thiết bích: +35 giáp và giảm 15% sát thương nhận vào trong 5 giây, chấn 80% công lên địch trong 3 m. |
+| Hỏa Linh | Hỏa Cầu Thuật (`hoaCau`) | Phóng đạn diện rộng | Vùng địch đông nhất | (viết tay, js/13-skills.js) | 3 s | damage, dot · tổng hệ số ≈ 150% | Phóng hỏa cầu truy đuổi mục tiêu, nổ gây 150% công trong bán kính 3 m và thiêu đốt. |
+| Thanh Mộc | Mộc Linh Hồi Xuân (`mocLinh`) | Hỗ trợ | Bản thân / đồng minh | đồng minh < 75% máu | 0,3 / 0,45 / 0,9 s | ally:heal 25% máu · ally:hot 15% máu 3s | Hồi cho đồng minh yếu nhất 25% máu tối đa của Thanh Mộc + 120% công, rồi hồi thêm 15% trong 3 giây. |
+| Ma Binh | Huyết Chiến (`huyetChien`) | Hỗ trợ | Bản thân / đồng minh | đầy năng lượng | 0,2 / 0,3 / 0,6 s | ally:selfDamage 12% máu · ally:buff atk ×1,4 5s · ally:buff aspd ×1,3 5s · ally:buff ls +0.2 5s | Đốt 12% máu hiện tại để nhận +40% công, +30% tốc đánh, +20% hút máu trong 5 giây. Nội tại: máu càng thấp công càng cao (tới +60%). |
+| Linh Cung | Liên Châu Tiễn (`lienChau`) | Phóng đạn | Gần nhất | đầy năng lượng | 0,25 / 0,35 / 0,8 s | damage 110% xuyên 25% | Bắn liền 3 mũi tên vào mục tiêu, mỗi mũi 110% công và bỏ qua 25% giáp. |
+| Thanh Phong Kiếm Khách | Thanh Phong Liên Trảm (`lienTram`) | Liên kích | Gần nhất | đầy năng lượng | 0,2 / 0,28 / 0,95 s | damage 75% xuyên 20% | Chém liên hoàn 4 nhát vào mục tiêu (đổi sang kẻ gần nhất nếu mục tiêu ngã), mỗi nhát 75% công, bỏ qua 20% giáp. |
+| Huyền Giáp Vệ | Hộ Thể Chân Khí (`hoThe`) | Hỗ trợ – lá chắn | 3 đồng minh yếu nhất | (viết tay, js/13-skills.js) | 6 s | shield · tổng hệ số ≈ 0% | Tạo khiên bằng 30% máu tối đa của bản thân cho 3 đồng minh đang yếu nhất (luôn gồm bản thân), giữ 6 giây. |
+| Băng Linh Sư | Hàn Băng Tiễn (`hanBang`) | Phóng đạn r=2,2 | Vùng địch đông nhất | đầy năng lượng | 0,35 / 0,45 / 0,9 s | damage 180% · slow 3s 40% | Phóng băng tiễn vào vùng địch đông nhất: 180% công trong bán kính 2,2 m, làm chậm 40% trong 3 giây. |
+| Huyết Ma | Huyết Phệ (`huyetPhe`) | Đơn mục tiêu | Gần nhất | đầy năng lượng | 0,25 / 0,35 / 0,75 s | damage 220% hút 100% | Cắn xé mục tiêu: 220% công, hồi máu bằng 100% sát thương gây ra. |
+| Lôi Thương | Lôi Thương Xuyên Vân (`loiThuong`) | Xuyên tuyến | Hướng trúng nhiều nhất | đầy năng lượng | 0,3 / 0,38 / 0,85 s | damage 180% xuyên 20% · stun 0,5s | Đâm lôi thương xuyên hàng địch dài 9 m: 180% công, bỏ qua 20% giáp, choáng 0,5 giây. |
+| Linh Y | Diệu Thủ Hồi Xuân (`dieuThu`) | Hỗ trợ | Bản thân / đồng minh | đồng minh < 75% máu | 0,3 / 0,45 / 0,9 s | ally:heal 20% máu · ally:buff dmgTaken ×0,8 3s | Hồi cho 2 đồng minh yếu nhất 20% máu tối đa của Linh Y + 100% công, và giảm 20% sát thương họ nhận trong 3 giây. |
+| Ngự Kiếm Chân Nhân | Ngự Kiếm Thuật (`nguKiem`) | Triệu hồi phi kiếm | Gần nhất | đầy năng lượng | 0,3 / 0,45 / 0,9 s | damage 45% | Triệu hồi 5 phi kiếm (+1 mỗi sao) bay quanh mình trong 6 giây; cứ 0,6 giây một thanh lao vào kẻ địch gần nhất gây 45% công. |
+| Cửu Viêm Pháp Sư | Cửu Viêm Hỏa Trận (`cuuViem`) | Vùng duy trì r=3 | Vùng địch đông nhất | đầy năng lượng | 0,35 / 0,5 / 0,95 s | damage 30% | Lập hỏa trận 3 m tại vùng địch đông nhất trong 4 giây: cứ 0,5 giây gây 30% công lên mọi kẻ địch đứng trong (tối đa 240%). |
+| Kim Cang Hộ Pháp | Kim Cang Bất Hoại (`kimCang`) | Hỗ trợ | Bản thân / đồng minh | địch trong tầm nổ | 0,3 / 0,4 / 0,8 s | ally:buff dmgTaken ×0,65 4s · ally:shield 12% máu 4s | Bản thân và đồng minh trong 3,5 m giảm 35% sát thương nhận vào trong 4 giây; bản thân nhận lá chắn 12% máu tối đa. |
+| Ảnh Sát | Ảnh Tập (`anhTap`) | Đột kích | Tuyến sau | đầy năng lượng | 0,15 / 0,32 / 0,7 s | damage 260% xuyên 40% | Ẩn vào bóng tối, xuất hiện sau lưng kẻ địch ở tuyến sau: 260% công, bỏ qua 40% giáp. |
+| Huyền Băng Tiên Tử | Huyền Băng Phong Ấn (`huyenBang`) | Diện rộng r=2,8 | Vùng địch đông nhất | đầy năng lượng | 0,4 / 0,55 / 1 s | damage 150% · freeze 1,6s | Đóng băng vùng địch đông nhất bán kính 2,8 m: 150% công và đóng băng 1,6 giây (đỡ đòn kháng 40%). |
+| Vô Cực Kiếm Tôn | Vô Cực Kiếm Khí (`voCucKiem`) | Xuyên tuyến (2 đạo) | Hướng trúng nhiều nhất | (viết tay, js/13-skills.js) | — | damage, pen · tổng hệ số ≈ 480% | Chém 2 đạo kiếm khí bán nguyệt liên tiếp theo hướng trúng nhiều địch nhất: mỗi đạo 240% công, xuyên mọi kẻ địch và bỏ qua 50% giáp. |
+| Thiên Lôi Đạo Nhân | Cửu Thiên Lôi Kiếp (`cuuThienLoi`) | Diện rộng (6 tia sét) | Vùng địch đông nhất | (viết tay, js/13-skills.js) | 1 s | damage, stun · tổng hệ số ≈ 1080% | Gọi 6 tia sét giáng xuống các kẻ địch quanh vùng đông nhất: mỗi tia gây 180% công trong bán kính 2,6 m và choáng 1 giây. |
+| Bất Diệt Chiến Thần | Bất Diệt Kim Thân (`batDiet`) | Diện rộng quanh mình r=3,2 | Gần nhất | bản thân < 50% máu hoặc địch trong tầm nổ | 0,3 / 0,42 / 0,85 s | damage 120% · ally:heal 15% máu · ally:hot 20% máu 3s · ally:buff dmgTaken ×0,7 4s | Chấn 120% công và hất lùi địch trong 3,2 m; hồi ngay 15% máu tối đa, thêm 20% trong 3 giây và giảm 30% sát thương nhận trong 4 giây. Nội tại: hồi 1% máu mỗi giây. |
+| U Minh Ma Quân | U Minh Phệ Hồn (`uMinhPhe`) | Phóng nhiều mục tiêu | Yếu nhất | đầy năng lượng | 0,35 / 0,5 / 1 s | damage 140% hút 50% | Phóng 4 u hồn hút sinh lực vào các kẻ địch yếu nhất: mỗi hồn 140% công, hồi cho bản thân 50% sát thương gây ra. |
+| Vạn Kiếm Tiên Đế | Vạn Kiếm Quy Tông (`vanKiem`) | Triệu hồi phi kiếm + diện rộng | Vùng địch đông nhất | (viết tay, js/13-skills.js) | 5,1 s | damage, knock, stun · tổng hệ số ≈ 620% | Triệu hồi phi kiếm vây quanh vùng địch đông nhất: 10 nhát chém liên tiếp (32% công mỗi nhát, bán kính 3,4 m), rồi cự kiếm giáng xuống gây 300% công trong bán kính 5 m, hất lùi và choáng 1,2 giây. |
+| Cửu Thiên Thần Nữ | Cửu Thiên Thánh Trận (`cuuThien`) | Diện rộng r=4 | Vùng địch đông nhất | đầy năng lượng | 0,5 / 0,8 / 1,4 s | damage 220% · slow 3s 30% · ally:heal 20% máu · ally:buff atk ×1,2 4s | Giáng thánh trận bán kính 4 m vào vùng địch đông nhất: 220% công, làm chậm 30% trong 3 giây; mọi đồng minh hồi 20% máu tối đa của Thần Nữ và +20% công trong 4 giây. |
+| Hỗn Độn Ma Đế | Hỗn Độn Diệt Thế (`honDon`) | Đột kích r=4,5 | Vùng địch đông nhất | đầy năng lượng | 0,4 / 0,75 / 1,3 s | damage 340% xuyên 50% hút 25% · debuff 4s · stun 1s | Lao vào giữa vùng địch đông nhất rồi nổ hỗn độn bán kính 4,5 m: 340% công, bỏ qua 50% giáp, giảm 40% giáp trong 4 giây, choáng 1 giây; hồi 25% sát thương gây ra. |
+
+## Tộc / hệ
+
+| id | Tên | Mốc | Hiệu ứng | Trạng thái | Tướng |
+|---|---|---|---|---|---|
+| `kiemtu` | Kiếm Tu | 2 / 4 | +20% công · +50% công, +20% tốc đánh | đang hoạt động | Kiếm Đồng, Thanh Phong Kiếm Khách, Ngự Kiếm Chân Nhân, Vô Cực Kiếm Tôn, Vạn Kiếm Tiên Đế |
+| `phaptu` | Pháp Tu | 2 / 4 | Tuyệt kỹ +25%, linh lực đầu +20 · Tuyệt kỹ +60%, linh lực đầu +40 | đang hoạt động | Hỏa Linh, Băng Linh Sư, Cửu Viêm Pháp Sư, Huyền Băng Tiên Tử, Thiên Lôi Đạo Nhân, Cửu Thiên Thần Nữ |
+| `hophap` | Hộ Pháp | 2 / 3 | +30% máu, +20 giáp · +60% máu, +45 giáp | đang hoạt động | Thiết Vệ, Huyền Giáp Vệ, Kim Cang Hộ Pháp |
+| `matu` | Ma Tu | 2 / 4 | Hút máu 20% sát thương gây ra · Hút máu 40%, +15% công | đang hoạt động | Ma Binh, Huyết Ma, U Minh Ma Quân, Hỗn Độn Ma Đế |
+| `dantu` | Đan Tu | 2 / 3 | (tuần 2) Hồi máu + · (tuần 2) Hồi máu ++ | tuần 2 | Thanh Mộc, Linh Y, Cửu Thiên Thần Nữ |
+| `xatu` | Xạ Tu | 2 | (tuần 2) Tầm đánh + | tuần 2 | Linh Cung |
+| `thuongtu` | Thương Tu | 2 | (tuần 2) Xuyên giáp + | tuần 2 | Lôi Thương |
+| `sattu` | Sát Tu | 2 | (tuần 2) Chí mạng + | tuần 2 | Ảnh Sát |
+| `thetu` | Thể Tu | 2 | (tuần 2) Máu & hồi phục + | tuần 2 | Bất Diệt Chiến Thần |
+
+## Tộc (nguồn gốc) – dữ liệu cho tuần 2
+
+| id | Tộc | Tướng |
+|---|---|---|
+| `nhan` | Nhân tộc | Kiếm Đồng, Thiết Vệ, Linh Cung, Thanh Phong Kiếm Khách, Huyền Giáp Vệ, Lôi Thương, Linh Y, Bất Diệt Chiến Thần |
+| `tien` | Tiên tộc | Ngự Kiếm Chân Nhân, Kim Cang Hộ Pháp, Huyền Băng Tiên Tử, Vô Cực Kiếm Tôn, Thiên Lôi Đạo Nhân, Vạn Kiếm Tiên Đế, Cửu Thiên Thần Nữ |
+| `ma` | Ma tộc | Ma Binh, Huyết Ma, Ảnh Sát, U Minh Ma Quân, Hỗn Độn Ma Đế |
+| `linh` | Linh tộc | Hỏa Linh, Thanh Mộc, Băng Linh Sư, Cửu Viêm Pháp Sư |
+| `yeu` | Yêu tộc |  |
+
+## Mô hình & animation
+
+| Tướng | Ngoại hình (LOOKS) | Vũ khí | Tỉ lệ | Preset animation | Đòn thường | Clip thi triển |
+|---|---|---|---|---|---|---|
+| Kiếm Đồng | `kiemdong` | sword | 0.95 | melee | Attack01 → Attack02 → Attack03 → HeavyAttack | Attack03 |
+| Thiết Vệ | `thietve` | spear | 1 | heavy | Attack01 → HeavyAttack → Attack02 → HeavyAttack | HeavyAttack |
+| Hỏa Linh | `hoa` | staff | 0.95 | caster | Attack01 → Attack02 → Attack03 → HeavyAttack | SkillCast |
+| Thanh Mộc | `thanhmoc` | staff | 0.95 | caster | Attack01 → Attack02 → Attack03 → HeavyAttack | SkillCast |
+| Ma Binh | `mabinh` | blade | 0.98 | melee | Attack01 → Attack02 → Attack03 → HeavyAttack | Attack03 |
+| Linh Cung | `linhcung` | bow | 0.95 | archer | Attack01 → Attack02 → Attack01 → HeavyAttack | SkillCast |
+| Thanh Phong Kiếm Khách | `thanhphong` | sword | 1 | melee | Attack01 → Attack02 → Attack03 → HeavyAttack | Attack03 |
+| Huyền Giáp Vệ | `huyengiap` | spear | 1.02 | heavy | Attack01 → HeavyAttack → Attack02 → HeavyAttack | HeavyAttack |
+| Băng Linh Sư | `bangling` | staff | 1 | caster | Attack01 → Attack02 → Attack03 → HeavyAttack | SkillCast |
+| Huyết Ma | `huyetma` | claws | 1.02 | melee | Attack01 → Attack02 → Attack03 → HeavyAttack | Attack03 |
+| Lôi Thương | `loithuong` | spear | 1 | heavy | Attack01 → HeavyAttack → Attack02 → HeavyAttack | HeavyAttack |
+| Linh Y | `linhy` | staff | 0.97 | caster | Attack01 → Attack02 → Attack03 → HeavyAttack | SkillCast |
+| Ngự Kiếm Chân Nhân | `ngukiem` | sword | 1.02 | caster | Attack01 → Attack02 → Attack03 → HeavyAttack | SkillCast |
+| Cửu Viêm Pháp Sư | `cuuviem` | staff | 1.02 | caster | Attack01 → Attack02 → Attack03 → HeavyAttack | SkillCast |
+| Kim Cang Hộ Pháp | `kimcuong` | spear | 1.04 | heavy | Attack01 → HeavyAttack → Attack02 → HeavyAttack | HeavyAttack |
+| Ảnh Sát | `anhsat` | blade | 1 | melee | Attack01 → Attack02 → Attack03 → HeavyAttack | Attack03 |
+| Huyền Băng Tiên Tử | `huyenbang` | staff | 1.02 | caster | Attack01 → Attack02 → Attack03 → HeavyAttack | SkillCast |
+| Vô Cực Kiếm Tôn | `vocuc` | sword | 1.06 | melee | Attack01 → Attack02 → Attack03 → HeavyAttack | Attack03 |
+| Thiên Lôi Đạo Nhân | `loiton` | staff | 1.06 | caster | Attack01 → Attack02 → Attack03 → HeavyAttack | SkillCast |
+| Bất Diệt Chiến Thần | `batdiet` | spear | 1.08 | heavy | Attack01 → HeavyAttack → Attack02 → HeavyAttack | HeavyAttack |
+| U Minh Ma Quân | `umaquan` | staff | 1.06 | caster | Attack01 → Attack02 → Attack03 → HeavyAttack | SkillCast |
+| Vạn Kiếm Tiên Đế | `kiemtien` | sword | 1.1 | ultimate | Attack01 → Attack02 → Attack03 → HeavyAttack | UltimateCast |
+| Cửu Thiên Thần Nữ | `thannu` | staff | 1.1 | ultimate | Attack01 → Attack02 → Attack03 → HeavyAttack | UltimateCast |
+| Hỗn Độn Ma Đế | `hondon` | claws | 1.12 | ultimate | Attack01 → Attack02 → Attack03 → HeavyAttack | UltimateCast |

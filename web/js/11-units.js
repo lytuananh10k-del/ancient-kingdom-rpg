@@ -167,6 +167,7 @@ class Unit {
         const d = Math.hypot(u.pos.x - this.pos.x, u.pos.z - this.pos.z);
         let sc = d;
         if (role === 'assassin') sc = d * 0.4 + (u.def.ranged ? -2.5 : 0) + (u.hp / u.maxHp) * 2.5;
+        if (role === 'marksman' && d <= this.def.range) sc = d - 3 + (u.hp / u.maxHp) * 3;   // xạ thủ: trong tầm thì bắn kẻ còn ít máu nhất
         if (u === this.target) sc -= 1;
         if (melee) {
           let crowd = 0;
