@@ -1,4 +1,4 @@
-// Kiểm thử bản đóng gói 1 tệp (dist/Vạn Kiếm Kỳ Trận V1.5 FINAL.html) mở bằng file:// – KHÔNG cho truy cập mạng (chặn mọi http/https):
+// Kiểm thử bản đóng gói 1 tệp (dist/Van_Kiem_Ky_Tran_V1.6.html) mở bằng file:// – KHÔNG cho truy cập mạng (chặn mọi http/https):
 // phải tự chạy (three.js đã nhúng), vào trận, đánh xong một trận, lưu / tải lại được, không lỗi.
 // Chạy: cd web && npm run build && npm run test:dist
 'use strict';
@@ -6,7 +6,7 @@ const { chromium } = require('playwright');
 const path = require('path');
 const fs = require('fs');
 
-const FILE = path.resolve(__dirname, '..', 'dist', 'Vạn Kiếm Kỳ Trận V1.5 FINAL.html');
+const FILE = path.resolve(__dirname, '..', 'dist', 'Van_Kiem_Ky_Tran_V1.6.html');
 (async () => {
   if (!fs.existsSync(FILE)) { console.error('Chưa có bản đóng gói – chạy npm run build'); process.exit(1); }
   const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });

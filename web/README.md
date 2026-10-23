@@ -41,8 +41,13 @@ và phải nạp đúng thứ tự số. Thêm file mới: đặt số thứ t�
 | `js/19-main.js` | Vòng lặp chính, khởi động, móc kiểm thử `window.__vkkt` |
 | `js/combat/test-runner.js` | **CombatTestRunner** – mô phỏng trận không render, seed cố định, báo cáo & bất thường |
 | `js/combat/balance-sim.js` | **BalanceSimulator** – hàng nghìn trận có seed, thống kê theo tướng / vai trò / bậc / sao / tộc-hệ (KTC Wilson), thí nghiệm thay thế, ngưỡng cảnh báo chỉnh được, xuất JSON / CSV |
+| `js/data/artifacts.js` | **Dữ liệu pháp bảo V1.6**: 8 nguyên liệu, 36 pháp bảo (công thức A+B = B+A), 29 loại nội tại (mô tả sinh từ tham số) |
+| `js/items/artifact-system.js` | **ArtifactInventory** (sổ vật phẩm theo instanceId + giao dịch nguyên tử), ghép, trang bị 3 ô, bán / nâng sao giữ đồ, phần thưởng PvE, lớp chỉ số trang bị |
+| `js/items/artifact-passives.js` | Nội tại pháp bảo trong trận (bước mô phỏng, chặn vòng lặp) + ArtifactVFX theo nhóm / mức đồ hoạ |
+| `js/items/artifact-ui.js` | Kho pháp bảo kiểu TFT: dock thu gọn, chạm / kéo thả ghép & trang bị, tooltip, xem trước chỉ số, bảng 36 công thức |
+| `js/items/equipment-test-runner.js` | **EquipmentTestRunner** – kiểm thử hệ thống pháp bảo trong game (sandbox) |
 | `js/20-debug.js` | **Bảng Debug** cho nhà phát triển (ẩn mặc định: `?debug=1`, Ctrl+Shift+D, chạm 5 lần ô FPS) – FPS, draw call, tài nguyên, trận thử / đội hình thử trong sandbox, mô phỏng, nhật ký kỹ năng, xuất báo cáo |
-| `tools/build-single.js` | Đóng gói **1 tệp HTML chạy không cần mạng** → `dist/Vạn Kiếm Kỳ Trận V1.5 FINAL.html` (`npm run build`) |
+| `tools/build-single.js` | Đóng gói **1 tệp HTML chạy không cần mạng** → `dist/Van_Kiem_Ky_Tran_V1.6.html` (`npm run build`) |
 
 ## Kiểm thử tự động
 ```bash
@@ -314,3 +319,13 @@ Báo cáo tổng hợp: **[docs/V1.5-FINAL.md](docs/V1.5-FINAL.md)** (tình tr�
 - **Lưu**: phiên bản v2 + chuyển đổi từ v1, làm sạch trường hỏng, bản hỏng / của bản mới hơn được chép sang `vkkt_save_backup` (không bao giờ xoá), công cụ thử không ghi bản lưu thật.
 - **Cân bằng có bằng chứng**: Huyền Giáp, Bất Diệt (giảm khiên / hồi), Linh Cung (giảm), Băng Linh (tăng) – lý do và số liệu ở V1.5-FINAL.md §3.
 - **Kiểm thử mới**: `npm run test:audit` · `simulate` · `test:ai` · `test:memory` · `test:save` · `perf` · `test:dist`; tổng hợp `node tools/collect-regression.js <log>` → `node tools/final-report.js`.
+
+## V1.6 – Tuần 5: Trang bị · Ghép pháp bảo · Nội tại · Kho đồ · Giao diện TFT
+Báo cáo: **[docs/V1.6-REPORT.md](docs/V1.6-REPORT.md)** · thiết kế: [docs/EQUIPMENT.md](docs/EQUIPMENT.md) · 36 công thức: [docs/ARTIFACTS.md](docs/ARTIFACTS.md) · giá trị biên từng món: [docs/ARTIFACT-BALANCE.md](docs/ARTIFACT-BALANCE.md).
+
+- **8 nguyên liệu → 36 pháp bảo** (ghép 2, không phân biệt thứ tự), mỗi món có chỉ số + nội tại thật (29 loại: hút máu, thiêu đốt, giảm giáp / kháng phép, lá chắn, hồi năng lượng, tăng tốc đánh, phản sát thương, tăng sát thương kỹ năng, hồi đồng minh, tăng công theo thời gian, Bất Diệt, giải khống chế…).
+- **Không mất, không nhân đôi đồ**: một sổ vật phẩm duy nhất (instanceId / itemId / ownerId / vị trí), mọi thao tác là giao dịch nguyên tử (lỗi → hoàn tác), giữ chỗ khi chờ xác nhận ghép; ô tạm giữ khi kho đầy; bán / nâng sao trả đồ đúng quy tắc.
+- **Kho pháp bảo** (nút 法 bên phải): Android chạm – chạm – Ghép, chạm pháp bảo rồi chạm tướng; Windows kéo thả, rê chuột xem tooltip + chỉ số trước → sau; 3 ô trên bảng thông tin tướng (tháo ↩, chuyển); bảng 36 công thức (📜).
+- **Nguồn**: vòng yêu thú (3, 7, 11…) rơi nguyên liệu, tối đa 3 / vòng, nhận đúng 1 lần (tải lại không nhận lặp); bảng Debug → *Kho thử* (sandbox).
+- **Lưu v3** + chuyển đổi: 6 trang bị cũ → nguyên liệu trong kho; bản gốc sao lưu `vkkt_save_backup_v<cũ>`.
+- **Kiểm thử**: `npm run test:equipment` (EquipmentTestRunner + giao diện chuột / cảm ứng), `npm run artifact-balance` (giá trị biên 36 món), toàn bộ hồi quy cũ.

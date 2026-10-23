@@ -75,8 +75,9 @@ async function main() {
       hp: g.hp, gold: g.gold, level: g.level, xp: g.xp, streak: g.streak, over: g.over, round: K.battle.round, phase: K.battle.phase,
       bench: g.bench.map(e => (e ? e.key + '*' + e.star : null)), shop: g.shop.slice(),
       board: K.boardAllies().map(u => u.key + '*' + u.star + '@' + u.homeTile.c + ',' + u.homeTile.r).sort(),
-      cap: K.boardCap(), items: g.items.join(','), rivals: JSON.stringify(Object.entries(g.rivals).sort()),
-      unitItems: K.boardAllies().map(u => u.key + ':' + (u.items || []).join('+')).sort().join(' ') + ' | ' + g.bench.map(e => (e ? (e.items || []).join('+') : '')).join(',')
+      cap: K.boardCap(), items: K.ArtifactInventory.invList().map(r => r.itemId).join(','), rivals: JSON.stringify(Object.entries(g.rivals).sort()),
+      invAudit: K.ArtifactInventory.audit().length, invTotal: K.ArtifactInventory.recs.size,
+      unitItems: K.boardAllies().map(u => u.key + ':' + u.items.join('+')).sort().join(' ') + ' | ' + g.bench.map(e => (e ? K.ArtifactInventory.itemIdsOf(e.cid).join('+') : '')).join(',')
     };
   });
   /** Bất biến chung – gọi sau mỗi thao tác. */
@@ -85,6 +86,7 @@ async function main() {
       const K = window.__vkkt, g = K.game, out = [];
       if (!(g.gold >= 0) || !Number.isInteger(g.gold)) out.push('gold không hợp lệ: ' + g.gold);
       if (g.bench.length !== K.BENCH_SIZE) out.push('độ dài hàng chờ ' + g.bench.length);
+      { const ia = K.ArtifactInventory.audit(); if (ia.length) out.push('sổ pháp bảo: ' + ia[0]); }   // mỗi vật phẩm đúng 1 nơi, chủ tồn tại
       const allies = K.boardAllies();
       if (allies.length > K.boardCap()) out.push(`quá số quân: ${allies.length}/${K.boardCap()}`);
       const tiles = new Set();
@@ -319,21 +321,35 @@ async function main() {
     }
     if (SHOTS) await page.screenshot({ path: path.join(SHOTS, `round${String(played).padStart(2, '0')}_prep.png`) });
 
-    // --- Gắn trang bị trong túi: chạm món đồ rồi chạm tướng trên bàn
+    // --- Kho pháp bảo (V1.6): chạm 2 nguyên liệu → xác nhận ghép; chạm pháp bảo rồi chạm tướng trên bàn để trang bị
     for (let guard = 0; guard < 3; guard++) {
-      s = await state(); if (!s.items || !s.board.length) break;
-      const target = await V(() => { const K = window.__vkkt; const u = K.boardAllies().filter(x => (x.items || []).length < 3).sort((a, b) => b.star * 10 + K.UNIT_DEFS[b.key].cost - (a.star * 10 + K.UNIT_DEFS[a.key].cost))[0]; return u ? { c: u.homeTile.c, r: u.homeTile.r, n: u.items.length, bonus: JSON.stringify(u.bonus) } : null; });
+      const comps = await V(() => { const K = window.__vkkt; if (K.ArtifactUI.collapsed) { K.ArtifactUI.collapsed = false; K.ui.update(); } return K.ArtifactInventory.invList().filter(r => K.COMPONENTS[r.itemId]).map(r => r.slot); });
+      if (comps.length < 2) break;
+      const n0 = await V(() => window.__vkkt.ArtifactInventory.recs.size);
+      await press(`.aslot[data-slot="${comps[0]}"]`); await page.waitForTimeout(60);
+      await press(`.aslot[data-slot="${comps[1]}"]`); await page.waitForTimeout(80);
+      const popup = await page.isVisible('#art-craft');
+      if (popup) await press('#ac-ok'); await page.waitForTimeout(60);
+      const n1 = await V(() => window.__vkkt.ArtifactInventory.recs.size);
+      check(popup && n1 === n0 - 1, 'chạm 2 nguyên liệu → xem công thức → Ghép: −2 nguyên liệu, +1 pháp bảo', { popup, n0, n1 });
+      stats.crafts = (stats.crafts || 0) + 1;
+    }
+    for (let guard = 0; guard < 3; guard++) {
+      s = await state(); if (!s.board.length) break;
+      const art = await V(() => { const K = window.__vkkt; const r = K.ArtifactInventory.invList().find(x => K.ARTIFACTS[x.itemId]); return r ? r.slot : null; });
+      if (art === null) break;
+      const target = await V(() => { const K = window.__vkkt; const u = K.boardAllies().filter(x => x.items.length < 3).sort((a, b) => b.star * 10 + K.UNIT_DEFS[b.key].cost - (a.star * 10 + K.UNIT_DEFS[a.key].cost))[0]; return u ? { c: u.homeTile.c, r: u.homeTile.r, n: u.items.length, bonus: JSON.stringify(u.bonus) } : null; });
       if (!target) break;
       const p = await unitScreen({ c: target.c, r: target.r }); if (!onScreen(p)) break;
-      const nInv = s.items.split(',').length;
-      await press('#items .item:first-child'); await page.waitForTimeout(60);
+      const nInv = await V(() => window.__vkkt.ArtifactInventory.invCount());
+      await press(`.aslot[data-slot="${art}"]`); await page.waitForTimeout(60);
       await tapAt(p);
-      const after = await V(([c, r]) => { const K = window.__vkkt, u = K.boardAllies().find(x => x.homeTile.c === c && x.homeTile.r === r); return { n: u.items.length, inv: K.game.items.length, bonus: JSON.stringify(u.bonus) }; }, [target.c, target.r]);
-      if (check(after.n === target.n + 1 && after.inv === nInv - 1, 'chạm trang bị rồi chạm tướng để gắn', { target, after, nInv })) {
+      const after = await V(([c, r]) => { const K = window.__vkkt, u = K.boardAllies().find(x => x.homeTile.c === c && x.homeTile.r === r); return { n: u.items.length, inv: K.ArtifactInventory.invCount(), bonus: JSON.stringify(u.bonus) }; }, [target.c, target.r]);
+      if (check(after.n === target.n + 1 && after.inv === nInv - 1, 'chạm pháp bảo rồi chạm tướng để trang bị', { target, after, nInv })) {
         stats.itemsEquipped++;
         check(after.bonus !== target.bonus, 'trang bị thay đổi chỉ số cộng thêm của tướng', { before: target.bonus, after: after.bonus });
       }
-      await invariants('sau khi gắn trang bị');
+      await invariants('sau khi trang bị pháp bảo');
     }
     // --- Bảng thông tin: chạm tướng phe ta, chạm địch, chạm chỗ trống
     s = await state();
@@ -419,8 +435,8 @@ async function main() {
     let dmg = win ? 0 : 2 + Math.floor(s.round / 2) + res.enemyStars; if (monster) dmg = Math.ceil(dmg / 2);
     if (monster) {
       stats.monsterRounds++;
-      const inv = await V(() => window.__vkkt.game.items.length);
-      if (win) check(loot.items.length >= 1 && inv >= loot.items.length, 'thắng vòng yêu thú nhận ≥ 1 trang bị vào túi', { loot, inv });
+      const inv = await V(() => window.__vkkt.ArtifactInventory.invCount());
+      if (win) check(loot.items.length >= 1 && (loot.got || []).length === Math.min(loot.items.length, 3) && inv >= loot.got.length, 'thắng vòng yêu thú nhận ≥ 1 nguyên liệu vào kho (đúng 1 lần)', { loot, inv });
     }
     check(end.gold === s.gold + income, 'thu nhập cuối vòng', { expected: s.gold + income, got: end.gold });
     check(end.hp === Math.max(0, s.hp - dmg), 'mất máu khi thua', { expected: s.hp - dmg, got: end.hp });

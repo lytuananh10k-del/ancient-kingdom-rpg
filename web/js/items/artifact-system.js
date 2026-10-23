@@ -100,7 +100,7 @@ const ArtifactInventory = {
       return { ok: true, value };
     } catch (e) {
       this.recs = backup; this.nextId = nextId; this.ver++; this.stats.fail++;
-      if (!(e instanceof UserError)) console.error('[Pháp bảo] ' + label + ' – hoàn tác', e);
+      if (!(e instanceof UserError) && !e.simulated) console.error('[Pháp bảo] ' + label + ' – hoàn tác', e);
       return { ok: false, reason: e.message };
     } finally { this.busy = false; }
   },

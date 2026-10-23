@@ -11,7 +11,10 @@ const ArtifactUI = {
   collapsed: false, drag: null, tipFor: null, lpTimer: 0,
   init() {
     this.collapsed = store.get('artDockCollapsed', false);
-    $('ad-toggle').addEventListener('click', () => { this.collapsed = !this.collapsed; store.set('artDockCollapsed', this.collapsed); this.render(); if (info.unit) placeUnitInfo(info.unit); });
+    $('ad-toggle').addEventListener('click', () => {
+      this.collapsed = !this.collapsed; store.set('artDockCollapsed', this.collapsed); this.render(); if (info.unit) placeUnitInfo(info.unit);
+      if (battle.phase === 'prep') requestAnimationFrame(() => { fitPrepCamera(); combatCam.tDist = prepFit.dist; });   // khung camera chừa / trả chỗ cho kho
+    });
     $('ad-book').addEventListener('click', () => this.openBook());
     $('btn-book-close').addEventListener('click', () => { $('art-book').hidden = true; });
     $('art-dock').addEventListener('pointerdown', e => e.stopPropagation());
@@ -65,6 +68,8 @@ const ArtifactUI = {
   /** Không đè lên cửa hàng / nút đáy: giới hạn chiều cao theo mép trên của bảng chuẩn bị khi hai bên chồng ngang. */
   layout() {
     const dock = $('art-dock'); if (dock.hidden) return;
+    const ta = document.querySelector('.top-actions').getBoundingClientRect();   // dưới cụm FPS / Menu (màn dọc xếp chồng)
+    dock.style.top = Math.round(ta.bottom + 6) + 'px';
     const r = dock.getBoundingClientRect(), H = window.innerHeight;
     let floor = H - 8;
     for (const el of [$('prep-panel'), $('next-dock')]) { if (!el || el.hidden) continue; const q = el.getBoundingClientRect(); if (q.width && q.right > r.left && q.left < r.right) floor = Math.min(floor, q.top - 8); }
@@ -180,7 +185,7 @@ const ArtifactUI = {
     if (!res.ok) { ui.toast('Không ghép được: ' + res.reason); this.sel = []; this.render(); return; }
     const A = ITEM_DB[res.value.itemId];
     ui.toast('Ghép thành công: ' + A.name); Sfx.chime();
-    this.sel = [res.value.instanceId]; this.hint('Chạm (hoặc kéo lên) tướng phe ta để trang bị ' + A.name);
+    this.sel = []; this.hint('Chạm ' + A.name + ' rồi chạm tướng để trang bị (máy tính: kéo thả)');
     saveGame(); this.render();
     const b = document.querySelector(`.aslot[data-iid="${res.value.instanceId}"]`);
     if (b && b.animate) b.animate([{ transform: 'scale(1.35)', filter: 'brightness(2)' }, { transform: 'scale(1)', filter: 'none' }], { duration: 380, easing: 'ease-out' });

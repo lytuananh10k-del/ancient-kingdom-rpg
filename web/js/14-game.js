@@ -311,7 +311,8 @@ const SAVE_MIGRATIONS = {
   // v2 (V1.5) → v3 (V1.6 pháp bảo): trang bị cũ dạng tên (6 món, trong túi và trên tướng) giữ ở legacyItems → restoreGame đổi thành
   // NGUYÊN LIỆU tương ứng trong kho (LEGACY_ITEM_MAP). Tướng nhận mã bản sao (cid). Không bỏ món nào.
   2: s => {
-    const legacy = [].concat(s.items || [], ...(s.bench || []).map(e => (e && e.items) || []), ...(s.board || []).map(b => (b && b.items) || []));
+    const arr = x => (Array.isArray(x) ? x : []);
+    const legacy = [].concat(arr(s.items), ...arr(s.bench).map(e => arr(e && e.items)), ...arr(s.board).map(b => arr(b && b.items)));
     return Object.assign({}, s, { v: 3, build: 'V1.6', legacyItems: legacy.filter(k => typeof k === 'string'), inv: null, rewardLog: [] });
   }
 };
@@ -362,7 +363,7 @@ function restoreGame(st, sandbox = false) {
     rewardLog: (st.rewardLog || []).slice() });
   if (typeof ArtifactUI !== 'undefined') ArtifactUI.clearSel();
   // cid: giữ mã trong bản lưu (trùng → cấp mã mới), bộ đếm không lùi
-  cidSeq = Math.max(cidSeq, st.cidSeq | 0);
+  cidSeq = st.cidSeq | 0;   // mã > bộ đếm (bản lưu cũ / sửa tay) được takeCid đẩy bộ đếm lên – không bao giờ cấp trùng
   const usedCid = new Set(), takeCid = c => { if (typeof c === 'string' && !usedCid.has(c)) { usedCid.add(c); const n = +c.slice(1); if (n > cidSeq) cidSeq = n; return c; } const m = newCid(); usedCid.add(m); return m; };
   // Bản lưu cũ (trước V1.5): id tướng đã đổi / gỡ được chuyển sang tướng mới cùng bậc (migrateChampionKey), giữ sao & trang bị.
   game.rivals = {}; for (const k in st.rivals || {}) { const m = migrateChampionKey(k); if (m && st.rivals[k] > 0) game.rivals[m] = (game.rivals[m] || 0) + (st.rivals[k] | 0); }

@@ -67,7 +67,7 @@ function showDefInfo(key, star = 1) { Object.assign(info, { unit: null, key, sta
  *  cụm nút dưới (để vẫn mua, bán, bắt đầu được khi bảng đang mở). Xem trước từ cửa hàng (u = null) thì đặt phía trên. */
 function placeUnitInfo(u) {
   const el = $('unit-info'), W = window.innerWidth, H = window.innerHeight, st = el.style;
-  st.left = st.right = st.top = st.bottom = ''; st.maxHeight = ''; el.hidden = false;
+  st.left = st.right = st.top = st.bottom = ''; st.maxHeight = ''; st.maxWidth = ''; el.hidden = false;
   const pw = el.offsetWidth;
   // Màn dọc / màn thấp: được phủ tạm lên vùng thông tin trên cùng (bảng có nút ✕); màn lớn thì nằm dưới hàng nút.
   const top = W < H || H < 520 ? 8 : document.querySelector('.top-actions').getBoundingClientRect().bottom + 6;
@@ -86,8 +86,11 @@ function placeUnitInfo(u) {
     const sd = sides[0];
     st[sd.k] = sd.inset + 'px'; st.top = top + 'px'; st.maxHeight = Math.max(100, sd.room) + 'px';
   } else {
-    const x0 = W - 12 - pw, lim = floor(x0, W - 12), maxH = Math.min((lim - top) * 0.55, 340), ph = Math.min(el.scrollHeight, maxH);
-    st.right = '12px'; st.maxHeight = maxH + 'px';
+    // màn dọc: chừa cột Kho pháp bảo bên phải (đang mở) để vẫn chạm được kho khi xem thông tin
+    const ri = typeof ArtifactUI !== 'undefined' ? ArtifactUI.rightInset() : 12;
+    st.maxWidth = Math.max(220, W - ri - 12) + 'px';
+    const pw2 = el.offsetWidth, x0 = W - ri - pw2, lim = floor(x0, W - ri), maxH = Math.min((lim - top) * 0.55, 340), ph = Math.min(el.scrollHeight, maxH);
+    st.right = ri + 'px'; st.maxHeight = maxH + 'px';
     if (covers(x0, W - 12, top, top + ph) && !covers(x0, W - 12, lim - ph, lim)) st.bottom = (H - lim) + 'px'; else st.top = top + 'px';
   }
 }

@@ -1,10 +1,10 @@
-# Hướng dẫn chạy – Android / Windows (V1.5 FINAL)
+# Hướng dẫn chạy – Android / Windows (V1.6)
 
 ## 1. Cách chạy
 
 | Cách | Làm gì | Ghi chú |
 |---|---|---|
-| **Một tệp duy nhất** | Mở `dist/Vạn Kiếm Kỳ Trận V1.5 FINAL.html` bằng Chrome / Edge (Windows) hoặc Chrome Android | Đã nhúng sẵn three.js r128 + toàn bộ mã game → chạy **không cần mạng** (chỉ phông chữ Google cần mạng; mất mạng thì dùng phông hệ thống). Tạo lại: `cd web && npm run build` |
+| **Một tệp duy nhất** | Mở `dist/Van_Kiem_Ky_Tran_V1.6.html` bằng Chrome / Edge (Windows) hoặc Chrome Android | Đã nhúng sẵn three.js r128 + toàn bộ mã game → chạy **không cần mạng** (chỉ phông chữ Google cần mạng; mất mạng thì dùng phông hệ thống). Tạo lại: `cd web && npm run build` |
 | Thư mục nguồn | Phục vụ thư mục `web/` bằng máy chủ tĩnh bất kỳ (`npx http-server web`, `python -m http.server`) rồi mở `index.html` | `index.html` là phần thân (dùng cho Artifact); trình duyệt vẫn hiển thị đúng. three.js tải từ CDN |
 | Artifact | Mở liên kết Artifact đã xuất bản | Cần mạng |
 
@@ -21,6 +21,8 @@ Android: mở tệp HTML từ trình quản lý tệp → chọn Chrome. Nên **
 | Xoay camera | Kéo một ngón trên chỗ trống | Kéo chuột trên chỗ trống |
 | Thu phóng | Chụm / mở hai ngón | Con lăn chuột |
 | Phím tắt | – | Space: giao chiến / vòng tiếp · D: làm mới · F: mua kinh nghiệm · U: Vạn Kiếm · P: tạm dừng · Esc: đóng menu |
+| Kho pháp bảo (V1.6) | Nút **法 n/10** bên phải: chạm 2 nguyên liệu → **Ghép**; chạm pháp bảo → chạm tướng để trang bị; nhấn giữ ô xem chi tiết | Kéo nguyên liệu lên nguyên liệu → **Ghép**; kéo pháp bảo lên tướng; rê chuột xem tooltip / chỉ số trước → sau |
+| 3 ô pháp bảo | Chạm tướng → bảng thông tin: chạm ô → chạm tướng khác để chuyển, ↩ tháo về kho | Như Android |
 | Bảng Debug (nhà phát triển) | Chạm nhanh **5 lần** vào ô FPS | **Ctrl+Shift+D**, hoặc thêm `?debug=1` vào địa chỉ |
 
 ## 3. Đồ hoạ và hiệu năng
@@ -64,11 +66,13 @@ npm test                 # chơi thử 12 vòng bằng chuột (ROUNDS=20 cho 20
 npm run test:portrait    # màn dọc + cảm ứng
 npm run test:combat · test:economy · test:champions · test:traits · test:combat3
 npm run test:audit       # 15 kiểm tra × 24 tướng → docs/QA-CHAMPIONS.md
+npm run test:equipment   # pháp bảo: EquipmentTestRunner + giao diện chuột / cảm ứng (V1.6)
+npm run artifact-balance # giá trị biên 36 pháp bảo → docs/ARTIFACT-BALANCE.md
 npm run test:save        # bản lưu: phiên bản, hỏng, thiếu trường, Debug không ghi đè
 npm run test:memory      # rò rỉ geometry / texture / listener / đối tượng sau trận, ván mới, đổi đồ hoạ, thay GLB
 npm run balance          # bảng cân bằng theo bậc / vai trò
 npm run simulate         # BalanceSimulator 1200 trận (N=…, SEED=…) → docs/BALANCE-SIM.md + CSV / JSON
 npm run perf             # 7 kịch bản hiệu năng (TAG=before|after) → docs/reports/perf-*.json; node tools/perf-report.js → docs/PERF-DATA.md
-npm run build            # tạo dist/Vạn Kiếm Kỳ Trận V1.5 FINAL.html
+npm run build            # tạo dist/Van_Kiem_Ky_Tran_V1.6.html
 ```
 Cần Chromium cho Playwright (biến `THREE_DIR` trỏ tới gói three@0.128.0 nếu không có mạng tới CDN).

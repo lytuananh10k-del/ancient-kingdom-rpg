@@ -48,10 +48,12 @@ function botGame([strategy, rounds]) {
       K.moveTo({ type: 'bench', i: best }, { type: 'tile', c: weak.homeTile.c, r: weak.homeTile.r });
     }
   };
-  const equipAll = () => {
-    while (g.items.length) {
-      const u = K.boardAllies().filter(x => (x.items || []).length < 3).sort((a, b) => value(b.key, b.star) - value(a.key, a.star))[0];
-      if (!u || !K.equipItem(0, { type: 'board', unit: u })) break;
+  const equipAll = () => {   // V1.6: ghép từng cặp nguyên liệu trong kho rồi trang bị pháp bảo cho tướng mạnh nhất còn ô
+    const I = K.ArtifactInventory;
+    for (let guard = 0; guard < 20; guard++) { const c = I.invList().filter(r => K.COMPONENTS[r.itemId]); if (c.length < 2 || !K.ArtifactCraftingSystem.craft(c[0].instanceId, c[1].instanceId).ok) break; }
+    for (const r of I.invList().filter(r => K.ARTIFACTS[r.itemId])) {
+      const u = K.boardAllies().filter(x => x.items.length < 3).sort((a, b) => value(b.key, b.star) - value(a.key, a.star))[0];
+      if (!u || !K.equipArtifact(r.instanceId, { type: 'board', unit: u }).ok) break;
     }
   };
   const buyLoop = (allow) => {
@@ -201,21 +203,22 @@ async function main() {
   check(ot.phase === 'end' && ot.time <= 60.1 && ot.overtime === 1, `trận giữa hai tướng trâu kết thúc sau ${ot.time.toFixed(1)} s (≤ 60), có giai đoạn hỗn loạn`, ot);
   await page.evaluate(() => window.__vkkt.nextRound());
 
-  // ---------- 4. Trang bị: gắn, lưu, bán
-  console.log('\n4. Trang bị');
+  // ---------- 4. Trang bị (V1.6 pháp bảo): ghép, gắn, lưu, bán
+  console.log('\n4. Trang bị (pháp bảo)');
   const it1 = await page.evaluate(() => {
-    const K = window.__vkkt, g = K.game; K.newGame();
-    g.items = ['kiem', 'phu', 'ngoa'];
+    const K = window.__vkkt, I = K.ArtifactInventory; K.newGame();
+    const id = ['sword', 'sword', 'jade', 'jade', 'bow'].map(k => I.add(k).value.instanceId);
+    const a = K.ArtifactCraftingSystem.craft(id[0], id[1]).value, b = K.ArtifactCraftingSystem.craft(id[2], id[3]).value;
     const u = K.boardAllies()[0], atk0 = u.atk, hp0 = u.maxHp;
-    K.equipItem(0, { type: 'board', unit: u }); K.equipItem(0, { type: 'board', unit: u });
-    return { key: u.key, items: u.items.slice(), atkUp: u.atk > atk0, hpUp: u.maxHp > hp0, inv: g.items.slice() };
+    K.equipArtifact(a.instanceId, { type: 'board', unit: u }); K.equipArtifact(b.instanceId, { type: 'board', unit: u });
+    return { key: u.key, items: u.items.slice(), atkUp: u.atk === atk0 + 20, hpUp: u.maxHp === hp0 + 300, inv: I.invList().map(r => r.itemId) };
   });
   await page.reload(); await page.click('#btn-enter');
-  const it2 = await page.evaluate(() => { const K = window.__vkkt; const u = K.boardAllies().find(x => x.items && x.items.length); return { items: u ? u.items.slice() : [], inv: K.game.items.slice(), atk: u && u.atk, base: u && K.UNIT_DEFS[u.key].atk }; });
-  const it3 = await page.evaluate(() => { const K = window.__vkkt, u = K.boardAllies().find(x => x.items && x.items.length); K.sellSrc({ type: 'board', unit: u }); return K.game.items.slice(); });
-  check(it1.items.join() === 'kiem,phu' && it1.atkUp && it1.hpUp, 'gắn Thanh Phong Kiếm + Hộ Mệnh Phù: công và máu tăng', it1);
-  check(it2.items.join() === 'kiem,phu' && it2.inv.join() === 'ngoa' && it2.atk > it2.base, 'tải lại trang: trang bị trên tướng và trong túi còn nguyên, vẫn cộng chỉ số', it2);
-  check(it3.sort().join() === 'kiem,ngoa,phu', 'bán tướng thì trang bị trả về túi', it3);
+  const it2 = await page.evaluate(() => { const K = window.__vkkt; const u = K.boardAllies().find(x => x.items.length); return { items: u ? u.items.slice() : [], inv: K.ArtifactInventory.invList().map(r => r.itemId), atk: u && u.atk, base: u && K.UNIT_DEFS[u.key].atk }; });
+  const it3 = await page.evaluate(() => { const K = window.__vkkt, u = K.boardAllies().find(x => x.items.length); K.sellSrc({ type: 'board', unit: u }); return K.ArtifactInventory.invList().map(r => r.itemId); });
+  check(it1.items.join() === 'tru_tien_kiem,truong_sinh_ngoc' && it1.atkUp && it1.hpUp && it1.inv.join() === 'bow', 'ghép 2 pháp bảo, gắn Tru Tiên Kiếm + Trường Sinh Ngọc: công +20, máu +300', it1);
+  check(it2.items.join() === 'tru_tien_kiem,truong_sinh_ngoc' && it2.inv.join() === 'bow' && it2.atk > it2.base, 'tải lại trang: pháp bảo trên tướng và nguyên liệu trong kho còn nguyên, vẫn cộng chỉ số', it2);
+  check(it3.sort().join() === 'bow,tru_tien_kiem,truong_sinh_ngoc', 'bán tướng thì pháp bảo trả về kho', it3);
 
   // ---------- 5. Ba chiến thuật
   console.log(`\n5. Ba chiến thuật, mỗi chiến thuật ${GAMES} ván × ${ROUNDS} vòng (bot tự chơi, trận tua nhanh)`);

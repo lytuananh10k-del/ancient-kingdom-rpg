@@ -1,4 +1,4 @@
-// Kiểm thử hệ thống lưu (mục IX): chuyển phiên bản v1 → v2, bản lưu hỏng / thiếu trường / của bản mới hơn, giữ tùy chọn đồ hoạ,
+// Kiểm thử hệ thống lưu (mục IX): chuyển phiên bản v1 → v3, bản lưu hỏng / thiếu trường / của bản mới hơn, giữ tùy chọn đồ hoạ,
 // lưu / tải đầy đủ (vòng, máu, vàng, cấp, kinh nghiệm, tướng, sao, vị trí, hàng chờ, cửa hàng), bảng Debug không ghi bản lưu chính.
 // Chạy: cd web && npm run test:save
 'use strict';
@@ -46,15 +46,17 @@ async function main() {
     board: [{ key: 'kimcuong', star: 2, c: 3, r: 3 }, { key: 'cuuviem', star: 1, c: 5, r: 1 }, { key: 'linhcung', star: 3, c: 2, r: 0 }] };
   await boot({ vkkt_save: JSON.stringify(v1) });
   let s = await state();
-  check('v1 → v2: vòng / máu / vàng / cấp / kinh nghiệm / chuỗi', s.round === 9 && s.hp === 63 && s.gold === 27 && s.level === 6 && s.xp === 5 && s.streak === -2, JSON.stringify([s.round, s.hp, s.gold, s.level, s.xp, s.streak]));
-  check('v1 → v2: tướng, sao, vị trí trên bàn', s.board.join(' ') === ['cuuviem*1@5,1', 'kimcuong*2@3,3', 'linhcung*3@2,0'].join(' '), s.board.join(' '));
-  check('v1 → v2: hàng chờ và cửa hàng', s.bench[0] === 'thanhphong*2' && s.bench[2] === 'hoa*1' && s.shop.join() === v1.shop.join(), s.bench.join() + ' | ' + s.shop.join());
-  check('v1 → v2: nút "Tiếp tục – Vòng 9"', /Vòng 9/.test(s.enter), s.enter);
+  check('v1 → v3: vòng / máu / vàng / cấp / kinh nghiệm / chuỗi', s.round === 9 && s.hp === 63 && s.gold === 27 && s.level === 6 && s.xp === 5 && s.streak === -2, JSON.stringify([s.round, s.hp, s.gold, s.level, s.xp, s.streak]));
+  check('v1 → v3: tướng, sao, vị trí trên bàn', s.board.join(' ') === ['cuuviem*1@5,1', 'kimcuong*2@3,3', 'linhcung*3@2,0'].join(' '), s.board.join(' '));
+  check('v1 → v3: hàng chờ và cửa hàng', s.bench[0] === 'thanhphong*2' && s.bench[2] === 'hoa*1' && s.shop.join() === v1.shop.join(), s.bench.join() + ' | ' + s.shop.join());
+  check('v1 → v3: nút "Tiếp tục – Vòng 9"', /Vòng 9/.test(s.enter), s.enter);
   // ghi lại sau một thao tác (mua XP) → bản lưu v2
   await page.click('#btn-enter');
   await page.evaluate(() => window.__vkkt.buyXP());
   s = await state(); const sv = JSON.parse(s.save);
-  check('ghi lại thành v2 (có savedAt, không chứa đối tượng Three.js)', sv.v === 2 && sv.savedAt > 0 && !/"isObject3D"|"uuid"/.test(s.save) && s.save.length < 4000, 'v' + sv.v + ', ' + s.save.length + ' byte');
+  check('ghi lại thành v3 (có savedAt, kho pháp bảo, không chứa đối tượng Three.js)', sv.v === 3 && sv.inv && Array.isArray(sv.inv.items) && sv.savedAt > 0 && !/"isObject3D"|"uuid"/.test(s.save) && s.save.length < 4000, 'v' + sv.v + ', ' + s.save.length + ' byte');
+  { const bk = await page.evaluate(() => localStorage.getItem('vkkt_save_backup_v1'));
+    check('nâng phiên bản: bản gốc v1 được sao lưu ở vkkt_save_backup_v1 trước khi ghi v3', bk && JSON.parse(bk).v === 1 && JSON.parse(bk).round === 9, bk ? 'v' + JSON.parse(bk).v : 'không có'); }
   // 2. tải lại → giống hệt
   const before = s;
   await boot({}, false); s = await state();

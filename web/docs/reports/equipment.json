@@ -1,0 +1,318 @@
+{
+ "date": "2026-10-23T05:53:47.991Z",
+ "note": "Chromium headless + SwiftShader; Android = giả lập cảm ứng (hasTouch, isMobile)",
+ "results": [
+  {
+   "id": "1",
+   "name": "Có đủ 8 nguyên liệu (ID, tên, mô tả, icon, màu, chỉ số)",
+   "ok": true,
+   "detail": "sword,staff,bow,armor,cloak,crystal,jade,glove"
+  },
+  {
+   "id": "2",
+   "name": "Có đúng 36 công thức, mỗi pháp bảo đủ dữ liệu (ID, tên, 2 nguyên liệu, chỉ số, nội tại có logic, kích hoạt, giới hạn, tooltip, icon, nhóm VFX)",
+   "ok": true,
+   "detail": "36 pháp bảo / 36 công thức"
+  },
+  {
+   "id": "3",
+   "name": "Không trùng công thức / ID / tên; validateArtifacts không lỗi",
+   "ok": true,
+   "detail": "{\"dupId\":0,\"dupName\":0,\"dupRecipe\":0,\"errors\":[]}"
+  },
+  {
+   "id": "4",
+   "name": "A+B và B+A cho cùng pháp bảo (64 cặp có thứ tự)",
+   "ok": true,
+   "detail": "64/64"
+  },
+  {
+   "id": "5",
+   "name": "Ghép A+A dùng 2 instance khác nhau; cùng 1 instance bị từ chối",
+   "ok": true,
+   "detail": "{\"same\":\"Cần hai nguyên liệu khác nhau (cùng loại thì phải là 2 vật phẩm riêng)\",\"result\":\"tru_tien_kiem\"}"
+  },
+  {
+   "id": "6",
+   "name": "Không ghép khi thiếu nguyên liệu (instance không tồn tại)",
+   "ok": true,
+   "detail": "Nguyên liệu không còn tồn tại"
+  },
+  {
+   "id": "7",
+   "name": "Ghép thất bại không mất đồ (sự cố giữa giao dịch → hoàn tác; thiếu / trùng nguyên liệu → không đổi)",
+   "ok": true,
+   "detail": "{\"crash\":\"sự cố giả lập giữa giao dịch\"}"
+  },
+  {
+   "id": "8",
+   "name": "Ghép thành công không nhân đôi: đúng −2 nguyên liệu +1 pháp bảo, bấm dồn 6 lần chỉ ghép 1",
+   "ok": true,
+   "detail": "{\"spam\":[true,false,false,false,false,false],\"total\":2}"
+  },
+  {
+   "id": "8b",
+   "name": "Đang chờ xác nhận ghép: vật phẩm bị giữ chỗ, chỉ giao dịch xác nhận được dùng",
+   "ok": true,
+   "detail": "{\"locked\":\"Vật phẩm đang chờ xác nhận ghép\"}"
+  },
+  {
+   "id": "9",
+   "name": "Trang bị tối đa 3 món (món thứ 4 bị từ chối, vẫn ở kho)",
+   "ok": true,
+   "detail": "Mỗi tướng mang tối đa 3 pháp bảo"
+  },
+  {
+   "id": "10",
+   "name": "Một vật phẩm không thuộc hai tướng: trang bị cho tướng khác = CHUYỂN (tướng cũ mất món đó)",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "id": "11",
+   "name": "Không trang bị cho tướng địch",
+   "ok": true,
+   "detail": "Chỉ trang bị cho tướng phe ta"
+  },
+  {
+   "id": "11b",
+   "name": "Không đổi đồ trong giao tranh tiêu chuẩn (trang bị / tháo bị từ chối)",
+   "ok": true,
+   "detail": "Chỉ trang bị được ở giai đoạn chuẩn bị"
+  },
+  {
+   "id": "12",
+   "name": "Bán tướng hoàn trả vật phẩm về kho (tổng số vật phẩm không đổi)",
+   "ok": true,
+   "detail": "{\"returned\":2}"
+  },
+  {
+   "id": "13",
+   "name": "Nâng sao bảo toàn vật phẩm: bản chính giữ đồ, ô trống nhận đồ bản phụ, phần dư về kho, không mất / nhân đôi",
+   "ok": true,
+   "detail": "{\"star\":2,\"items\":[\"tru_tien_kiem\",\"phong_loi_than_cung\",\"bat_diet_than_giap\"],\"inv\":[\"truong_sinh_ngoc\",\"thien_menh_thu_sao\"]}"
+  },
+  {
+   "id": "13b",
+   "name": "Nâng sao khi kho + ô tạm giữ đầy: huỷ nâng sao, không mất đồ",
+   "ok": true,
+   "detail": "{\"star\":1,\"total\":45}"
+  },
+  {
+   "id": "14",
+   "name": "Lưu và tải không nhân đôi (2 lần lưu/tải giống hệt; bản lưu bị sửa trùng instance / 2 chủ / chủ lạ → mỗi instance 1 nơi)",
+   "ok": true,
+   "detail": "{\"same\":true,\"dupLeft\":1,\"forgedComp\":\"inv\"}"
+  },
+  {
+   "id": "14b",
+   "name": "Bản lưu V1.5 (v2): 6 trang bị cũ → 6 nguyên liệu trong kho, tướng giữ nguyên",
+   "ok": true,
+   "detail": "armor,bow,cloak,crystal,jade,sword"
+  },
+  {
+   "id": "14c",
+   "name": "Phần thưởng PvE: nhận đúng 1 lần mỗi vòng (gọi lặp / sau khi tải lại không nhận thêm), tối đa 3 / vòng",
+   "ok": true,
+   "detail": "{\"r1\":[\"sword\",\"bow\"],\"r2\":[],\"r3\":[]}"
+  },
+  {
+   "id": "15",
+   "name": "Nội tại không kích hoạt khi chưa đủ điều kiện: khiên máu thấp (trên 40% → 0, dưới 40% → 1 lần, không lặp)",
+   "ok": true,
+   "detail": "{\"above\":0,\"below\":1,\"again\":1,\"shield\":321}"
+  },
+  {
+   "id": "15b",
+   "name": "Kết liễu chỉ khi mục tiêu dưới 30% máu; sét chỉ ở đòn đánh thứ 3, 6… (kỹ năng / sát thương phụ không đếm)",
+   "ok": true,
+   "detail": "{\"exeHigh\":0,\"exeLow\":1,\"bolts\":2,\"boltSkill\":2}"
+  },
+  {
+   "id": "15c",
+   "name": "Giải khống chế chỉ lần đầu; Bất Diệt Thần Giáp giữ 1 máu đúng 1 lần mỗi trận",
+   "ok": true,
+   "detail": "{\"st1\":false,\"st2\":true,\"alive1\":true,\"alive2\":false}"
+  },
+  {
+   "id": "16",
+   "name": "Không có vòng lặp hiệu ứng vô hạn: 2 bên cùng phản đòn – 10 đòn thật → A phản 10 lần, B không phản lại phản đòn, độ sâu ≤ 2",
+   "ok": true,
+   "detail": "{\"reflA\":10,\"reflB\":0,\"maxDepth\":1}"
+  },
+  {
+   "id": "16b",
+   "name": "Trận nhiều nội tại (phản đòn 2 phía, hồi, khiên, thiêu, cộng dồn tốc đánh / chí mạng): kết thúc bình thường, không NaN, cộng dồn không vượt giới hạn",
+   "ok": true,
+   "detail": "{\"result\":\"lose\",\"time\":26.167,\"kinds\":15,\"anomalies\":[]}"
+  },
+  {
+   "id": "17",
+   "name": "Không cộng lại chỉ số khi vẽ giao diện (60 lần vẽ + áp tộc/hệ + reset: chỉ số giống hệt; +20 công +300 máu đúng)",
+   "ok": true,
+   "detail": "[72,900,100,20,20,0.1]"
+  },
+  {
+   "id": "18",
+   "name": "VFX LOW / ULTRA không ảnh hưởng sát thương (cùng seed, có pháp bảo: kết quả giống hệt từng điểm máu)",
+   "ok": true,
+   "detail": "{\"lo\":\"win@17.817\",\"hi\":\"win@17.817\"}"
+  },
+  {
+   "id": "19",
+   "name": "24 tướng vẫn mua, nâng sao, bán đúng giá; đồ trên tướng được trả về khi bán",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "id": "21",
+   "name": "Kinh tế không đổi ở vòng thường: thu nhập = 5 + lãi 2 + thắng 1 (chuỗi 1 → +0)",
+   "ok": true,
+   "detail": "8"
+  },
+  {
+   "id": "21b",
+   "name": "Sổ vật phẩm toàn vẹn sau toàn bộ bài kiểm thử",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "id": "A-err",
+   "name": "EquipmentTestRunner không gây lỗi console",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "id": "B1",
+   "name": "Windows: kéo nguyên liệu thả lên nguyên liệu → xem công thức (Pháp Kiếm Lôi Đình) → Ghép",
+   "ok": true,
+   "detail": "[\"phap_kiem_loi_dinh\",\"armor\",\"armor\",\"jade\"]"
+  },
+  {
+   "id": "B2",
+   "name": "Windows: rê chuột lên tướng khi đang cầm pháp bảo → xem chỉ số thay đổi trước khi trang bị",
+   "ok": true,
+   "detail": "ỗi đòn đánh thứ 3 · Giới hạn: 1 lần / 3 đòn\nKiếm Đồng: Công 52→62 · Phép 100→110"
+  },
+  {
+   "id": "B3",
+   "name": "Windows: kéo pháp bảo từ kho thả lên tướng → trang bị",
+   "ok": true,
+   "detail": "{\"items\":[\"phap_kiem_loi_dinh\"],\"audit\":[]}"
+  },
+  {
+   "id": "B4",
+   "name": "Windows: thả nguyên liệu lên tướng → thông báo \"chỉ trang bị được pháp bảo hoàn chỉnh\", không đổi gì",
+   "ok": true,
+   "detail": "Chỉ trang bị được pháp bảo hoàn chỉnh – ghép 2 nguyên liệu trước"
+  },
+  {
+   "id": "B5",
+   "name": "Bảng công thức: 8×8 ô (36 pháp bảo, A+B = B+A), nhấn để xem chỉ số + nội tại",
+   "ok": true,
+   "detail": "{\"cells\":64}"
+  },
+  {
+   "id": "B6",
+   "name": "Kho thu gọn được (nhớ lựa chọn)",
+   "ok": true,
+   "detail": "{\"c\":true,\"grid\":\"none\"}"
+  },
+  {
+   "id": "B7",
+   "name": "Kho không che cửa hàng / nút Giao chiến (1280×720)",
+   "ok": true,
+   "detail": "[false,false]"
+  },
+  {
+   "id": "B8",
+   "name": "Chạm tướng → bảng thông tin có 3 ô pháp bảo; nút ↩ tháo về kho",
+   "ok": true,
+   "detail": "{\"slots\":3,\"back\":{\"own\":0,\"inv\":[\"phap_kiem_loi_dinh\",\"armor\",\"armor\",\"jade\"]}}"
+  },
+  {
+   "id": "B9",
+   "name": "Giao tranh: kho pháp bảo ẩn (không đổi đồ trong trận tiêu chuẩn)",
+   "ok": true,
+   "detail": "{\"hidden\":true}"
+  },
+  {
+   "id": "B-err",
+   "name": "Windows: không lỗi console",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "id": "C1-ngang",
+   "name": "Android (ngang 844×390): chạm nguyên liệu 1 → gợi ý công thức → chạm nguyên liệu 2 → xác nhận → Phong Lôi Thần Cung",
+   "ok": true,
+   "detail": "{\"hint\":\"Chọn nguyên liệu thứ 2 để ghép: Phong Lôi Thần Cung, Liên Kí\",\"popup\":true,\"locked\":2,\"inv\":[\"phong_loi_than_cung\",\"glove\"]}"
+  },
+  {
+   "id": "C2-ngang",
+   "name": "Android (ngang): chạm pháp bảo → chạm tướng địch bị từ chối → chạm tướng ta để trang bị",
+   "ok": true,
+   "detail": "{\"toast\":\"Không thể trang bị cho tướng đối thủ\",\"own\":[\"phong_loi_than_cung\"]}"
+  },
+  {
+   "id": "C3-ngang",
+   "name": "Android (ngang): nhấn giữ ô kho → tooltip nguyên liệu",
+   "ok": true,
+   "detail": "Thiên Cơ Thủ · nguyên liệu\n+10% Chí mạng\nGăng tay thiên cơ –"
+  },
+  {
+   "id": "C4-ngang",
+   "name": "Android (ngang): kho không che cửa hàng / nút Giao chiến / Menu, ô ≥ 44 px",
+   "ok": true,
+   "detail": "{\"overlap\":[false,false,false],\"slot\":44}"
+  },
+  {
+   "id": "C5-ngang",
+   "name": "Android (ngang): tải lại trang → kho và pháp bảo trên tướng giống hệt, sổ toàn vẹn",
+   "ok": true,
+   "detail": "phong_loi_than_cung,"
+  },
+  {
+   "id": "C-err-ngang",
+   "name": "Android (ngang): không lỗi console",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "id": "C1-dọc",
+   "name": "Android (dọc 400×820): chạm nguyên liệu 1 → gợi ý công thức → chạm nguyên liệu 2 → xác nhận → Phong Lôi Thần Cung",
+   "ok": true,
+   "detail": "{\"hint\":\"Chọn nguyên liệu thứ 2 để ghép: Phong Lôi Thần Cung, Liên Kí\",\"popup\":true,\"locked\":2,\"inv\":[\"phong_loi_than_cung\",\"glove\"]}"
+  },
+  {
+   "id": "C2-dọc",
+   "name": "Android (dọc): chạm pháp bảo → chạm tướng địch bị từ chối → chạm tướng ta để trang bị",
+   "ok": true,
+   "detail": "{\"toast\":\"Không thể trang bị cho tướng đối thủ\",\"own\":[\"phong_loi_than_cung\"]}"
+  },
+  {
+   "id": "C3-dọc",
+   "name": "Android (dọc): nhấn giữ ô kho → tooltip nguyên liệu",
+   "ok": true,
+   "detail": "Thiên Cơ Thủ · nguyên liệu\n+10% Chí mạng\nGăng tay thiên cơ –"
+  },
+  {
+   "id": "C4-dọc",
+   "name": "Android (dọc): kho không che cửa hàng / nút Giao chiến / Menu, ô ≥ 44 px",
+   "ok": true,
+   "detail": "{\"overlap\":[false,false,false],\"slot\":44}"
+  },
+  {
+   "id": "C5-dọc",
+   "name": "Android (dọc): tải lại trang → kho và pháp bảo trên tướng giống hệt, sổ toàn vẹn",
+   "ok": true,
+   "detail": "phong_loi_than_cung,"
+  },
+  {
+   "id": "C-err-dọc",
+   "name": "Android (dọc): không lỗi console",
+   "ok": true,
+   "detail": ""
+  }
+ ]
+}

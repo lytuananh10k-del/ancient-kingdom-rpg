@@ -1,30 +1,35 @@
 {
- "date": "2026-10-22T20:24:54.983Z",
+ "date": "2026-10-23T05:51:06.285Z",
  "results": [
   {
-   "name": "v1 → v2: vòng / máu / vàng / cấp / kinh nghiệm / chuỗi",
+   "name": "v1 → v3: vòng / máu / vàng / cấp / kinh nghiệm / chuỗi",
    "ok": true,
    "detail": "[9,63,27,6,5,-2]"
   },
   {
-   "name": "v1 → v2: tướng, sao, vị trí trên bàn",
+   "name": "v1 → v3: tướng, sao, vị trí trên bàn",
    "ok": true,
    "detail": "cuuviem*1@5,1 kimcuong*2@3,3 linhcung*3@2,0"
   },
   {
-   "name": "v1 → v2: hàng chờ và cửa hàng",
+   "name": "v1 → v3: hàng chờ và cửa hàng",
    "ok": true,
    "detail": "thanhphong*2,,hoa*1,,,,,, | kiemdong,,ngukiem,linhy,mabinh"
   },
   {
-   "name": "v1 → v2: nút \"Tiếp tục – Vòng 9\"",
+   "name": "v1 → v3: nút \"Tiếp tục – Vòng 9\"",
    "ok": true,
    "detail": "Tiếp tục – Vòng 9"
   },
   {
-   "name": "ghi lại thành v2 (có savedAt, không chứa đối tượng Three.js)",
+   "name": "ghi lại thành v3 (có savedAt, kho pháp bảo, không chứa đối tượng Three.js)",
    "ok": true,
-   "detail": "v2, 485 byte"
+   "detail": "v3, 536 byte"
+  },
+  {
+   "name": "nâng phiên bản: bản gốc v1 được sao lưu ở vkkt_save_backup_v1 trước khi ghi v3",
+   "ok": true,
+   "detail": "v1"
   },
   {
    "name": "lưu → tải lại: trạng thái giống hệt",

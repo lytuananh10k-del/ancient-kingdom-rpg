@@ -271,18 +271,20 @@ async function main() {
   await page.waitForFunction(() => !!window.__vkkt);
   const mig = await page.evaluate(() => {
     const K = window.__vkkt, g = K.game;
-    return { gold: g.gold, hp: g.hp, round: K.battle.round, level: g.level, items: g.items.slice(),
-      bench: g.bench.filter(Boolean).map(e => e.key + '★' + e.star + (e.items.length ? '[' + e.items.join(',') + ']' : '')),
+    const own = cid => K.ArtifactInventory.itemIdsOf(cid);
+    return { gold: g.gold, hp: g.hp, round: K.battle.round, level: g.level, items: K.ArtifactInventory.invList().map(r => r.itemId).sort(),
+      bench: g.bench.filter(Boolean).map(e => e.key + '★' + e.star + (own(e.cid).length ? '[' + own(e.cid).join(',') + ']' : '')),
       board: K.boardAllies().map(u => u.key + '★' + u.star + (u.items.length ? '[' + u.items.join(',') + ']' : '')).sort(),
       shop: g.shop.slice(), rivals: Object.assign({}, g.rivals), allValid: K.boardAllies().every(u => K.UNIT_DEFS[u.key].cost) && g.bench.every(e => !e || K.UNIT_DEFS[e.key].cost) && g.shop.every(k => !k || K.UNIT_DEFS[k].cost) };
   });
   console.log('   ' + JSON.stringify(mig));
   check(mig.allValid, 'mọi tướng sau khi tải bản lưu cũ đều là tướng hiện hành', mig);
   check(mig.gold === 23 && mig.hp === 74 && mig.round === 8 && mig.level === 6, 'giữ nguyên linh thạch / máu / vòng / cấp', mig);
-  check(mig.board.includes('bangling★2[kiem,ngoc]') && mig.board.includes('thietve★1') && mig.board.includes('kiemtien★1'), 'tướng cũ trên bàn đổi sang tướng mới, giữ sao & trang bị (Lôi → Băng Linh, Hộ Pháp → Thiết Vệ)', mig.board);
+  check(mig.board.includes('bangling★2') && mig.board.includes('thietve★1') && mig.board.includes('kiemtien★1'), 'tướng cũ trên bàn đổi sang tướng mới, giữ sao (Lôi → Băng Linh, Hộ Pháp → Thiết Vệ)', mig.board);
+  check(mig.items.join() === ['sword', 'sword', 'jade', 'armor'].sort().join(), 'V1.6: 4 trang bị cũ (túi + trên tướng) → 4 nguyên liệu trong Kho pháp bảo (Kiếm → Linh Kiếm, Huyết Ngọc → Sinh Mệnh Ngọc, Giáp → Huyền Giáp)', mig.items);
   const hm = mig.board.concat(mig.bench).filter(s => s.startsWith('huyetma'));
   check(hm.length === 1 && hm[0].startsWith('huyetma★2'), '3 bản cũ cùng đổi về Huyết Ma (Ảnh Kiếm ×2 + U Minh) tự gộp thành ★2', hm);
-  check(mig.bench.some(s => s.startsWith('thannu★2[giap]')) && !mig.bench.some(s => s.includes('khongton')), 'Hỏa Tôn ★2 → Cửu Thiên Thần Nữ ★2 giữ trang bị; id không tồn tại bị bỏ', mig.bench);
+  check(mig.bench.some(s => s.startsWith('thannu★2')) && !mig.bench.some(s => s.includes('khongton')), 'Hỏa Tôn ★2 → Cửu Thiên Thần Nữ ★2; id không tồn tại bị bỏ', mig.bench);
   check(mig.shop.join() === 'bangling,hoa,huyetma,,huyenbang' && mig.rivals.bangling === 3 && mig.rivals.thannu === 1, 'cửa hàng và đối thủ ảo cũng được chuyển id', { shop: mig.shop, rivals: mig.rivals });
   await page.click('#btn-enter');
   const after = await page.evaluate(() => { const K = window.__vkkt; K.startBattle(); K.simulate(20); return { phase: K.battle.phase }; });

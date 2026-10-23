@@ -18,7 +18,9 @@
     "test:memory": "node tests/memory.js",
     "build": "node tools/build-single.js",
     "test:ai": "node tests/ai.js",
-    "test:dist": "node tests/dist.js"
+    "test:dist": "node tests/dist.js",
+    "test:equipment": "node tests/equipment.js",
+    "artifact-balance": "node tests/artifact-balance.js"
   },
   "devDependencies": {
     "playwright": "^1.47.0",

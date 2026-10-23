@@ -1,11 +1,11 @@
 {
- "date": "2026-10-22T20:28:18.543Z",
+ "date": "2026-10-23T05:53:48.812Z",
  "note": "Chromium headless + SwiftShader",
  "suites": [
   {
    "name": "playtest20",
    "exit": 0,
-   "secs": 233,
+   "secs": 155,
    "pass": 1,
    "fail": 0,
    "total": null,
@@ -14,7 +14,16 @@
   {
    "name": "portrait",
    "exit": 0,
-   "secs": 143,
+   "secs": 100,
+   "pass": 1,
+   "fail": 0,
+   "total": null,
+   "failed": []
+  },
+  {
+   "name": "touch",
+   "exit": 0,
+   "secs": 80,
    "pass": 1,
    "fail": 0,
    "total": null,
@@ -23,7 +32,7 @@
   {
    "name": "combat",
    "exit": 0,
-   "secs": 16,
+   "secs": 10,
    "pass": 1,
    "fail": 0,
    "total": null,
@@ -32,7 +41,7 @@
   {
    "name": "economy",
    "exit": 0,
-   "secs": 77,
+   "secs": 44,
    "pass": 16,
    "fail": 0,
    "total": null,
@@ -41,8 +50,8 @@
   {
    "name": "champions",
    "exit": 0,
-   "secs": 61,
-   "pass": 119,
+   "secs": 42,
+   "pass": 120,
    "fail": 0,
    "total": null,
    "failed": []
@@ -50,7 +59,7 @@
   {
    "name": "traits",
    "exit": 0,
-   "secs": 42,
+   "secs": 26,
    "pass": 41,
    "fail": 0,
    "total": null,
@@ -59,7 +68,7 @@
   {
    "name": "combat3",
    "exit": 0,
-   "secs": 90,
+   "secs": 59,
    "pass": 32,
    "fail": 0,
    "total": null,
@@ -68,7 +77,7 @@
   {
    "name": "audit",
    "exit": 0,
-   "secs": 25,
+   "secs": 15,
    "pass": 24,
    "fail": 0,
    "total": null,
@@ -77,16 +86,16 @@
   {
    "name": "save",
    "exit": 0,
-   "secs": 32,
-   "pass": 17,
+   "secs": 20,
+   "pass": 18,
    "fail": 0,
-   "total": "17/17 PASS",
+   "total": "18/18 PASS",
    "failed": []
   },
   {
    "name": "memory",
    "exit": 0,
-   "secs": 34,
+   "secs": 24,
    "pass": 12,
    "fail": 0,
    "total": "12/12 PASS",
@@ -95,7 +104,7 @@
   {
    "name": "ai",
    "exit": 0,
-   "secs": 14,
+   "secs": 8,
    "pass": 16,
    "fail": 0,
    "total": "16/16 PASS",
@@ -104,16 +113,25 @@
   {
    "name": "dist",
    "exit": 0,
-   "secs": 7,
+   "secs": 4,
    "pass": 1,
    "fail": 0,
    "total": null,
    "failed": []
   },
   {
+   "name": "equipment",
+   "exit": 0,
+   "secs": 37,
+   "pass": 52,
+   "fail": 0,
+   "total": "52/52 PASS",
+   "failed": []
+  },
+  {
    "name": "balance",
    "exit": 0,
-   "secs": 56,
+   "secs": 33,
    "pass": 0,
    "fail": 0,
    "total": null,

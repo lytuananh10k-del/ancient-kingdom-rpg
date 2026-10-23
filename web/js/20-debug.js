@@ -17,7 +17,7 @@ const DebugPanel = {
     el.innerHTML = `<button class="x" data-a="close" aria-label="Đóng bảng Debug">✕</button><h4>Debug</h4><pre id="dbg-stats"></pre>
       <h4>Công cụ (không ghi bản lưu chính)</h4><div class="b">
       <button data-a="fight">Trận thử</button><button data-a="lineup">Đội hình thử</button><button data-a="end">Kết thúc thử</button>
-      <button data-a="reset">Đặt lại vòng</button><button data-a="items">Kho thử (16 nguyên liệu)</button><button data-a="sim">Mô phỏng 100 trận</button><button data-a="log">Nhật ký kỹ năng</button><button data-a="export">Xuất báo cáo</button></div>
+      <button data-a="reset">Đặt lại vòng</button><button data-a="items">Kho thử (16 nguyên liệu)</button><button data-a="eqtest">Kiểm thử trang bị</button><button data-a="sim">Mô phỏng 100 trận</button><button data-a="log">Nhật ký kỹ năng</button><button data-a="export">Xuất báo cáo</button></div>
       <h4 id="dbg-outh" hidden>Kết quả</h4><pre id="dbg-out"></pre>`;
     document.body.appendChild(el);
     el.addEventListener('click', e => { const b = e.target.closest('button'); if (b) this.act(b.dataset.a); });
@@ -76,6 +76,12 @@ ${s.phase} · vòng ${s.round} · bước ${s.step} (${s.time} s) · seed ${s.se
       if (!this.enterSandbox()) return ui.toast('Đang giao chiến – chờ hết trận');
       let n = 0; for (const k of COMPONENT_KEYS) for (let i = 0; i < 2; i++) if (ArtifactInventory.add(k, true).ok) n++;
       ui.update(); this.out('Kho thử: +' + n + ' nguyên liệu (không ghi vào bản lưu chính – bấm "Kết thúc thử" để trả lại kho thật).'); return;
+    }
+    if (a === 'eqtest') {
+      if (battle.phase === 'fight') return ui.toast('Đang giao chiến – chờ hết trận');
+      this.out('Đang chạy EquipmentTestRunner…');
+      setTimeout(() => { const r = EquipmentTestRunner.run(); this.out(`EquipmentTestRunner: ${r.pass}/${r.total} PASS · ${r.ms} ms\n` + r.results.map(x => (x.ok ? 'PASS ' : 'FAIL ') + x.id + ' ' + x.name).join('\n')); }, 30);
+      return;
     }
     if (a === 'end') {
       if (!this.snap) return ui.toast('Không có trận / đội hình thử');

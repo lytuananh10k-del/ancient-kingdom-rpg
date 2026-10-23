@@ -93,4 +93,4 @@ DPS = sát thương trung bình mỗi giây trong 20 s đánh bia đỡ (gồm k
 
 Phe dưới thắng 32 · phe trên thắng 28 · hoà 0 · thời lượng TB 20.3 s · sát thương TB mỗi tướng 1046 · bất thường: không có
 
-_Thời gian chạy: 50 s. Lỗi console: 0._
+_Thời gian chạy: 30 s. Lỗi console: 0._

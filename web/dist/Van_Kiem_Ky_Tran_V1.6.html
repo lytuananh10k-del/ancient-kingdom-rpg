@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0b0d12">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="description" content="Vạn Kiếm Kỳ Trận V1.5 FINAL – cờ nhân phẩm tu tiên 3D (Three.js)">
+<meta name="description" content="Vạn Kiếm Kỳ Trận V1.6 – cờ nhân phẩm tu tiên 3D (Three.js) – hệ thống pháp bảo">
 <title>Vạn Kiếm Kỳ Trận</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -120,8 +120,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .ui-stats dd { white-space: nowrap; }
 @media (max-height: 520px) and (orientation: landscape) {   /* màn ngang thấp: 2 cột cho bảng thấp hơn */
   #unit-info { width: min(440px, 58vw); display: grid; grid-template-columns: 1fr 1fr; column-gap: 10px;
-    grid-template-areas: "head head" "tags tags" "bars skill" "stats skill" "foot foot"; align-content: start; }
-  #unit-info .ui-head { grid-area: head; } #ui-tags { grid-area: tags; } #ui-bars { grid-area: bars; } #ui-stats { grid-area: stats; } #ui-foot { grid-area: foot; }
+    grid-template-areas: "head head" "tags tags" "items items" "bars skill" "stats skill" "foot foot"; align-content: start; }
+  #unit-info .ui-head { grid-area: head; } #ui-tags { grid-area: tags; } #ui-items { grid-area: items; } #ui-bars { grid-area: bars; } #ui-stats { grid-area: stats; } #ui-foot { grid-area: foot; }
   #unit-info .ui-skill { grid-area: skill; border-top: 0; padding-top: 0; border-left: 1px solid var(--panel-line); padding-left: 8px; }
   #unit-info .ui-mana { float: none; display: block; }
 }
@@ -207,21 +207,12 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 #odds { display: flex; flex-wrap: wrap; gap: 2px 10px; font-size: 0.66rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 #odds b { font-weight: 700; } #odds .o1 { color: #a8c0bb; } #odds .o2 { color: #7cc4ff; } #odds .o3 { color: #c9a0ff; } #odds .o4 { color: #f0b44a; } #odds .o5 { color: #ff7a5a; }
 #odds .z { opacity: 0.4; }
-#items-row { display: flex; align-items: center; gap: 6px; }
-#items-row[hidden] { display: none; }
-#items-row .lbl { font-size: 0.68rem; color: var(--muted); }
-#items { display: flex; flex-wrap: wrap; gap: 4px; }
-.item { min-width: 40px; min-height: 32px; padding: 2px 7px; border-radius: 8px; border: 1px solid var(--c); background: rgba(0,0,0,0.35); color: var(--c); font-size: 0.72rem; font-weight: 700; touch-action: none; }
-.item.sel { background: var(--c); color: #111; }
-.item-ghost { position: fixed; z-index: 30; pointer-events: none; transform: translate(-50%, -120%); }
 .timer { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 0.85rem; color: var(--paper); background: rgba(255,255,255,0.08); border-radius: 6px; padding: 1px 6px; }
 .timer.low { color: #ffb3a6; background: rgba(226,85,63,0.25); }
 .timer.ot { color: #ffd166; }
 .monster-tag { font-size: 0.7rem; color: #9fffa0; border: 1px solid rgba(127,224,138,0.5); border-radius: 999px; padding: 0 6px; margin-left: 6px; vertical-align: middle; font-family: var(--font-ui); }
 .econ .int { color: var(--muted); }
 .econ .int b { color: var(--gold); }
-.ui-items { display: flex; flex-wrap: wrap; gap: 4px; margin: 0 0 6px; }
-.ui-items span { font-size: 0.68rem; padding: 1px 6px; border-radius: 6px; border: 1px solid var(--c); color: var(--c); }
 .shop-actions { display: flex; gap: 5px; flex-wrap: wrap; }
 .sbtn { min-height: 40px; flex: 1 1 auto; background: rgba(255,255,255,0.06); border: 1px solid var(--panel-line); border-radius: 8px; padding: 8px 10px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; }
 .sbtn:disabled { opacity: 0.45; cursor: default; }
@@ -272,6 +263,57 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 #toast { position: fixed; left: 50%; top: 27%; transform: translateX(-50%); z-index: 7; pointer-events: none;
   background: var(--panel); border: 1px solid var(--panel-line); border-radius: 10px; padding: 8px 14px; font-size: 0.85rem; max-width: 90vw; text-align: center; }
 
+/* ---------- Kho pháp bảo (V1.6): dock bên phải, thu gọn được; ô 44 px (chạm được trên Android) ---------- */
+#art-dock { position: fixed; z-index: 6; right: max(10px, env(safe-area-inset-right, 0px)); top: calc(env(safe-area-inset-top, 0px) + 56px); width: 104px; box-sizing: border-box;
+  background: var(--panel); border: 1px solid var(--panel-line); border-radius: 12px; padding: 4px; display: flex; flex-direction: column; gap: 4px; pointer-events: auto; touch-action: none; }
+#art-dock.collapsed { width: auto; }
+#art-dock.collapsed #ad-grid, #art-dock.collapsed #ad-hint { display: none; }
+#art-dock .ad-head { display: flex; gap: 4px; }
+#ad-toggle { flex: 1; min-height: 32px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--panel-line); font-size: 0.72rem; font-weight: 700; color: var(--gold); white-space: nowrap; padding: 0 6px; }
+#ad-toggle b { color: var(--paper); font-weight: 600; }
+#ad-book { min-width: 30px; min-height: 32px; padding: 0; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--panel-line); font-size: 0.8rem; }
+#art-dock.collapsed #ad-book { display: none; }
+#ad-grid { display: grid; grid-template-columns: repeat(2, 44px); gap: 4px; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; }
+.aslot { position: relative; width: 44px; height: 44px; border-radius: 9px; border: 1px dashed rgba(196,220,214,0.18); background: rgba(0,0,0,0.25); padding: 0; touch-action: none;
+  display: grid; place-items: center; font-family: "Noto Serif SC", "Noto Serif", serif; line-height: 1; }
+.aslot.full { border: 1px solid var(--c); background: color-mix(in srgb, var(--c) 18%, rgba(0,0,0,0.55)); color: var(--c); }
+.aslot.comp .g { font-size: 1.15rem; font-weight: 700; }
+.aslot.art { border-width: 2px; border-color: var(--c); box-shadow: inset 0 0 0 1px var(--c2), 0 0 8px color-mix(in srgb, var(--c) 40%, transparent); }
+.aslot.art .g { font-size: 0.82rem; font-weight: 700; letter-spacing: -0.05em; background: linear-gradient(90deg, var(--c), var(--c2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.aslot .n { position: absolute; left: 2px; right: 2px; bottom: 1px; font: 600 0.5rem/1.1 var(--font-ui); color: var(--paper); opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.aslot.over { border-color: var(--cinnabar) !important; }
+.aslot.over::after { content: 'tạm'; position: absolute; top: 1px; right: 2px; font: 700 0.48rem var(--font-ui); color: var(--cinnabar); }
+.aslot.sel { outline: 2px solid var(--gold); outline-offset: 1px; }
+.aslot.lock { opacity: 0.55; }
+.aslot.drop { outline: 2px dashed var(--jade); }
+#ad-hint { font-size: 0.6rem; line-height: 1.3; color: var(--muted); padding: 0 2px; }
+#ad-hint:empty { display: none; }
+.art-ghost { position: fixed; z-index: 30; pointer-events: none; transform: translate(-50%, -120%); }
+#art-tip { position: fixed; z-index: 12; width: min(270px, calc(100vw - 16px)); background: rgba(14, 20, 24, 0.97); border: 1px solid var(--c, var(--panel-line)); border-radius: 10px;
+  padding: 8px 10px; font-size: 0.74rem; line-height: 1.4; white-space: pre-line; pointer-events: none; }
+#art-tip b { color: var(--c, var(--gold)); font-size: 0.82rem; }
+#art-tip .d { color: var(--jade); }
+#art-tip .x { color: var(--cinnabar); }
+#art-craft { position: fixed; z-index: 13; width: min(300px, calc(100vw - 20px)); background: rgba(10, 16, 22, 0.97); border: 1px solid var(--gold); border-radius: 12px; padding: 10px 12px; font-size: 0.78rem; line-height: 1.4; pointer-events: auto; }
+#art-craft h4 { margin: 0 0 4px; font-family: var(--font-display); font-size: 1.15rem; color: var(--gold); }
+#art-craft .eq { color: var(--muted); font-size: 0.72rem; }
+#art-craft .ps { margin: 6px 0; color: var(--paper); }
+#art-craft .row { display: flex; gap: 6px; margin-top: 8px; }
+#art-craft .row button { flex: 1; min-height: 40px; border-radius: 9px; font-weight: 700; border: 1px solid var(--panel-line); background: rgba(255,255,255,0.06); }
+#art-craft .row .ok { background: var(--gold); color: #1a1408; border-color: var(--gold); }
+#art-book table { border-collapse: collapse; font-size: 0.62rem; margin-top: 6px; }
+#art-book th, #art-book td { border: 1px solid var(--panel-line); padding: 2px; text-align: center; }
+#art-book th { font-family: "Noto Serif SC", serif; font-size: 0.85rem; }
+#art-book td button { width: 100%; min-height: 30px; font-size: 0.58rem; line-height: 1.15; color: var(--c); padding: 1px; }
+#art-book td.diag { background: rgba(255,255,255,0.04); }
+#art-book .detail { margin-top: 8px; white-space: pre-line; font-size: 0.76rem; line-height: 1.45; min-height: 3em; }
+.ui-items { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin: 0 0 6px; }
+.ui-items .eqs { position: relative; min-height: 38px; border-radius: 8px; border: 1px dashed var(--panel-line); background: rgba(0,0,0,0.25); font-size: 0.6rem; line-height: 1.15; padding: 3px 4px; text-align: left; color: var(--muted); }
+.ui-items .eqs.full { border: 1px solid var(--c); color: var(--c); background: color-mix(in srgb, var(--c) 14%, rgba(0,0,0,0.4)); }
+.ui-items .eqs.sel { outline: 2px solid var(--gold); }
+.ui-items .eqs small { display: block; color: var(--muted); font-size: 0.55rem; }
+.ui-items .eqs .un { position: absolute; top: 1px; right: 2px; width: 18px; height: 18px; border-radius: 5px; font-size: 0.6rem; background: rgba(255,255,255,0.08); color: var(--paper); }
+.ui-art-preview { grid-column: 1 / -1; font-size: 0.64rem; color: var(--jade); }
 /* ---------- Bảng cài đặt ---------- */
 .sheet {
   position: fixed; z-index: 20; right: max(10px, env(safe-area-inset-right, 0px)); top: calc(env(safe-area-inset-top, 0px) + 58px);
@@ -365,15 +407,31 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
   </div>
   <div class="ui-tags" id="ui-tags"></div>
   <div class="ui-bars" id="ui-bars"></div>
+  <div class="ui-items" id="ui-items" aria-label="3 ô pháp bảo"></div>
   <dl class="ui-stats" id="ui-stats"></dl>
-  <div class="ui-items" id="ui-items"></div>
   <div class="ui-skill"><b id="ui-skill-name"></b><span class="ui-mana" id="ui-skill-mana"></span><p id="ui-skill-desc"></p></div>
   <div class="ui-foot" id="ui-foot"></div>
 </aside>
 
+<aside id="art-dock" aria-label="Kho pháp bảo">
+  <div class="ad-head">
+    <button id="ad-toggle" aria-expanded="true" aria-controls="ad-grid" title="Thu gọn / mở Kho pháp bảo" aria-label="Kho pháp bảo – thu gọn / mở">法 <b id="ad-count">0/10</b></button>
+    <button id="ad-book" aria-controls="art-book" title="Xem 36 công thức ghép" aria-label="Xem 36 công thức ghép">📜</button>
+  </div>
+  <div id="ad-grid" role="list" aria-label="Nguyên liệu và pháp bảo trong kho"></div>
+  <div id="ad-hint" aria-live="polite"></div>
+</aside>
+<div id="art-tip" hidden role="tooltip"></div>
+<div id="art-craft" hidden role="dialog" aria-label="Xác nhận ghép pháp bảo"></div>
+<section class="sheet" id="art-book" hidden aria-label="Bảng công thức pháp bảo">
+  <div class="sheet-head"><h2>36 công thức pháp bảo</h2><button class="close" id="btn-book-close" aria-label="Đóng bảng công thức">✕</button></div>
+  <p class="note">Ghép 2 nguyên liệu (không phân biệt thứ tự) trong kho để tạo pháp bảo. Chạm một ô để xem chỉ số và nội tại.</p>
+  <div id="book-table"></div>
+  <div class="detail" id="book-detail"></div>
+</section>
+
 <div class="hud-bottom">
   <div id="prep-panel">
-    <div id="items-row" hidden><span class="lbl">Túi</span><div id="items" aria-label="Túi trang bị – chạm hoặc kéo lên tướng để gắn"></div></div>
     <div id="shop" aria-label="Cửa hàng tu sĩ"></div>
     <div id="odds" aria-label="Tỉ lệ xuất hiện theo bậc ở cấp hiện tại"></div>
     <div class="shop-actions">
@@ -437,7 +495,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
       <li><b>Tộc/hệ:</b> Kiếm Tu · Pháp Tu · Hộ Pháp · Ma Tu – đủ số tướng khác nhau sẽ kích hoạt</li>
       <li>Tướng 5 bậc giá 1–5 linh thạch; cấp càng cao càng dễ gặp tướng hiếm. Bể tướng dùng chung với 7 đối thủ ảo – mỗi tướng có hạn số bản</li>
       <li>Lãi 1 linh thạch cho mỗi 10 đang giữ (tối đa 5) · chuỗi thắng/thua được thưởng thêm · giữ tiền, lên cấp hay làm mới là lựa chọn của bạn</li>
-      <li>Vòng 3, 7, 11… là vòng yêu thú: hạ yêu thú để nhận trang bị, kéo trang bị lên tướng để gắn</li>
+      <li>Vòng 3, 7, 11… là vòng yêu thú: hạ yêu thú để nhận <b>nguyên liệu</b> – ghép 2 nguyên liệu trong <b>Kho pháp bảo</b> (nút 法) thành 1 trong 36 pháp bảo, mỗi tướng mang tối đa 3</li>
       <li>Tiến trình tự lưu trên máy này sau mỗi thao tác</li>
     </ul>
     <button class="cta" id="btn-enter">Nhập trận</button>
@@ -6208,7 +6266,10 @@ function fitPrepCamera() {
   const PTS_FULL = [[9.3, 0, -11.9], [-9.3, 0, -11.9], [9.3, 0, 6.9], [-9.3, 0, 6.9], [4, 2.4, 5.8], [-4, 2.4, 5.8]];
   let cx = 0, cy = 0, pts = PTS_ALLY;
   // Vùng trống: hoặc nằm dưới cột thông tin bên trái (màn dọc), hoặc bên phải nó (màn ngang) – thử cả hai, lấy hình to hơn.
-  const rects = [{ l: 6, r: W - 6, t: Math.max(ta, lc.bottom + 6), b: bottom }, { l: lc.right + 8, r: W - 6, t: ta, b: bottom }];
+  // Kho pháp bảo (dock phải, V1.6): vùng trống không được lấn dưới dock (chỉ khi dock chồng theo chiều dọc với vùng đó)
+  const dk = document.getElementById('art-dock'), dr = dk && !dk.hidden ? dk.getBoundingClientRect() : null;
+  const right = (t, b) => (dr && dr.width && dr.bottom > t && dr.top < b ? Math.min(W - 6, dr.left - 6) : W - 6);
+  const rects = [{ l: 6, r: right(Math.max(ta, lc.bottom + 6), bottom), t: Math.max(ta, lc.bottom + 6), b: bottom }, { l: lc.right + 8, r: right(ta, bottom), t: ta, b: bottom }];
   const search = () => {
   let best = null;
   for (const R of rects) {
@@ -6911,6 +6972,24 @@ class Unit {
     this.reset(1);
   }
   get alive() { return this.hp > 0; }
+  /** Pháp bảo đang mang (itemId theo ô 0–2). Tướng phe ta có cid: đọc thẳng từ sổ ArtifactInventory (một vật phẩm chỉ ở một nơi).
+   *  Tướng thử nghiệm (CombatTestRunner, BalanceSimulator – không có cid): danh sách gán trực tiếp, không thuộc sổ. */
+  get items() { return this.cid ? ArtifactInventory.itemIdsOf(this.cid) : (this._items || EMPTY_ITEMS); }
+  set items(v) { this._items = Array.isArray(v) ? v.filter(id => ITEM_DB[id]).slice(0, MAX_EQUIP) : []; }
+  /** Chỉ số trận (không gồm hiệu ứng tạm thời) từ gốc × sao × tộc/hệ + trang bị. Hàm thuần – dùng cho reset và xem trước khi trang bị. */
+  static computeStats(d, s, b, scale = 1) {
+    return {
+      maxHp: Math.round(d.hp * scale * STAR.hp[s] * b.hp + (b.hpAdd || 0)),
+      atk: Math.round((d.atk * scale * STAR.atk[s] * b.atk + (b.atkAdd || 0)) * 10) / 10,
+      def: Math.round(d.def * Math.sqrt(scale) * (b.defMul || 1) + b.def),
+      mr: Math.round((d.mr || 0) * Math.sqrt(scale) + (b.mr || 0)),
+      ap: Math.round(((d.ap || 100) * (STAR.skill[s] || 1) * b.skill + (b.apAdd || 0)) * 10) / 10,   // AP = 100 × sao × (tộc/hệ) + trang bị
+      mana0: Math.min(d.mana, d.mana0 + b.mana0),
+      crit: Math.min(1, (d.crit || 0) + (b.crit || 0)), critDmg: (d.critDmg || 1.5) + (b.critDmg || 0),
+      aspd: d.aspd * b.aspd
+    };
+  }
+  critNow() { return Math.min(1, (this.crit_ !== undefined ? this.crit_ : this.def.crit) + (this.critStack || 0)); }
   modelScale() { return STAR.scale[this.star] * ((this.def.model && this.def.model.scale) || 1); }
   /* Chỉ số hiện hành = chỉ số trận (gốc × sao × tộc/hệ → trang bị, tính 1 lần ở reset) × trạng thái tạm thời (StatusEffectManager) × nội tại.
    * Giáp / kháng phép có thể âm khi bị giảm quá 0 – DamageCalculator xử lý riêng (defenseFactor), không chia cho 0. */
@@ -6927,20 +7006,18 @@ class Unit {
   /** Bảng chỉ số chuẩn hoá (giao diện, bài kiểm thử, bảng cân bằng). */
   statsNow() {
     return { hp: this.hp, maxHp: this.maxHp, atk: this.atkNow(), ap: this.apNow(), armor: this.defNow(), mr: this.mrNow(), aspd: this.aspdNow(), range: this.def.range,
-      speed: this.speedNow(), mana: this.mana, maxMana: this.maxMana, crit: this.def.crit, critDmg: this.def.critDmg,
+      speed: this.speedNow(), mana: this.mana, maxMana: this.maxMana, crit: this.critNow(), critDmg: this.critDmg_ || this.def.critDmg,
       lifesteal: (this.bonus.ls || 0) + this.fx.sum('ls'), omnivamp: this.bonus.omni || 0, tenacity: this.tenacity(), shield: this.shield };
   }
   /** Điểm phóng đạn: tính từ vị trí logic + hướng mặt (KHÔNG đọc tư thế animation) → cùng kết quả ở mọi FPS / tốc độ. */
   launchPoint(out = new V3()) { const f = 0.6; return out.set(this.pos.x + Math.sin(this.yaw) * f, 1.45, this.pos.z + Math.cos(this.yaw) * f); }
   reset(scale) {
     const d = this.def, b = this.bonus, s = this.star;
-    // Gốc → × sao → × (1 + Σ% tộc/hệ) → trang bị (phẳng). Làm tròn: máu & giáp số nguyên, công 1 chữ số thập phân. Không sửa UNIT_DEFS.
-    this.maxHp = Math.round(d.hp * scale * STAR.hp[s] * b.hp + (b.hpAdd || 0)); this.hp = this.maxHp;
-    this.atk = Math.round(d.atk * scale * STAR.atk[s] * b.atk * 10) / 10;
-    this.def_ = Math.round(d.def * Math.sqrt(scale) * (b.defMul || 1) + b.def);
-    this.mr_ = Math.round((d.mr || 0) * Math.sqrt(scale));
-    this.ap_ = Math.round((d.ap || 100) * (STAR.skill[s] || 1) * b.skill * 10) / 10;   // AP = 100 × sao × (tộc/hệ + trang bị)
-    this.mana = Math.min(d.mana, d.mana0 + b.mana0); this.maxMana = d.mana; this.shield = 0;
+    // Gốc → × sao → × (1 + Σ% tộc/hệ) → + trang bị (cộng thẳng / % cộng dồn) – Unit.computeStats. Làm tròn: máu & giáp số nguyên, công 1 chữ số thập phân.
+    const S = Unit.computeStats(d, s, b, scale);
+    this.maxHp = S.maxHp; this.hp = this.maxHp; this.atk = S.atk; this.def_ = S.def; this.mr_ = S.mr; this.ap_ = S.ap;
+    this.crit_ = S.crit; this.critDmg_ = S.critDmg; this.critStack = 0;
+    this.mana = S.mana0; this.maxMana = d.mana; this.shield = 0;
     this.status = { stun: 0, frozen: 0, burn: 0 };
     this.fx.clear();
     this.target = null; this.retarget = 0; this.atkCd = crand() * 0.4; this.attackIdx = 0; this.attackSeq = 0; this.dashCd = 0; this.nav = null; this.searchT = 0;
@@ -7295,6 +7372,7 @@ const combatLog = { dodges: 0, crits: 0, stuns: 0, resisted: 0, kites: 0, unstuc
 function applyStun(u, dur, kind = 'stun', src) {
   if (!u || !u.alive || dur <= 0) return false;
   if (u.ccImmune > 0) { combatLog.resisted++; floatText(u.chest(_v2.clone()), 'Kháng', '#c9d6df', 0.75); return false; }
+  if (u.art && ArtifactPassives.onCC(u)) return false;   // Huyền Linh Pháp Bào: miễn khống chế lần đầu
   const d = dur * (1 - u.tenacity());
   const freeze = kind === 'freeze';
   if (u.status.stun <= 0 || (freeze && u.status.frozen <= 0)) floatText(u.chest(_v2.clone()), freeze ? 'Đóng băng' : 'Choáng', freeze ? '#cfeeff' : '#ffe08a', 0.8);
@@ -7323,10 +7401,11 @@ const DamageCalculator = {
   /** Sát thương sau phòng thủ & giảm sát thương nhận (chưa trừ lá chắn). Dùng RNG có seed (CombatRNG). */
   compute(src, dst, mult, opts) {
     const type = this.typeOf(src, opts);
-    const crit = opts.crit !== undefined ? opts.crit : opts.flat === undefined && !opts.dot && crand() < src.def.crit;
+    const crit = opts.crit !== undefined ? opts.crit : opts.flat === undefined && !opts.dot && crand() < (src.critNow ? src.critNow() : src.def.crit);
     let raw = opts.flat !== undefined ? opts.flat : (src.atkNow ? src.atkNow() : src.atk) * mult * (1 + (crand() * 2 - 1) * DAMAGE.variance);
-    if (crit) raw *= src.def.critDmg;
-    if (opts.skill && src.apNow) raw *= src.apNow() / 100;   // sức mạnh phép thuật (AP): sao × tộc/hệ × trang bị
+    if (crit) raw *= src.critDmg_ || src.def.critDmg;
+    if (opts.skill && src.apNow) raw *= src.apNow() / 100;   // sức mạnh phép thuật (AP): sao × tộc/hệ + trang bị
+    if (opts.skill && !opts.proc && src.bonus && src.bonus.skillDmg) raw *= src.bonus.skillDmg;   // pháp bảo: + sát thương kỹ năng
     const f = this.factor(dst, type, opts.pen);
     let dmg = raw * f * overtimeMul() * (dst.fx ? dst.fx.mul('dmgTaken') : 1);
     if (!Number.isFinite(dmg)) dmg = 0;
@@ -7354,6 +7433,7 @@ function dealDamage(src, dst, mult, opts = {}) {
   const absorbed = dst.fx ? dst.fx.absorb(dmg) : 0;
   if (absorbed > 0) { dmg -= absorbed; if (dst.shieldFx) { dst.shieldFx.hit(); if (dst.shield <= 0) { dst.shieldFx.shatter(); dst.shieldFx = null; } } }
   dst.hp = Math.max(0, dst.hp - dmg);
+  if (dst.hp <= 0 && dst.art) ArtifactPassives.onLethal(dst);   // Bất Diệt Thần Giáp: giữ 1 máu (1 lần / trận)
   if (opts.attack) { const k = src.id + ':' + opts.attack; if (CombatAudit.hitKeys.has(k)) CombatAudit.doubleHits++; else CombatAudit.hitKeys.add(k); }
   if (!Number.isFinite(dst.hp) || !Number.isFinite(dmg)) CombatAudit.nonFinite++;
   if (src.cs) { const hit = dmg + absorbed; src.cs.dealt += hit; src.cs[r.type] += hit; if (hit > src.cs.maxHit) { src.cs.maxHit = hit; src.cs.maxHitRatio = hit / Math.max(1, src.atkNow ? src.atkNow() : src.atk); } }
@@ -7388,7 +7468,7 @@ function dealDamage(src, dst, mult, opts = {}) {
   if (opts.burn && dst.hp > 0) applyBurn(dst, src, opts.burn);
   if (dst.hp <= 0) { if (src.cs) src.cs.kills++; if (dst.cs) dst.cs.deathT = battle.time; dst.fsm.set('dead'); onUnitDeath(dst); }
   // Sự kiện cho tộc/hệ – phát SAU khi xử lý chết để hiệu ứng phụ (nổ Pháp Tu) không làm một tướng chết hai lần.
-  TraitEvents.emit('onHit', src, dst, dmg, opts);
+  TraitEvents.emit('onHit', src, dst, dmg, opts, crit);
   TraitEvents.emit('onDamageTaken', dst, src, dmg, opts);
   return dmg;
 }
@@ -8595,6 +8675,164 @@ const TraitRegistry = {
 };
 
 </script>
+<script>/* js/data/artifacts.js */
+// Vạn Kiếm Kỳ Trận – Dữ liệu trang bị V1.6: 8 nguyên liệu, 36 pháp bảo (ghép 2 nguyên liệu, không phân biệt thứ tự), loại nội tại.
+// Chỉ là DỮ LIỆU + mô tả sinh từ tham số (tooltip luôn khớp logic). Logic: js/items/artifact-system.js (kho, ghép, trang bị),
+// js/items/artifact-passives.js (nội tại trong trận). Nạp sau js/data/traits.js. Script thường (không phải module).
+'use strict';
+
+/** Nhóm chỉ số trang bị (lớp "trang bị" của quy trình chỉ số). Cộng thẳng: atk, ap, def, mr, hp, mana; phần trăm cộng dồn: aspd, crit, critDmg, ls, omni, skillDmg. */
+const ITEM_STATS = {
+  atk: { name: 'Công', fmt: v => '+' + v },
+  ap: { name: 'Phép thuật', fmt: v => '+' + v },
+  aspd: { name: 'Tốc đánh', fmt: v => '+' + Math.round(v * 100) + '%' },
+  def: { name: 'Giáp', fmt: v => '+' + v },
+  mr: { name: 'Kháng phép', fmt: v => '+' + v },
+  mana: { name: 'Năng lượng khởi đầu', fmt: v => '+' + v },
+  hp: { name: 'Máu', fmt: v => '+' + v },
+  crit: { name: 'Chí mạng', fmt: v => '+' + Math.round(v * 100) + '%' },
+  critDmg: { name: 'Sát thương chí mạng', fmt: v => '+' + Math.round(v * 100) + '%' },
+  ls: { name: 'Hút máu (đòn đánh)', fmt: v => '+' + Math.round(v * 100) + '%' },
+  omni: { name: 'Hút máu toàn phần', fmt: v => '+' + Math.round(v * 100) + '%' },
+  skillDmg: { name: 'Sát thương kỹ năng', fmt: v => '+' + Math.round(v * 100) + '%' }
+};
+const statText = s => Object.keys(ITEM_STATS).filter(k => s[k]).map(k => ITEM_STATS[k].fmt(s[k]) + ' ' + ITEM_STATS[k].name).join(' · ');
+
+/** 8 nguyên liệu. group = nhóm VFX của pháp bảo có nguyên liệu này đứng đầu công thức. */
+const COMPONENTS = {
+  sword:   { id: 'sword',   name: 'Linh Kiếm',      glyph: '剑', color: '#ff9a6a', stats: { atk: 10 },    desc: 'Kiếm luyện từ linh thiết – tăng công.' },
+  staff:   { id: 'staff',   name: 'Pháp Trượng',    glyph: '杖', color: '#c39bff', stats: { ap: 10 },     desc: 'Trượng dẫn linh lực – tăng phép thuật.' },
+  bow:     { id: 'bow',     name: 'Thần Cung',      glyph: '弓', color: '#e9e3a0', stats: { aspd: 0.10 }, desc: 'Cung nhẹ như gió – tăng tốc đánh.' },
+  armor:   { id: 'armor',   name: 'Huyền Giáp',     glyph: '甲', color: '#b8c4cc', stats: { def: 20 },    desc: 'Giáp huyền thiết – tăng giáp.' },
+  cloak:   { id: 'cloak',   name: 'Linh Bào',       glyph: '袍', color: '#8fd3ff', stats: { mr: 20 },     desc: 'Áo bào dệt linh tơ – tăng kháng phép.' },
+  crystal: { id: 'crystal', name: 'Linh Tinh',      glyph: '晶', color: '#7fe6ff', stats: { mana: 15 },   desc: 'Tinh thể tụ linh khí – thêm năng lượng khởi đầu.' },
+  jade:    { id: 'jade',    name: 'Sinh Mệnh Ngọc', glyph: '玉', color: '#7fe0a0', stats: { hp: 150 },    desc: 'Ngọc chứa sinh khí – tăng máu.' },
+  glove:   { id: 'glove',   name: 'Thiên Cơ Thủ',   glyph: '手', color: '#ffd166', stats: { crit: 0.10 }, desc: 'Găng tay thiên cơ – tăng chí mạng.' }
+};
+const COMPONENT_KEYS = Object.keys(COMPONENTS);
+
+/** Loại nội tại. text(p) sinh mô tả từ đúng tham số mà logic dùng; trigger / limit cho tooltip; chain = có thể kích hoạt sự kiện tiếp theo không.
+ *  Quy tắc chung (artifact-passives.js): nội tại "theo đòn đánh" chỉ chạy với ĐÒN ĐÁNH THƯỜNG (không phải sát thương phụ / theo thời gian);
+ *  mọi sát thương do nội tại gây ra đánh dấu proc → KHÔNG kích hoạt lại nội tại nào (chặn vòng lặp vô hạn). */
+const PASSIVE_KINDS = {
+  stat:          { trigger: 'Luôn có',                 limit: 'Chỉ số – cộng dồn khi mang nhiều bản', chain: 'Không', text: () => 'Hiệu ứng chỉ số đặc biệt (xem chỉ số).' },
+  rampAtk:       { trigger: 'Mỗi {every} giây trong trận', limit: 'Tối đa {max} lần', chain: 'Không', text: p => `Mỗi ${p.every} giây trong trận: +${artPct(p.pct)} công (tối đa ${p.max} lần = +${artPct(p.pct * p.max)}).` },
+  chainBolt:     { trigger: 'Mỗi đòn đánh thứ {nth}',   limit: '1 lần / {nth} đòn', chain: 'Không (sét là sát thương phụ)', text: p => `Mỗi đòn đánh thứ ${p.nth}: sét gây ${artPct(p.mult)} công sát thương phép lên mục tiêu và 1 kẻ địch gần nó (≤ ${p.radius} m).` },
+  aspdStack:     { trigger: 'Đòn đánh trúng',           limit: 'Tối đa {max} lần cộng dồn / trận', chain: 'Không', text: p => `Mỗi đòn đánh trúng: +${artPct(p.pct)} tốc đánh, cộng dồn tối đa ${p.max} lần (+${artPct(p.pct * p.max)}) tới hết trận.` },
+  shredOnHit:    { trigger: 'Đòn đánh trúng',           limit: 'Không cộng dồn (lấy hiệu ứng mạnh nhất)', chain: 'Không', text: p => `Đòn đánh giảm ${artPct(p.pct)} ${p.stat === 'def' ? 'giáp' : 'kháng phép'} của mục tiêu trong ${p.dur} giây.` },
+  shredOnSkill:  { trigger: 'Kỹ năng trúng địch',       limit: 'Không cộng dồn (lấy hiệu ứng mạnh nhất)', chain: 'Không', text: p => `Kỹ năng giảm ${artPct(p.pct)} ${p.stat === 'mr' ? 'kháng phép' : 'giáp'} của mọi kẻ địch trúng chiêu trong ${p.dur} giây.` },
+  lowHpShield:   { trigger: 'Máu xuống dưới {below%}',  limit: '1 lần / trận', chain: 'Không', text: p => `Lần đầu máu dưới ${artPct(p.below)}: nhận lá chắn ${artPct(p.pct)} máu tối đa trong ${p.dur} giây (1 lần mỗi trận).` },
+  manaOnHit:     { trigger: 'Đòn đánh trúng',           limit: 'Không vượt năng lượng tối đa', chain: 'Có thể giúp tung kỹ năng sớm', text: p => `Mỗi đòn đánh trúng: hồi thêm ${p.amount} năng lượng.` },
+  aspdOnCast:    { trigger: 'Sau khi thi triển',        limit: 'Làm mới thời gian, không cộng dồn', chain: 'Không', text: p => `Sau mỗi lần thi triển: +${artPct(p.pct)} tốc đánh trong ${p.dur} giây (làm mới, không cộng dồn).` },
+  burnAura:      { trigger: 'Mỗi {every} giây trong trận', limit: 'Thiêu đốt làm mới, không cộng dồn', chain: 'Không', text: p => `Mỗi ${p.every} giây: thiêu đốt mọi kẻ địch trong ${p.radius} m (${artPct(p.power)} công mỗi 0,5 giây trong 3 giây, sát thương phép).` },
+  manaAfterCast: { trigger: 'Sau khi thi triển',        limit: '1 lần / lần thi triển', chain: 'Có thể giúp tung kỹ năng sớm', text: p => `Sau mỗi lần thi triển: hồi ${p.amount} năng lượng.` },
+  healOnCast:    { trigger: 'Khi thi triển',            limit: 'Hồi chiêu {cd} giây', chain: 'Không', text: p => `Khi thi triển: hồi ${artPct(p.pct)} máu tối đa cho ${p.who === 'weakest' ? 'đồng minh đang yếu nhất' : 'bản thân và đồng minh gần nhất'} (hồi chiêu ${p.cd} giây).` },
+  multiShot:     { trigger: 'Mỗi đòn đánh thứ {nth}',   limit: '1 lần / {nth} đòn', chain: 'Không (tia phụ là sát thương phụ)', text: p => `Mỗi đòn đánh thứ ${p.nth}: bắn thêm 1 tia vào kẻ địch khác gần nhất, gây ${artPct(p.mult)} công.` },
+  startShield:   { trigger: 'Đầu trận',                 limit: '1 lần / trận', chain: 'Không', text: p => `Đầu trận: lá chắn ${artPct(p.pct)} máu tối đa trong ${p.dur} giây.` },
+  startDR:       { trigger: 'Đầu trận',                 limit: '1 lần / trận', chain: 'Không', text: p => `${p.dur} giây đầu trận: giảm ${artPct(p.pct)} sát thương nhận vào.` },
+  healOnHit:     { trigger: 'Đòn đánh trúng',           limit: 'Không vượt máu tối đa', chain: 'Không', text: p => `Mỗi đòn đánh trúng: hồi ${artPct(p.pct)} máu tối đa.` },
+  aspdOnCrit:    { trigger: 'Chí mạng (đòn đánh)',      limit: 'Tối đa {max} lần cộng dồn / trận', chain: 'Không', text: p => `Mỗi đòn đánh chí mạng: +${artPct(p.pct)} tốc đánh, cộng dồn tối đa ${p.max} lần.` },
+  deathSave:     { trigger: 'Nhận đòn chí tử',          limit: '1 lần / trận', chain: 'Không', text: p => `Lần đầu nhận sát thương chí tử: giữ lại 1 máu và nhận lá chắn ${artPct(p.shield)} máu tối đa trong ${p.dur} giây (1 lần mỗi trận).` },
+  allyAura:      { trigger: 'Đầu trận',                 limit: 'Không cộng dồn giữa nhiều người mang', chain: 'Không', text: p => `Đầu trận: bản thân và đồng minh đứng cạnh +${p.def} giáp, +${p.mr} kháng phép cả trận (nhiều người mang không cộng dồn).` },
+  manaOnDamaged: { trigger: 'Nhận sát thương',          limit: 'Hồi chiêu {cd} giây', chain: 'Có thể giúp tung kỹ năng sớm', text: p => `Khi nhận sát thương: hồi thêm ${p.amount} năng lượng (tối đa 1 lần mỗi ${p.cd} giây).` },
+  thorns:        { trigger: 'Nhận đòn đánh thường',     limit: 'Phản đòn không bị phản lại', chain: 'Không (chặn vòng lặp)', text: p => `Phản lại ${artPct(p.pct)} sát thương đòn đánh thường nhận vào dưới dạng sát thương phép (phản đòn không kích hoạt phản đòn khác).` },
+  cleanseOnce:   { trigger: 'Bị khống chế',             limit: '1 lần / trận', chain: 'Không', text: p => `Lần đầu bị choáng / đóng băng: miễn hiệu ứng đó và miễn khống chế thêm ${p.immune} giây (1 lần mỗi trận).` },
+  teamManaStart: { trigger: 'Đầu trận',                 limit: '1 lần / trận / người mang', chain: 'Có thể giúp tung kỹ năng sớm', text: p => `Đầu trận: bản thân và đồng minh đứng cạnh +${p.amount} năng lượng.` },
+  regen:         { trigger: 'Mỗi giây',                 limit: 'Không vượt máu tối đa', chain: 'Không', text: p => `Mỗi giây hồi ${artPct(p.pct)} máu tối đa.` },
+  execute:       { trigger: 'Đòn đánh lên mục tiêu yếu', limit: 'Mục tiêu dưới {below%} máu', chain: 'Không (sát thương phụ)', text: p => `Đòn đánh lên mục tiêu dưới ${artPct(p.below)} máu: gây thêm ${artPct(p.pct)} sát thương chuẩn.` },
+  manaRegen:     { trigger: 'Mỗi giây',                 limit: 'Không vượt năng lượng tối đa', chain: 'Có thể giúp tung kỹ năng sớm', text: p => `Mỗi giây hồi ${p.amount} năng lượng.` },
+  critMana:      { trigger: 'Chí mạng (đòn đánh)',      limit: 'Hồi chiêu {cd} giây', chain: 'Có thể giúp tung kỹ năng sớm', text: p => `Đòn đánh chí mạng: hồi ${p.amount} năng lượng (tối đa 1 lần mỗi ${p.cd} giây).` },
+  critStack:     { trigger: 'Chí mạng (đòn đánh)',      limit: 'Tối đa {max} lần cộng dồn / trận', chain: 'Không', text: p => `Mỗi đòn đánh chí mạng: +${artPct(p.pct)} chí mạng, cộng dồn tối đa ${p.max} lần (+${artPct(p.pct * p.max)}).` },
+  regenLow:      { trigger: 'Mỗi giây khi máu thấp',    limit: 'Chỉ khi dưới {below%} máu', chain: 'Không', text: p => `Khi máu dưới ${artPct(p.below)}: mỗi giây hồi ${artPct(p.pct)} máu tối đa.` }
+};
+function artPct(x) { return Math.round(x * 1000) / 10 + '%'; }
+
+/** 36 pháp bảo. [id, tên, nguyên liệu A, nguyên liệu B, chỉ số thêm (ngoài tổng 2 nguyên liệu), nội tại { kind, ...tham số }].
+ *  Chỉ số = A + B + phần thêm. Cộng dồn: chỉ số luôn cộng dồn; nội tại (trừ 'stat') chỉ áp 1 lần cho mỗi tướng dù mang 2 bản cùng loại. */
+const ARTIFACT_LIST = [
+  ['tru_tien_kiem',       'Tru Tiên Kiếm',          'sword', 'sword',     {},                          { kind: 'rampAtk', every: 2, pct: 0.04, max: 10 }],
+  ['phap_kiem_loi_dinh',  'Pháp Kiếm Lôi Đình',     'sword', 'staff',     {},                          { kind: 'chainBolt', nth: 3, mult: 0.6, radius: 3 }],
+  ['phong_anh_kiem',      'Phong Ảnh Kiếm',         'sword', 'bow',       {},                          { kind: 'aspdStack', pct: 0.04, max: 8 }],
+  ['pha_giap_than_kiem',  'Phá Giáp Thần Kiếm',     'sword', 'armor',     {},                          { kind: 'shredOnHit', stat: 'def', pct: 0.3, dur: 4 }],
+  ['huyet_kiem',          'Huyết Kiếm',             'sword', 'cloak',     { ls: 0.15 },                { kind: 'lowHpShield', below: 0.4, pct: 0.25, dur: 4 }],
+  ['tu_linh_kiem',        'Tụ Linh Kiếm',           'sword', 'crystal',   {},                          { kind: 'manaOnHit', amount: 4 }],
+  ['kiem_hon_ngoc',       'Kiếm Hồn Ngọc',          'sword', 'jade',      { omni: 0.12 },              { kind: 'stat' }],
+  ['thien_sat_kiem',      'Thiên Sát Kiếm',         'sword', 'glove',     { critDmg: 0.35 },           { kind: 'stat' }],
+  ['cuu_thien_phap_truong', 'Cửu Thiên Pháp Trượng', 'staff', 'staff',    { skillDmg: 0.15 },          { kind: 'stat' }],
+  ['phong_loi_phap_chau', 'Phong Lôi Pháp Châu',    'staff', 'bow',       {},                          { kind: 'aspdOnCast', pct: 0.35, dur: 4 }],
+  ['hoa_linh_ho_giap',    'Hỏa Linh Hộ Giáp',       'staff', 'armor',     {},                          { kind: 'burnAura', every: 2, radius: 2.5, power: 0.25 }],
+  // V1.6: đo giá trị biên (240 cặp trận) chỉ +2,1% → thêm 10 phép, giảm kháng phép 30% → 40%, 5 → 6 giây
+  ['ngu_hanh_phap_an',    'Ngũ Hành Pháp Ấn',       'staff', 'cloak',     { ap: 10 },                  { kind: 'shredOnSkill', stat: 'mr', pct: 0.4, dur: 6 }],
+  ['van_phap_linh_tinh',  'Vạn Pháp Linh Tinh',     'staff', 'crystal',   {},                          { kind: 'manaAfterCast', amount: 20 }],
+  ['thanh_moc_phap_chau', 'Thanh Mộc Pháp Châu',    'staff', 'jade',      {},                          { kind: 'healOnCast', pct: 0.12, who: 'weakest', cd: 2 }],
+  ['thien_menh_phap_an',  'Thiên Mệnh Pháp Ấn',     'staff', 'glove',     { skillDmg: 0.1, critDmg: 0.2 }, { kind: 'stat' }],
+  ['phong_loi_than_cung', 'Phong Lôi Thần Cung',    'bow',   'bow',       {},                          { kind: 'multiShot', nth: 3, mult: 0.7 }],
+  ['ho_than_than_cung',   'Hộ Thân Thần Cung',      'bow',   'armor',     {},                          { kind: 'startShield', pct: 0.15, dur: 8 }],
+  ['anh_phong_linh_bao',  'Ảnh Phong Linh Bào',     'bow',   'cloak',     {},                          { kind: 'startDR', pct: 0.5, dur: 4 }],
+  ['tu_linh_than_cung',   'Tụ Linh Thần Cung',      'bow',   'crystal',   {},                          { kind: 'manaOnHit', amount: 3 }],
+  ['truong_sinh_than_cung', 'Trường Sinh Thần Cung', 'bow',  'jade',      {},                          { kind: 'healOnHit', pct: 0.02 }],
+  ['lien_kich_thu_sao',   'Liên Kích Thủ Sáo',      'bow',   'glove',     {},                          { kind: 'aspdOnCrit', pct: 0.06, max: 5 }],
+  ['bat_diet_than_giap',  'Bất Diệt Thần Giáp',     'armor', 'armor',     {},                          { kind: 'deathSave', shield: 0.3, dur: 3 }],
+  ['huyen_thien_ho_phu',  'Huyền Thiên Hộ Phù',     'armor', 'cloak',     {},                          { kind: 'allyAura', def: 15, mr: 15 }],
+  ['tu_linh_bao_giap',    'Tụ Linh Bảo Giáp',       'armor', 'crystal',   {},                          { kind: 'manaOnDamaged', amount: 3, cd: 0.5 }],
+  ['kim_cang_ho_giap',    'Kim Cang Hộ Giáp',       'armor', 'jade',      {},                          { kind: 'startShield', pct: 0.25, dur: 6 }],
+  ['phan_kich_chi_giap',  'Phản Kích Chi Giáp',     'armor', 'glove',     {},                          { kind: 'thorns', pct: 0.2 }],
+  // V1.6: đo giá trị biên (240 cặp trận) chỉ +0,4% (giải khống chế ~0,3 lần / trận, chỉ có kháng phép) → thêm 200 máu
+  ['huyen_linh_phap_bao', 'Huyền Linh Pháp Bào',    'cloak', 'cloak',     { hp: 200 },                 { kind: 'cleanseOnce', immune: 1 }],
+  ['linh_khi_phap_bao',   'Linh Khí Pháp Bào',      'cloak', 'crystal',   {},                          { kind: 'teamManaStart', amount: 15 }],
+  ['bang_tam_ngoc',       'Băng Tâm Ngọc',          'cloak', 'jade',      {},                          { kind: 'regen', pct: 0.01 }],
+  ['u_minh_thu_sao',      'U Minh Thủ Sáo',         'cloak', 'glove',     {},                          { kind: 'execute', below: 0.3, pct: 0.3 }],
+  ['tu_linh_chau',        'Tụ Linh Châu',           'crystal', 'crystal', {},                          { kind: 'manaRegen', amount: 2 }],
+  ['sinh_menh_linh_chau', 'Sinh Mệnh Linh Châu',    'crystal', 'jade',    {},                          { kind: 'healOnCast', pct: 0.1, who: 'selfNearest', cd: 2 }],
+  ['thien_co_linh_tinh',  'Thiên Cơ Linh Tinh',     'crystal', 'glove',   {},                          { kind: 'critMana', amount: 5, cd: 0.5 }],
+  ['truong_sinh_ngoc',    'Trường Sinh Ngọc',       'jade',  'jade',      {},                          { kind: 'regenLow', pct: 0.02, below: 0.5 }],
+  ['ho_tam_bao_ngoc',     'Hộ Tâm Bảo Ngọc',        'jade',  'glove',     {},                          { kind: 'lowHpShield', below: 0.4, pct: 0.3, dur: 4 }],
+  ['thien_menh_thu_sao',  'Thiên Mệnh Thủ Sáo',     'glove', 'glove',     {},                          { kind: 'critStack', pct: 0.02, max: 10 }]
+];
+/** Bảng tra: ARTIFACTS[id], RECIPES['a+b'] (khoá đã sắp xếp → A+B = B+A). */
+const ARTIFACTS = {}, RECIPES = {};
+const recipeKey = (a, b) => (COMPONENT_KEYS.indexOf(a) <= COMPONENT_KEYS.indexOf(b) ? a + '+' + b : b + '+' + a);
+ARTIFACT_LIST.forEach(([id, name, a, b, extra, passive], i) => {
+  const stats = {};
+  for (const s of [COMPONENTS[a].stats, COMPONENTS[b].stats, extra]) for (const k in s) stats[k] = Math.round(((stats[k] || 0) + s[k]) * 1000) / 1000;
+  const K = PASSIVE_KINDS[passive.kind], fill = str => str.replace(/\{(\w+)(%?)\}/g, (m, k, p) => (p ? artPct(passive[k]) : passive[k]));
+  const art = { id, no: i + 1, name, parts: [a, b], group: a, stats, extra, passive, color: COMPONENTS[a].color, color2: COMPONENTS[b].color,
+    glyph: COMPONENTS[a].glyph + COMPONENTS[b].glyph, unique: passive.kind !== 'stat',
+    passiveText: passive.kind === 'stat' ? 'Chỉ số đặc biệt: ' + statText(extra) + '.' : K.text(passive),
+    trigger: fill(K.trigger), limit: fill(K.limit), chain: K.chain };
+  ARTIFACTS[id] = art; RECIPES[recipeKey(a, b)] = id;
+});
+/** Mọi loại vật phẩm (nguyên liệu + pháp bảo) theo itemId. */
+const ITEM_DB = Object.assign({}, COMPONENTS, ARTIFACTS);
+const isComponent = id => !!COMPONENTS[id], isArtifact = id => !!ARTIFACTS[id];
+/** Pháp bảo nhận được khi ghép a + b (không phân biệt thứ tự), hoặc null. */
+const recipeOf = (a, b) => (isComponent(a) && isComponent(b) ? RECIPES[recipeKey(a, b)] || null : null);
+/** Mô tả đầy đủ cho tooltip. */
+function itemTooltip(id) {
+  const it = ITEM_DB[id]; if (!it) return '';
+  if (isComponent(id)) return `${it.name} (nguyên liệu)\n${statText(it.stats)}\n${it.desc}\nGhép 2 nguyên liệu trong kho để tạo pháp bảo – chỉ pháp bảo mới trang bị được.`;
+  return `${it.name}\n${COMPONENTS[it.parts[0]].name} + ${COMPONENTS[it.parts[1]].name}\n${statText(it.stats)}\nNội tại: ${it.passiveText}\nKích hoạt: ${it.trigger} · Giới hạn: ${it.limit}`;
+}
+/** Kiểm tra dữ liệu: 8 nguyên liệu, 36 công thức, không trùng, đủ mọi cặp, mọi loại nội tại có logic. Trả về danh sách lỗi. */
+function validateArtifacts() {
+  const bad = [];
+  if (COMPONENT_KEYS.length !== 8) bad.push('cần 8 nguyên liệu, có ' + COMPONENT_KEYS.length);
+  if (ARTIFACT_LIST.length !== 36) bad.push('cần 36 pháp bảo, có ' + ARTIFACT_LIST.length);
+  const ids = new Set(), names = new Set();
+  for (const [id, name, a, b, , p] of ARTIFACT_LIST) {
+    if (ids.has(id)) bad.push('trùng id ' + id); ids.add(id);
+    if (names.has(name)) bad.push('trùng tên ' + name); names.add(name);
+    if (!COMPONENTS[a] || !COMPONENTS[b]) bad.push(id + ': nguyên liệu lạ');
+    if (!PASSIVE_KINDS[p.kind]) bad.push(id + ': loại nội tại lạ ' + p.kind);
+  }
+  for (let i = 0; i < 8; i++) for (let j = i; j < 8; j++) if (!RECIPES[recipeKey(COMPONENT_KEYS[i], COMPONENT_KEYS[j])]) bad.push('thiếu công thức ' + COMPONENT_KEYS[i] + '+' + COMPONENT_KEYS[j]);
+  if (Object.keys(RECIPES).length !== 36) bad.push('số công thức ' + Object.keys(RECIPES).length);
+  return bad;
+}
+/** Trang bị cũ (V1.0–V1.5: 6 món hoàn chỉnh) → nguyên liệu tương ứng khi tải bản lưu cũ. */
+const LEGACY_ITEM_MAP = { kiem: 'sword', giap: 'armor', chau: 'crystal', phu: 'cloak', ngoa: 'bow', ngoc: 'jade' };
+
+</script>
 <script>/* js/combat/traits-engine.js */
 // Vạn Kiếm Kỳ Trận – Synergy Engine (V1.5 tuần 2): TraitCounter, TraitEvents, TraitEngine (TraitEffectEngine), TraitSwords, TraitVFX.
 // Dữ liệu + TraitRegistry ở js/data/traits.js. Nạp sau js/data/traits.js, trước js/14-game.js.
@@ -8610,9 +8848,9 @@ const TRAIT_EVENTS = ['onBattleStart', 'onAttack', 'onHit', 'onDamageTaken', 'on
 const TraitEvents = {
   h: {},
   on(ev, fn) { if (!this.h[ev]) throw new Error('Sự kiện tộc/hệ lạ: ' + ev); this.h[ev].push(fn); return fn; },
-  emit(ev, a, b, c, d) {
+  emit(ev, a, b, c, d, e) {
     const L = this.h[ev];
-    for (let i = 0; i < L.length; i++) { try { L[i](a, b, c, d); } catch (e) { console.error('[Tộc/hệ ' + ev + ']', e); } }
+    for (let i = 0; i < L.length; i++) { try { L[i](a, b, c, d, e); } catch (e) { console.error('[Tộc/hệ ' + ev + ']', e); } }
   },
   clear() { for (const k of TRAIT_EVENTS) this.h[k].length = 0; },
   size() { let n = 0; for (const k of TRAIT_EVENTS) n += this.h[k].length; return n; }
@@ -8667,7 +8905,7 @@ const TraitEngine = {
     const b = defaultBonus(), s = this.layerFor(u, active);
     b.atk = 1 + s.atk; b.hp = 1 + s.hp; b.defMul = 1 + s.def; b.aspd = 1 + s.aspd; b.skill = 1 + s.skill;
     b.omni = s.omni; b.manaGain = 1 + s.mana; b.heal = 1 + s.heal; b.traitStats = s;
-    for (const it of u.items || []) if (ITEMS[it]) ITEMS[it].apply(b);
+    ArtifactStats.apply(b, u.items);   // lớp trang bị (pháp bảo): cộng thẳng / % cộng dồn – js/items/artifact-system.js
     return b;
   },
   /** Áp lớp tộc/hệ cho mọi tướng theo đội hình hiện tại (giai đoạn chuẩn bị & lúc vào trận). announce: hiệu ứng khi mốc mới bật. */
@@ -8859,6 +9097,609 @@ const TraitVFX = {
 TraitSwords.init();   // tạo sẵn 1 lần lúc nạp → số object trong scene không đổi giữa các trận
 
 </script>
+<script>/* js/items/artifact-system.js */
+// Vạn Kiếm Kỳ Trận – Hệ thống Pháp bảo V1.6 (Equipment & Artifact System V2.0):
+//   ArtifactInventory (sổ vật phẩm DUY NHẤT: mỗi vật phẩm một instanceId, một vị trí), giao dịch nguyên tử,
+//   ArtifactCraftingSystem (ghép 2 nguyên liệu), ArtifactEquipment (3 ô / tướng, chuyển, tháo, bán, nâng sao), ArtifactRewards (PvE),
+//   ArtifactStats (lớp chỉ số trang bị). Dữ liệu ở js/data/artifacts.js. Nạp sau js/combat/traits-engine.js, trước js/14-game.js.
+//
+// Mô hình dữ liệu: bản ghi { instanceId, itemId, loc: 'inv' | 'unit', ownerId, slot }
+//   itemId     – loại vật phẩm (nguyên liệu / pháp bảo) · instanceId – vật phẩm cụ thể (không bao giờ dùng lại số)
+//   ownerId    – mã bản sao tướng (cid) khi loc = 'unit' · slot – ô trong kho (0–9 thường, 10+ ô tạm giữ) hoặc ô trang bị (0–2)
+// Tướng KHÔNG giữ bản sao danh sách đồ: Unit.items đọc thẳng từ sổ theo cid → một vật phẩm không thể ở hai nơi.
+// Script thường (không phải module): các file chia sẻ phạm vi toàn cục.
+'use strict';
+
+const INV_CAP = 10;          // ô kho thường
+const OVERFLOW_CAP = 30;     // ô tạm giữ (đồ trả về khi kho đầy – bán tướng, nâng sao, phần thưởng): không mất đồ, xử lý sau
+const MAX_EQUIP = 3;         // ô pháp bảo mỗi tướng
+
+/* ---------- Mã bản sao tướng (cid): đi theo tướng khi chuyển hàng chờ ↔ bàn, giữ qua lưu / tải ---------- */
+let cidSeq = 0;
+const newCid = () => 'c' + (++cidSeq);
+/** Gán cid cho mục hàng chờ / dữ liệu tướng chưa có (bản lưu cũ, bài kiểm thử ghi thẳng game.bench). */
+function ensureCid(e) { if (e && !e.cid) e.cid = newCid(); return e ? e.cid : null; }
+/** Tập cid đang có trong đội (bàn + hàng chờ). */
+function rosterCids() {
+  const s = new Set();
+  for (const u of units) if (u.team === 'ally' && u.cid) s.add(u.cid);
+  for (const e of game.bench) if (e) s.add(ensureCid(e));
+  return s;
+}
+/** Tìm nơi đang giữ bản sao tướng cid: { type: 'board', unit } | { type: 'bench', i, entry } | null. */
+function findOwner(cid) {
+  const u = units.find(x => x.team === 'ally' && x.cid === cid); if (u) return { type: 'board', unit: u };
+  const i = game.bench.findIndex(e => e && e.cid === cid); return i >= 0 ? { type: 'bench', i, entry: game.bench[i] } : null;
+}
+const ownerName = cid => { const o = findOwner(cid); const key = o ? (o.type === 'board' ? o.unit.key : o.entry.key) : null; return key ? (UNIT_DEFS[key].short || UNIT_DEFS[key].name) : '?'; };
+
+/* =====================================================================
+ *  ArtifactInventory – sổ vật phẩm + giao dịch nguyên tử
+ * ===================================================================*/
+const ArtifactInventory = {
+  recs: new Map(), nextId: 1, ver: 0, locks: new Set(), busy: false, _own: null, _ownVer: -1, stats: { tx: 0, ok: 0, fail: 0 },
+  reset() { this.recs.clear(); this.nextId = 1; this.locks.clear(); this.busy = false; this.ver++; },
+  get(iid) { return this.recs.get(iid) || null; },
+  all() { return [...this.recs.values()]; },
+  /** Vật phẩm trong kho (cả ô tạm giữ), theo thứ tự ô. */
+  invList() { return this.all().filter(r => r.loc === 'inv').sort((a, b) => a.slot - b.slot); },
+  invCount(regularOnly) { let n = 0; for (const r of this.recs.values()) if (r.loc === 'inv' && (!regularOnly || r.slot < INV_CAP)) n++; return n; },
+  overflowCount() { let n = 0; for (const r of this.recs.values()) if (r.loc === 'inv' && r.slot >= INV_CAP) n++; return n; },
+  /** Vật phẩm của một tướng, theo ô 0–2 (mảng dùng chung – KHÔNG sửa). */
+  ofOwner(cid) { this._index(); return this._own.get(cid) || EMPTY_ITEMS; },
+  /** itemId của một tướng theo ô (Unit.items) – lưu đệm theo phiên bản sổ, không cấp phát mỗi khung. */
+  itemIdsOf(cid) { this._index(); return this._ownIds.get(cid) || EMPTY_ITEMS; },
+  _index() {
+    if (this._ownVer === this.ver && this._own) return;
+    const own = new Map(), ids = new Map();
+    for (const r of this.recs.values()) if (r.loc === 'unit') { if (!own.has(r.ownerId)) own.set(r.ownerId, []); own.get(r.ownerId).push(r); }
+    for (const [k, l] of own) { l.sort((a, b) => a.slot - b.slot); ids.set(k, l.map(r => r.itemId)); }
+    this._own = own; this._ownIds = ids; this._ownVer = this.ver;
+  },
+  count(itemId) { let n = 0; for (const r of this.recs.values()) if (r.itemId === itemId) n++; return n; },
+  findInInv(itemId) { return this.invList().filter(r => r.itemId === itemId); },
+  /** Ô kho trống nhỏ nhất (thường trước; allowOverflow → cả ô tạm giữ). -1 nếu hết. */
+  freeInvSlot(allowOverflow) {
+    const used = new Set(); for (const r of this.recs.values()) if (r.loc === 'inv') used.add(r.slot);
+    const lim = INV_CAP + (allowOverflow ? OVERFLOW_CAP : 0);
+    for (let s = 0; s < lim; s++) if (!used.has(s)) return s;
+    return -1;
+  },
+  freeOwnerSlot(cid) { const used = new Set(this.ofOwner(cid).map(r => r.slot)); for (let s = 0; s < MAX_EQUIP; s++) if (!used.has(s)) return s; return -1; },
+  isLocked(iid) { return this.locks.has(iid); },
+  /** Giữ chỗ (đang chờ người chơi xác nhận ghép) – mọi giao dịch khác trên các vật phẩm này bị từ chối. */
+  lock(ids) { ids.forEach(i => this.locks.add(i)); this.ver++; },
+  unlock(ids) { ids.forEach(i => this.locks.delete(i)); this.ver++; },
+
+  /* ----- thao tác nội bộ: CHỈ gọi bên trong tx() ----- */
+  _create(itemId, loc, ownerId, slot) {
+    if (!this.busy) throw new Error('tạo vật phẩm ngoài giao dịch');
+    if (!ITEM_DB[itemId]) throw new Error('vật phẩm lạ ' + itemId);
+    const r = { instanceId: 'it' + (this.nextId++), itemId, loc, ownerId: loc === 'unit' ? ownerId : null, slot };
+    this.recs.set(r.instanceId, r); this._ownVer = -1; return r;
+  },
+  _delete(iid) { if (!this.busy) throw new Error('xoá vật phẩm ngoài giao dịch'); if (!this.recs.delete(iid)) throw new Error('không có ' + iid); this._ownVer = -1; },
+  _place(r, loc, ownerId, slot) { if (!this.busy) throw new Error('chuyển vật phẩm ngoài giao dịch'); r.loc = loc; r.ownerId = loc === 'unit' ? ownerId : null; r.slot = slot; this._ownVer = -1; },
+  /** Đưa về kho: ô thường trống trước, hết thì ô tạm giữ. Ném lỗi nếu hết cả hai. */
+  _toInv(r, allowOverflow = true) { const s = this.freeInvSlot(allowOverflow); if (s < 0) throw new UserError('Kho và ô tạm giữ đã đầy'); this._place(r, 'inv', null, s); },
+
+  /** Giao dịch nguyên tử: fn chạy trên sổ; ném lỗi / trả false → khôi phục NGUYÊN TRẠNG. ids: vật phẩm tham gia (bị từ chối nếu đang giữ chỗ;
+   *  own = các vật phẩm do chính giao dịch này giữ chỗ). Không cho lồng giao dịch (thao tác dồn dập / sự kiện chồng nhau). Trả về { ok, reason, value }. */
+  tx(label, ids, fn, own) {
+    this.stats.tx++;
+    if (this.busy) { this.stats.fail++; return { ok: false, reason: 'Đang xử lý thao tác khác – thử lại' }; }
+    for (const i of ids || []) if (this.locks.has(i) && !(own && own.includes(i))) { this.stats.fail++; return { ok: false, reason: 'Vật phẩm đang chờ xác nhận ghép' }; }
+    const backup = new Map([...this.recs].map(([k, r]) => [k, Object.assign({}, r)])), nextId = this.nextId;
+    this.busy = true;
+    try {
+      const value = fn();
+      if (value === false) throw new UserError('Thao tác không hợp lệ');
+      const bad = this.check();
+      if (bad.length) throw new Error('vi phạm toàn vẹn: ' + bad[0]);
+      this.ver++; this.stats.ok++;
+      return { ok: true, value };
+    } catch (e) {
+      this.recs = backup; this.nextId = nextId; this.ver++; this.stats.fail++;
+      if (!(e instanceof UserError) && !e.simulated) console.error('[Pháp bảo] ' + label + ' – hoàn tác', e);
+      return { ok: false, reason: e.message };
+    } finally { this.busy = false; }
+  },
+  /** Bất biến của sổ (không cần đội hình): id duy nhất, loại hợp lệ, mỗi ô kho / ô trang bị một vật phẩm, tối đa 3 món, chỉ pháp bảo mới được trang bị. */
+  check() {
+    const bad = [], inv = new Set(), own = new Map();
+    for (const [k, r] of this.recs) {
+      if (k !== r.instanceId) bad.push('khoá lệch ' + k);
+      if (!ITEM_DB[r.itemId]) bad.push('loại lạ ' + r.itemId);
+      if (r.loc === 'inv') { if (!(r.slot >= 0 && r.slot < INV_CAP + OVERFLOW_CAP) || inv.has(r.slot)) bad.push('ô kho trùng / sai ' + r.slot); inv.add(r.slot); }
+      else if (r.loc === 'unit') {
+        if (!r.ownerId) bad.push('trang bị không có chủ ' + k);
+        if (!isArtifact(r.itemId)) bad.push('nguyên liệu không được trang bị ' + r.itemId);
+        const o = own.get(r.ownerId) || new Set(); if (!(r.slot >= 0 && r.slot < MAX_EQUIP) || o.has(r.slot)) bad.push('ô trang bị trùng / sai ' + r.ownerId + ':' + r.slot); o.add(r.slot); own.set(r.ownerId, o);
+      } else bad.push('vị trí lạ ' + r.loc);
+    }
+    return bad;
+  },
+  /** Kiểm tra với đội hình thật: mọi chủ sở hữu đang tồn tại (dùng cho kiểm thử / sau khi tải). */
+  audit(roster = rosterCids()) {
+    const bad = this.check();
+    for (const r of this.recs.values()) if (r.loc === 'unit' && !roster.has(r.ownerId)) bad.push('chủ không tồn tại ' + r.ownerId + ' (' + r.instanceId + ')');
+    return bad;
+  },
+  /** Thêm vật phẩm mới vào kho (phần thưởng / thử nghiệm). allowOverflow: được vào ô tạm giữ khi kho đầy. */
+  add(itemId, allowOverflow = true) { return this.tx('add', [], () => { const s = this.freeInvSlot(allowOverflow); if (s < 0) throw new UserError('Kho đầy'); return this._create(itemId, 'inv', null, s); }); },
+  remove(iid) { return this.tx('remove', [iid], () => { this._delete(iid); return true; }); },
+  /** Đổi chỗ / chuyển trong kho (kéo thả sắp xếp). */
+  moveSlot(iid, slot) {
+    return this.tx('moveSlot', [iid], () => {
+      const r = this.get(iid); if (!r || r.loc !== 'inv') throw new UserError('Vật phẩm không ở trong kho');
+      if (!(slot >= 0 && slot < INV_CAP)) throw new UserError('Ô không hợp lệ');
+      const other = this.invList().find(x => x.slot === slot && x !== r);
+      const from = r.slot; this._place(r, 'inv', null, slot); if (other) this._place(other, 'inv', null, from);
+      return true;
+    });
+  },
+  serialize() { return { v: 1, nextId: this.nextId, items: this.invList().concat(this.all().filter(r => r.loc === 'unit')).map(r => [r.instanceId, r.itemId, r.loc === 'inv' ? 'i' : 'u', r.ownerId, r.slot]) }; },
+  /** Nạp từ bản lưu, LÀM SẠCH: bỏ loại lạ / id trùng; chủ không còn, ô trùng, quá 3 món, nguyên liệu đang "trang bị" → về kho (tạm giữ nếu cần).
+   *  Không bao giờ bỏ một vật phẩm hợp lệ. Trả về báo cáo { loaded, dropped, moved }. */
+  load(data, roster) {
+    this.reset();
+    const rep = { loaded: 0, dropped: 0, moved: 0 };
+    if (!data || !Array.isArray(data.items)) return rep;
+    const seen = new Set(), later = [];
+    let maxNum = 0;
+    this.busy = true;
+    try {
+      for (const row of data.items) {
+        if (!Array.isArray(row)) { rep.dropped++; continue; }
+        const [iid, itemId, l, owner, slot] = row;
+        if (typeof iid !== 'string' || seen.has(iid) || !ITEM_DB[itemId]) { rep.dropped++; continue; }
+        seen.add(iid); const num = +String(iid).replace(/\D/g, ''); if (num > maxNum) maxNum = num;
+        const r = { instanceId: iid, itemId, loc: 'inv', ownerId: null, slot: -1 };
+        this.recs.set(iid, r);
+        const okUnit = l === 'u' && typeof owner === 'string' && roster.has(owner) && isArtifact(itemId) && slot >= 0 && slot < MAX_EQUIP &&
+          !this.ofOwner(owner).some(x => x.slot === slot) && this.ofOwner(owner).length < MAX_EQUIP;
+        if (okUnit) { this._place(r, 'unit', owner, slot); rep.loaded++; continue; }
+        if (l === 'i' && slot >= 0 && slot < INV_CAP + OVERFLOW_CAP && !this.invList().some(x => x.slot === slot && x !== r)) { this._place(r, 'inv', null, slot); rep.loaded++; continue; }
+        later.push(r); if (l === 'u') rep.moved++;
+      }
+      for (const r of later) { const s = this.freeInvSlot(true); if (s < 0) { this.recs.delete(r.instanceId); rep.dropped++; continue; } this._place(r, 'inv', null, s); rep.loaded++; }
+      this.nextId = Math.max(+data.nextId || 1, maxNum + 1);
+    } finally { this.busy = false; this.ver++; }
+    return rep;
+  }
+};
+const EMPTY_ITEMS = Object.freeze([]);
+/** Lỗi do thao tác người chơi (hiện thông báo, không ghi console.error). */
+class UserError extends Error {}
+
+/* =====================================================================
+ *  ArtifactCraftingSystem – ghép 2 nguyên liệu thành 1 pháp bảo
+ * ===================================================================*/
+const ArtifactCraftingSystem = {
+  /** Kiểm tra mà KHÔNG đổi gì: { ok, reason, result (itemId), a, b }. */
+  preview(iidA, iidB) {
+    const inv = ArtifactInventory, a = inv.get(iidA), b = inv.get(iidB);
+    if (!a || !b) return { ok: false, reason: 'Nguyên liệu không còn tồn tại' };
+    if (iidA === iidB) return { ok: false, reason: 'Cần hai nguyên liệu khác nhau (cùng loại thì phải là 2 vật phẩm riêng)' };
+    if (a.loc !== 'inv' || b.loc !== 'inv') return { ok: false, reason: 'Chỉ ghép được nguyên liệu đang ở trong kho' };
+    if (!isComponent(a.itemId) || !isComponent(b.itemId)) return { ok: false, reason: 'Chỉ ghép được 2 nguyên liệu (pháp bảo hoàn chỉnh không ghép tiếp)' };
+    const result = recipeOf(a.itemId, b.itemId);
+    if (!result) return { ok: false, reason: 'Không có công thức' };
+    return { ok: true, result, a, b };
+  },
+  /** Ghép (nguyên tử): tiêu thụ đúng 2 nguyên liệu, tạo đúng 1 pháp bảo ở ô của nguyên liệu thứ nhất. Thất bại → không đổi gì. */
+  craft(iidA, iidB, own) {
+    if (battle.phase === 'fight') return { ok: false, reason: 'Không ghép trong lúc giao chiến' };
+    const res = ArtifactInventory.tx('craft', [iidA, iidB], () => {
+      const p = this.preview(iidA, iidB); if (!p.ok) throw new UserError(p.reason);
+      const slot = Math.min(p.a.slot, p.b.slot), keepSlot = slot < INV_CAP ? slot : Math.max(p.a.slot, p.b.slot);
+      ArtifactInventory._delete(iidA); ArtifactInventory._delete(iidB);
+      return ArtifactInventory._create(p.result, 'inv', null, keepSlot);   // 2 → 1: sức chứa luôn đủ (ô cũ được giải phóng trước)
+    }, own);
+    if (res.ok) { combatLog.crafts = (combatLog.crafts || 0) + 1; ArtifactEvents.emit('craft', res.value); }
+    return res;
+  },
+  /** Các pháp bảo ghép được từ nguyên liệu `comp` với từng loại trong kho (để xem trước). */
+  optionsFor(comp) { return COMPONENT_KEYS.map(k => ({ with: k, result: recipeOf(comp, k), have: ArtifactInventory.findInInv(k).length })); }
+};
+
+/* =====================================================================
+ *  ArtifactEquipment – trang bị cho tướng (3 ô), chuyển, tháo, bán, nâng sao
+ * ===================================================================*/
+const ArtifactEquipment = {
+  /** Chỉ được đổi đồ ở giai đoạn chuẩn bị (không trong giao tranh tiêu chuẩn). */
+  canEdit() { return battle.phase === 'prep' && !game.over; },
+  /** Trang bị (hoặc chuyển từ tướng khác) vật phẩm iid cho tướng cid. */
+  equip(iid, cid) {
+    if (!this.canEdit()) return { ok: false, reason: 'Chỉ trang bị được ở giai đoạn chuẩn bị' };
+    const res = ArtifactInventory.tx('equip', [iid], () => {
+      const r = ArtifactInventory.get(iid);
+      if (!r) throw new UserError('Vật phẩm không tồn tại');
+      if (!isArtifact(r.itemId)) throw new UserError('Chỉ trang bị được pháp bảo hoàn chỉnh – ghép 2 nguyên liệu trước');
+      if (!cid || !findOwner(cid)) throw new UserError('Chỉ trang bị cho tướng phe ta');
+      if (r.loc === 'unit' && r.ownerId === cid) throw new UserError('Tướng này đang mang vật phẩm đó');
+      const s = ArtifactInventory.freeOwnerSlot(cid); if (s < 0) throw new UserError('Mỗi tướng mang tối đa ' + MAX_EQUIP + ' pháp bảo');
+      const from = r.loc === 'unit' ? r.ownerId : null;
+      ArtifactInventory._place(r, 'unit', cid, s);
+      return { rec: r, from };
+    });
+    if (res.ok) ArtifactEvents.emit('equip', res.value.rec, cid, res.value.from);
+    return res;
+  },
+  /** Tháo về kho (ô thường – kho đầy thì từ chối). */
+  unequip(iid) {
+    if (!this.canEdit()) return { ok: false, reason: 'Chỉ tháo được ở giai đoạn chuẩn bị' };
+    return ArtifactInventory.tx('unequip', [iid], () => {
+      const r = ArtifactInventory.get(iid); if (!r || r.loc !== 'unit') throw new UserError('Vật phẩm không đang được trang bị');
+      const s = ArtifactInventory.freeInvSlot(false); if (s < 0) throw new UserError('Kho đầy – ghép bớt nguyên liệu trước');
+      ArtifactInventory._place(r, 'inv', null, s); return r;
+    });
+  },
+  /** Bán tướng: mọi trang bị về kho (thường trước, tạm giữ sau). Hết chỗ → thất bại (huỷ bán). */
+  returnAll(cid) {
+    return ArtifactInventory.tx('sell', ArtifactInventory.ofOwner(cid).map(r => r.instanceId), () => {
+      const list = ArtifactInventory.ofOwner(cid).slice();
+      for (const r of list) ArtifactInventory._toInv(r, true);
+      return list.length;
+    });
+  },
+  /** Nâng sao: bản chính (primary) GIỮ đồ đang mang; ô trống của nó nhận đồ từ các bản phụ (theo thứ tự), phần dư về kho / ô tạm giữ.
+   *  Hết chỗ → thất bại → nơi gọi huỷ lần nâng sao (không mất, không nhân đôi). Trả về { kept, moved, toInv }. */
+  merge(primary, others) {
+    const ids = others.flatMap(c => ArtifactInventory.ofOwner(c).map(r => r.instanceId));
+    return ArtifactInventory.tx('merge', ids, () => {
+      let moved = 0, toInv = 0;
+      for (const c of others) for (const r of ArtifactInventory.ofOwner(c).slice()) {
+        const s = ArtifactInventory.freeOwnerSlot(primary);
+        if (s >= 0) { ArtifactInventory._place(r, 'unit', primary, s); moved++; } else { ArtifactInventory._toInv(r, true); toInv++; }
+      }
+      return { kept: ArtifactInventory.ofOwner(primary).length - moved, moved, toInv };
+    });
+  }
+};
+
+/* ---------- Sự kiện giao diện / VFX của hệ thống pháp bảo (không phải sự kiện chiến đấu) ---------- */
+const ArtifactEvents = { h: [], on(fn) { this.h.push(fn); }, emit(ev, a, b, c) { for (const f of this.h) { try { f(ev, a, b, c); } catch (e) { console.error('[Pháp bảo]', e); } } } };
+
+/* =====================================================================
+ *  ArtifactStats – lớp "trang bị" trong quy trình chỉ số:
+ *  Gốc → × sao → × (1 + Σ% tộc/hệ) → + trang bị (cộng thẳng / % cộng dồn) → hiệu ứng tạm thời (StatusEffectManager) → chỉ số cuối.
+ *  Hàm thuần: dựng lại từ danh sách itemId mỗi lần → không bao giờ cộng dồn khi vẽ giao diện / qua các vòng.
+ * ===================================================================*/
+const ArtifactStats = {
+  sum(itemIds) {
+    const s = {};
+    for (const id of itemIds || []) { const it = ITEM_DB[id]; if (!it || !it.stats) continue; for (const k in it.stats) s[k] = (s[k] || 0) + it.stats[k]; }
+    return s;
+  },
+  apply(b, itemIds) {
+    const s = this.sum(itemIds);
+    b.atkAdd += s.atk || 0; b.apAdd += s.ap || 0; b.aspd += s.aspd || 0; b.def += s.def || 0; b.mr += s.mr || 0;
+    b.mana0 += s.mana || 0; b.hpAdd += s.hp || 0; b.crit += s.crit || 0; b.critDmg += s.critDmg || 0;
+    b.ls += s.ls || 0; b.omni += s.omni || 0; b.skillDmg += s.skillDmg || 0;
+    b.equip = s;
+    return b;
+  }
+};
+
+/* =====================================================================
+ *  ArtifactRewards – nguyên liệu từ vòng PvE (vòng yêu thú 3, 7, 11…). Cấu hình ở đây; thưởng ghi vào sổ ĐÚNG 1 lần mỗi vòng
+ *  (game.rewardLog lưu cùng bản lưu → tải lại không nhận lặp). Không đổi phần thưởng linh thạch của kinh tế chính.
+ * ===================================================================*/
+const ARTIFACT_REWARDS = {
+  killChance: { yeulang: 0.4, yeuvuong: 1 },   // xác suất rơi 1 nguyên liệu khi hạ (như trang bị cũ – giữ nguyên linh thạch rơi khi không ra đồ)
+  winMin: 1,                                   // thắng vòng yêu thú: ít nhất 1 nguyên liệu
+  maxPerRound: 3,                              // tối đa mỗi vòng
+  weights: { sword: 1, staff: 1, bow: 1, armor: 1, cloak: 1, crystal: 1, jade: 1, glove: 1 }
+};
+const ArtifactRewards = {
+  roll(rnd = Math.random) {
+    const W = ARTIFACT_REWARDS.weights, tot = COMPONENT_KEYS.reduce((a, k) => a + (W[k] || 0), 0); let r = rnd() * tot;
+    for (const k of COMPONENT_KEYS) { r -= W[k] || 0; if (r < 0) return k; }
+    return COMPONENT_KEYS[COMPONENT_KEYS.length - 1];
+  },
+  /** Có rơi nguyên liệu khi hạ yêu thú này không (tôn trọng giới hạn mỗi vòng). */
+  dropOnKill(monsterKey, loot, rnd = Math.random) {
+    if (!loot || loot.items.length >= ARTIFACT_REWARDS.maxPerRound) return null;
+    return rnd() < (ARTIFACT_REWARDS.killChance[monsterKey] || 0) ? this.roll(rnd) : null;
+  },
+  /** Cấp phần thưởng của vòng `round` vào kho – bỏ qua nếu vòng này đã nhận (tải lại / gọi lặp). Trả về danh sách itemId đã nhận. */
+  grant(round, itemIds) {
+    game.rewardLog = game.rewardLog || [];
+    if (game.rewardLog.includes(round)) { combatLog.rewardDupBlocked = (combatLog.rewardDupBlocked || 0) + 1; return []; }
+    const got = [];
+    for (const id of itemIds.slice(0, ARTIFACT_REWARDS.maxPerRound)) {
+      const r = ArtifactInventory.add(id, true);
+      if (r.ok) got.push(id); else { game.gold += 2; ui.toast('Kho và ô tạm giữ đầy – ' + ITEM_DB[id].name + ' đổi thành 2 linh thạch'); }
+    }
+    game.rewardLog.push(round); if (game.rewardLog.length > 60) game.rewardLog.splice(0, game.rewardLog.length - 60);
+    if (ArtifactInventory.overflowCount()) ui.toast('Kho đầy – ' + ArtifactInventory.overflowCount() + ' vật phẩm ở ô tạm giữ, hãy ghép hoặc trang bị');
+    return got;
+  }
+};
+
+/* ---------- Chuyển bản lưu cũ: trang bị V1.0–V1.5 (6 món, tên chuỗi) → nguyên liệu trong kho ---------- */
+function legacyItemsToInventory(lists) {
+  let n = 0;
+  ArtifactInventory.busy = true;
+  try {
+    for (const l of lists) for (const k of l || []) {
+      const id = LEGACY_ITEM_MAP[k] || (ITEM_DB[k] ? k : null); if (!id) continue;
+      const s = ArtifactInventory.freeInvSlot(true); if (s < 0) break;
+      ArtifactInventory._create(id, 'inv', null, s); n++;
+    }
+  } finally { ArtifactInventory.busy = false; ArtifactInventory.ver++; }
+  return n;
+}
+
+</script>
+<script>/* js/items/artifact-passives.js */
+// Vạn Kiếm Kỳ Trận – Nội tại pháp bảo trong giao tranh (V1.6) + ArtifactVFX.
+// Logic chạy hoàn toàn trong BƯỚC MÔ PHỎNG (60 Hz, đồng hồ battle.time, RNG có seed) – mức đồ hoạ chỉ đổi VFX, không đổi sát thương / thời điểm.
+// Nghe sự kiện qua TraitEvents (đăng ký khi vào trận, gỡ khi TraitEngine.battleEnd xoá bus) + các móc nhỏ trong dealDamage / applyStun.
+//
+// Chuỗi sự kiện (chặn vòng lặp vô hạn):
+//   - Nội tại "theo đòn đánh" chỉ chạy với ĐÒN ĐÁNH THƯỜNG (opts.attack, không proc / dot). Nội tại "theo kỹ năng" chỉ với kỹ năng gốc (không proc).
+//   - Mọi sát thương do nội tại gây ra mang opts.proc (+ reflect với phản đòn) → không kích hoạt nội tại nào nữa (kể cả phản đòn của đối phương).
+//   - Lưới an toàn: độ sâu lồng tối đa MAX_DEPTH; vượt thì bỏ qua và ghi CombatAudit.artDepthBlocked.
+// Nạp sau js/items/artifact-system.js. Script thường (không phải module).
+'use strict';
+
+const ArtifactPassives = {
+  MAX_DEPTH: 2,
+  active: false, list: [], depth: 0, maxDepthSeen: 0,
+  /** Vào trận: dựng trạng thái nội tại cho mọi tướng đang mang pháp bảo (cả hai phe – phe địch chỉ có khi thử nghiệm). */
+  battleStart() {
+    this.battleEnd();
+    this.active = true; this.depth = 0; this.maxDepthSeen = 0;
+    for (const u of units) {
+      const ids = u.items;
+      u.art = null; u.artStats = null; u.critStack = 0;
+      if (!ids || !ids.length) continue;
+      const seen = new Set(), list = [];
+      u.artStats = ids.map(id => ({ id, procs: 0, dmg: 0, heal: 0, shield: 0, mana: 0 }));
+      ids.forEach((id, i) => {
+        const A = ARTIFACTS[id]; if (!A || !A.unique || seen.has(id)) return;   // nội tại cùng loại: 1 lần / tướng (chỉ số vẫn cộng dồn)
+        seen.add(id); list.push({ A, p: A.passive, k: A.passive.kind, i, st: { t: 0, n: 0, stacks: 0, cd: -1, used: false, pending: false, vfxT: -1 } });
+      });
+      if (!list.length) continue;
+      u.art = list; this.list.push(u);
+    }
+    for (const u of this.list) for (const a of u.art) this.start(u, a);
+    if (!this.list.length) return;
+    TraitEvents.on('onHit', (s, d, dmg, o, crit) => this.onHit(s, d, dmg, o, crit));
+    TraitEvents.on('onDamageTaken', (d, s, dmg, o) => this.onDamageTaken(d, s, dmg, o));
+    TraitEvents.on('onSkillCast', (u, sk, t) => this.onSkillCast(u, sk, t));
+  },
+  /** Hết trận: ngừng xử lý (thống kê artStats giữ lại để xem sau trận). Sự kiện đã được TraitEngine.battleEnd gỡ. */
+  battleEnd() { for (const u of this.list) u.art = null; this.list.length = 0; this.active = false; },
+  /** Ghi nhận cho giao diện. */
+  rec(u, a, field, v) { const s = u.artStats && u.artStats[a.i]; if (!s) return; s.procs += field === 'procs' ? v : 0; if (field !== 'procs') { s[field] += v; } },
+  fired(u, a) { const s = u.artStats && u.artStats[a.i]; if (s) s.procs++; combatLog.artProcs = (combatLog.artProcs || 0) + 1; const by = combatLog.artByKind || (combatLog.artByKind = {}); by[a.k] = (by[a.k] || 0) + 1; ArtifactVFX.play(a.A.group, u, a); },
+  /** Sát thương phụ do nội tại: luôn proc (không kích hoạt nội tại khác), không chí mạng. */
+  proc(src, dst, a, mult, opts) {
+    if (!dst || !dst.alive) return 0;
+    if (this.depth >= this.MAX_DEPTH) { CombatAudit.artDepthBlocked = (CombatAudit.artDepthBlocked || 0) + 1; return 0; }
+    this.depth++; this.maxDepthSeen = Math.max(this.maxDepthSeen, this.depth);
+    try { const d = dealDamage(src, dst, mult, Object.assign({ proc: true, crit: false, art: a.A.id, color: ArtifactVFX.col(a.A.group) }, opts)); this.rec(src, a, 'dmg', d); return d; }
+    finally { this.depth--; }
+  },
+  heal(src, dst, a, amount) { const g = healUnit(src, dst, amount, true, true); this.rec(src, a, 'heal', g); return g; },
+  shield(u, a, amount, dur) { giveShield(u, amount, dur, u); this.rec(u, a, 'shield', amount); },
+  mana(u, a, amount) { if (u.manaLock || !u.alive) return 0; const m0 = u.mana; addMana(u, amount); this.rec(u, a, 'mana', u.mana - m0); return u.mana - m0; },
+  /** Đồng minh đứng cạnh (cả bản thân) theo ô xuất phát. */
+  near(u) { return units.filter(o => o.alive && o.team === u.team && Math.max(Math.abs(o.homeTile.c - u.homeTile.c), Math.abs(o.homeTile.r - u.homeTile.r)) <= 1); },
+
+  /* ---------- đầu trận ---------- */
+  start(u, a) {
+    const p = a.p;
+    switch (a.k) {
+      case 'startShield': this.shield(u, a, u.maxHp * p.pct, p.dur); this.fired(u, a); break;
+      case 'startDR': u.fx.push({ stat: 'dmgTaken', mul: 1 - p.pct, dur: p.dur, src: u, tag: 'art:startDR' }); this.fired(u, a); break;
+      case 'allyAura':   // một tag chung → nhiều người mang không cộng dồn (refresh cùng khoá)
+        for (const o of this.near(u)) o.fx.push({ type: 'defBuff', mods: [{ stat: 'def', add: p.def }, { stat: 'mr', add: p.mr }], power: p.def + p.mr, dur: 999, tag: 'art:aura' });
+        this.fired(u, a); break;
+      case 'teamManaStart':   // năng lượng cho đồng minh cạnh – ghi thống kê vào người mang
+        for (const o of this.near(u)) { if (o.manaLock) continue; const m0 = o.mana; addMana(o, p.amount); this.rec(u, a, 'mana', o.mana - m0); }
+        this.fired(u, a); break;
+    }
+  },
+  /* ---------- đòn đánh / kỹ năng gây sát thương ---------- */
+  onHit(src, dst, dmg, opts, crit) {
+    if (!src || !src.art || this.depth >= this.MAX_DEPTH) return;
+    const basic = opts.attack !== undefined && !opts.proc && !opts.dot, skill = !!opts.skill && !opts.proc && !opts.dot;
+    if (!basic && !skill) return;
+    for (const a of src.art) {
+      const p = a.p, st = a.st;
+      switch (a.k) {
+        case 'chainBolt':
+          if (!basic) break;
+          if (++st.n % p.nth) break;
+          this.fired(src, a);
+          this.proc(src, dst, a, p.mult, { type: 'magic' });
+          { const o = this.nearestFoe(src, dst, dst.pos, p.radius); if (o) this.proc(src, o, a, p.mult, { type: 'magic' }); }
+          break;
+        case 'multiShot':
+          if (!basic) break;
+          if (++st.n % p.nth) break;
+          { const o = this.nearestFoe(src, dst, src.pos, 99); if (o) { this.fired(src, a); this.proc(src, o, a, p.mult, { type: 'physical' }); } }
+          break;
+        case 'aspdStack':
+          if (!basic || st.stacks >= p.max) break;
+          st.stacks++; src.fx.push({ stat: 'aspd', mul: 1 + p.pct * st.stacks, dur: 999, src, tag: 'art:aspdStack' });
+          if (st.stacks === 1 || st.stacks === p.max) this.fired(src, a); else this.rec(src, a, 'procs', 1);
+          break;
+        case 'shredOnHit':
+          if (!basic || !dst.alive) break;
+          dst.fx.push({ stat: p.stat, mul: 1 - p.pct, dur: p.dur, src, tag: 'art:shred:' + p.stat }); this.rec(src, a, 'procs', 1);
+          if (battle.time > st.vfxT) { st.vfxT = battle.time + 1; this.fired(src, a); }
+          break;
+        case 'shredOnSkill':
+          if (!skill || !dst.alive) break;
+          dst.fx.push({ stat: p.stat, mul: 1 - p.pct, dur: p.dur, src, tag: 'art:shred:' + p.stat }); this.fired(src, a);
+          break;
+        case 'manaOnHit': if (basic) { this.mana(src, a, p.amount); this.rec(src, a, 'procs', 1); } break;
+        case 'healOnHit': if (basic) { this.heal(src, src, a, src.maxHp * p.pct); this.rec(src, a, 'procs', 1); } break;
+        case 'execute':
+          if (!basic || !dst.alive || dst.hp >= dst.maxHp * p.below) break;
+          this.fired(src, a); this.proc(src, dst, a, 0, { flat: Math.max(1, dmg * p.pct), type: 'true' });
+          break;
+        case 'aspdOnCrit':
+          if (!basic || !crit || st.stacks >= p.max) break;
+          st.stacks++; src.fx.push({ stat: 'aspd', mul: 1 + p.pct * st.stacks, dur: 999, src, tag: 'art:aspdCrit' }); this.fired(src, a);
+          break;
+        case 'critMana':
+          if (!basic || !crit || battle.time < st.cd) break;
+          st.cd = battle.time + p.cd; this.mana(src, a, p.amount); this.fired(src, a);
+          break;
+        case 'critStack':
+          if (!basic || !crit || st.stacks >= p.max) break;
+          st.stacks++; src.critStack = p.pct * st.stacks; this.fired(src, a);
+          break;
+      }
+    }
+  },
+  /* ---------- nhận sát thương ---------- */
+  onDamageTaken(dst, src, dmg, opts) {
+    if (!dst || !dst.art) return;
+    for (const a of dst.art) {
+      const p = a.p, st = a.st;
+      switch (a.k) {
+        case 'thorns':   // chỉ phản ĐÒN ĐÁNH THƯỜNG thật (không phản sát thương phụ / phản đòn) → không có chuỗi phản vô hạn
+          if (opts.attack === undefined || opts.proc || opts.reflect || !src || src === dst || !src.alive || !(dmg > 0)) break;
+          this.fired(dst, a); this.proc(dst, src, a, 0, { flat: Math.max(1, dmg * p.pct), type: 'magic', reflect: true });
+          break;
+        case 'manaOnDamaged':
+          if (!(dmg > 0) || battle.time < st.cd || !dst.alive) break;
+          st.cd = battle.time + p.cd; this.mana(dst, a, p.amount); this.rec(dst, a, 'procs', 1);
+          break;
+        case 'lowHpShield':
+          if (st.used || !dst.alive || dst.hp >= dst.maxHp * p.below) break;
+          st.used = true; this.shield(dst, a, dst.maxHp * p.pct, p.dur); this.fired(dst, a);
+          break;
+      }
+    }
+  },
+  /* ---------- thi triển ---------- */
+  onSkillCast(u, sk, t) {
+    if (!u || !u.art) return;
+    for (const a of u.art) {
+      const p = a.p, st = a.st;
+      switch (a.k) {
+        case 'aspdOnCast': u.fx.push({ stat: 'aspd', mul: 1 + p.pct, dur: p.dur, src: u, tag: 'art:aspdCast' }); this.fired(u, a); break;
+        case 'manaAfterCast': st.pending = true; break;   // cộng khi thi triển XONG (update) – không cộng trong lúc khoá năng lượng
+        case 'healOnCast': {
+          if (battle.time < st.cd) break;
+          st.cd = battle.time + p.cd;
+          const allies = units.filter(o => o.alive && o.team === u.team);
+          let who;
+          if (p.who === 'weakest') who = allies.sort((x, y) => x.hp / x.maxHp - y.hp / y.maxHp).slice(0, 1);
+          else { const others = allies.filter(o => o !== u).sort((x, y) => x.pos.distanceTo(u.pos) - y.pos.distanceTo(u.pos)); who = [u].concat(others.slice(0, 1)); }
+          for (const o of who) this.heal(u, o, a, o.maxHp * p.pct);
+          this.fired(u, a);
+          break;
+        }
+      }
+    }
+  },
+  /** Móc trong dealDamage: sát thương chí tử → Bất Diệt Thần Giáp giữ 1 máu (1 lần / trận). Trả về true nếu cứu. */
+  onLethal(u) {
+    if (!u.art) return false;
+    for (const a of u.art) if (a.k === 'deathSave' && !a.st.used) {
+      a.st.used = true; u.hp = 1; this.shield(u, a, u.maxHp * a.p.shield, a.p.dur); this.fired(u, a);
+      floatText(u.chest(_v2.clone()), 'Bất Diệt!', '#e9c46a', 1.1, true);
+      return true;
+    }
+    return false;
+  },
+  /** Móc trong applyStun: miễn khống chế lần đầu (Huyền Linh Pháp Bào). Trả về true nếu chặn. */
+  onCC(u) {
+    if (!u.art) return false;
+    for (const a of u.art) if (a.k === 'cleanseOnce' && !a.st.used) {
+      a.st.used = true; u.ccImmune = Math.max(u.ccImmune || 0, a.p.immune); this.fired(u, a);
+      floatText(u.chest(_v2.clone()), 'Giải trừ', '#8fd3ff', 0.9);
+      return true;
+    }
+    return false;
+  },
+  /* ---------- theo thời gian (bước mô phỏng) ---------- */
+  update(dt) {
+    if (!this.active || battle.phase !== 'fight') return;
+    for (const u of this.list) {
+      if (!u.alive || !u.art) continue;
+      for (const a of u.art) {
+        const p = a.p, st = a.st;
+        switch (a.k) {
+          case 'rampAtk':
+            st.t += dt;
+            while (st.t >= p.every - 1e-9 && st.stacks < p.max) { st.t -= p.every; st.stacks++; u.fx.push({ stat: 'atk', mul: 1 + p.pct * st.stacks, dur: 999, src: u, tag: 'art:ramp' }); this.fired(u, a); }
+            break;
+          case 'burnAura':
+            st.t += dt;
+            if (st.t >= p.every - 1e-9) {
+              st.t -= p.every; let n = 0;
+              for (const o of units) if (o.alive && o.team !== u.team && Math.hypot(o.pos.x - u.pos.x, o.pos.z - u.pos.z) <= p.radius) { applyBurn(o, u, p.power); n++; }
+              if (n) this.fired(u, a);
+            }
+            break;
+          case 'regen': case 'regenLow': case 'manaRegen':
+            st.t += dt;
+            if (st.t >= 1 - 1e-9) {
+              st.t -= 1;
+              if (a.k === 'manaRegen') { this.mana(u, a, p.amount); this.rec(u, a, 'procs', 1); }
+              else if (a.k === 'regen' || u.hp < u.maxHp * p.below) { if (u.hp < u.maxHp) { this.heal(u, u, a, u.maxHp * p.pct); this.rec(u, a, 'procs', 1); } }
+            }
+            break;
+          case 'manaAfterCast':
+            if (st.pending && !u.manaLock && u.fsm.name !== 'cast') { st.pending = false; this.mana(u, a, p.amount); this.fired(u, a); }
+            break;
+        }
+      }
+    }
+  },
+  nearestFoe(src, not, from, radius) {
+    let best = null, bd = radius;
+    for (const o of units) if (o.alive && o.team !== src.team && o !== not) { const d = Math.hypot(o.pos.x - from.x, o.pos.z - from.z); if (d <= bd) { bd = d; best = o; } }
+    return best;
+  }
+};
+
+/* =====================================================================
+ *  ArtifactVFX – hiệu ứng theo nhóm pháp bảo. CHỈ HÌNH ẢNH (Math.random, không đụng RNG trận): dùng lại pool hạt / pháp trận / sóng / vệt chém
+ *  của VFXManager, không tạo material / geometry mới. LOW: ít hạt, không pháp trận; ULTRA: nhiều hạt + sóng phụ. Giãn cách tối thiểu mỗi tướng.
+ * ===================================================================*/
+const ArtifactVFX = {
+  _col: {}, _v: null,
+  col(group) { return this._col[group] || (this._col[group] = new THREE.Color(COMPONENTS[group] ? COMPONENTS[group].color : '#ffffff')); },
+  level() { return QualityManager.order.indexOf(QualityManager.level); },   // 0 LOW … 3 ULTRA
+  play(group, u, a) {
+    if (!u) return;
+    const L = this.level(), gap = [0.6, 0.35, 0.25, 0.18][L] || 0.3;
+    if (a) { if (a.vfxNext !== undefined && battle.time < a.vfxNext) return; a.vfxNext = battle.time + gap; }
+    const c = this.col(group), k = [0.35, 0.7, 1, 1.5][L] || 1, n = x => Math.max(2, Math.round(x * k));
+    const p = this._v || (this._v = new V3()); u.chest(p);
+    switch (group) {
+      case 'sword': vfx.particles.burst(p, c, n(14), 7, 0.3, 0.2, { drag: 4 }); if (L >= 1) vfx.slash(u.pos, u.yaw, c, 1.4, 0.3, 0.2, 1.1); break;
+      case 'staff': vfx.particles.burst(p, c, n(16), 3, 0.6, 0.28, { up: 2.5, drag: 2 }); if (L >= 1) vfx.magicCircle(u.pos, 1.0, c, c, { reveal: 0.2, life: 0.6, spin: 2 }); break;
+      case 'bow': vfx.particles.burst(p, c, n(12), 9, 0.25, 0.16, { drag: 6 }); break;
+      case 'armor': vfx.particles.burst(p, c, n(12), 3, 0.5, 0.3, { up: 1, drag: 3 }); if (L >= 2) vfx.shockwave(u.pos, 1.2, c, 0.45, 0.06); break;
+      case 'cloak': vfx.particles.burst(_v1.set(u.pos.x, 0.5, u.pos.z), c, n(18), 1.5, 0.9, 0.45, { up: 0.6, drag: 1.5 }); break;
+      case 'crystal': vfx.particles.burst(p, c, n(14), 4, 0.5, 0.2, { up: 3, drag: 3 }); if (L >= 3) vfx.shockwave(u.pos, 0.9, c, 0.35, 0.05); break;
+      case 'jade': vfx.particles.burst(p, c, n(14), 2.5, 0.7, 0.26, { up: 2.5, drag: 2 }); if (L >= 1) vfx.magicCircle(u.pos, 0.9, c, COLORS.shield, { reveal: 0.25, life: 0.7, spin: 1 }); break;
+      case 'glove': vfx.particles.burst(p, c, n(16), 10, 0.25, 0.22, { drag: 5 }); break;
+    }
+  },
+  /** Khi gắn pháp bảo lên tướng (giai đoạn chuẩn bị). */
+  equip(u, itemId) {
+    if (!u) return;
+    const A = ITEM_DB[itemId], g = A && A.group ? A.group : itemId, c = this.col(g), L = this.level();
+    vfx.particles.burst(u.chest(new V3()), c, [10, 20, 28, 40][L] || 20, 4, 0.6, 0.3, { up: 2, drag: 2 });
+    if (L >= 1) vfx.magicCircle(u.pos, 1.2, c, COLORS.allyB, { reveal: 0.25, life: 0.7, spin: 2 });
+    floatText(u.chest(new V3()), '+' + A.name, A.color || '#ffffff', 0.9);
+  }
+};
+
+</script>
 <script>/* js/14-game.js */
 // Vạn Kiếm Kỳ Trận – Kinh tế, cửa hàng, nâng sao, tộc/hệ, vòng đấu, lưu ván (mục 20)
 // Script thường (không phải module): các file chia sẻ phạm vi toàn cục, nạp theo thứ tự số trong index.html.
@@ -8870,20 +9711,14 @@ TraitSwords.init();   // tạo sẵn 1 lần lúc nạp → số object trong sc
 /* ---------- Tộc / hệ ---------- */
 /* TRAITS: xem js/data/traits.js */
 /** Hệ số cộng thêm của 1 tướng (đều trung tính). Lớp tộc/hệ: atk, hp, defMul, aspd, skill, omni, manaGain, heal (TraitEngine.computeBonus);
- *  trang bị nhân / cộng tiếp lên trên (atk, def phẳng, hpAdd phẳng, aspd, skill, mana0, ls). */
-const defaultBonus = () => ({ atk: 1, hp: 1, hpAdd: 0, skill: 1, mana0: 0, ls: 0, aspd: 1, def: 0, defMul: 1, omni: 0, manaGain: 1, heal: 1, traitStats: null });
+ *  lớp trang bị (ArtifactStats.apply) cộng thẳng: atkAdd, apAdd, def, mr, hpAdd, mana0; cộng % : aspd, crit, critDmg, ls, omni, skillDmg. */
+const defaultBonus = () => ({ atk: 1, hp: 1, hpAdd: 0, skill: 1, mana0: 0, ls: 0, aspd: 1, def: 0, defMul: 1, omni: 0, manaGain: 1, heal: 1, traitStats: null,
+  atkAdd: 0, apAdd: 0, mr: 0, crit: 0, critDmg: 0, skillDmg: 1, equip: null });
 
-/* ---------- Trang bị (rơi ở vòng yêu thú; tối đa 3 món mỗi tướng, gắn rồi không tháo – bán tướng thì trả về túi) ---------- */
-const ITEMS = {
-  kiem: { name: 'Thanh Phong Kiếm', short: 'Kiếm', color: '#ff9a6a', desc: '+18% công', apply: b => { b.atk *= 1.18; } },
-  giap: { name: 'Huyền Thiết Giáp', short: 'Giáp', color: '#b8c4cc', desc: '+25 giáp', apply: b => { b.def += 25; } },
-  chau: { name: 'Tụ Linh Châu', short: 'Châu', color: '#9fc7ff', desc: '+20 linh lực đầu trận, tuyệt kỹ +10%', apply: b => { b.mana0 += 20; b.skill *= 1.1; } },
-  phu: { name: 'Hộ Mệnh Phù', short: 'Phù', color: '#9ff0d0', desc: '+250 máu', apply: b => { b.hpAdd += 250; } },
-  ngoa: { name: 'Phong Hành Ngoa', short: 'Ngoa', color: '#e9e3a0', desc: '+18% tốc đánh', apply: b => { b.aspd *= 1.18; } },
-  ngoc: { name: 'Huyết Ngọc', short: 'Ngọc', color: '#ff7a8a', desc: '+15% hút máu', apply: b => { b.ls += 0.15; } }
-};
-const ITEM_KEYS = Object.keys(ITEMS), MAX_ITEMS_PER_UNIT = 3, MAX_INVENTORY = 10;
-const entryOf = u => ({ key: u.key, star: u.star, items: (u.items || []).slice() });
+/* ---------- Trang bị: hệ thống Pháp bảo V1.6 – dữ liệu js/data/artifacts.js, sổ / ghép / trang bị js/items/artifact-system.js ---------- */
+const MAX_ITEMS_PER_UNIT = MAX_EQUIP;
+/** Mục hàng chờ của một tướng: { key, star, cid } – đồ KHÔNG chép theo, nằm trong sổ ArtifactInventory theo cid. */
+const entryOf = u => ({ key: u.key, star: u.star, cid: u.cid || newCid() });
 
 /* ---------- Kinh tế & cửa hàng ---------- */
 /** Tướng bán ở cửa hàng theo bậc – lấy thẳng từ danh sách 24 tướng (js/data/champions.js). */
@@ -8898,7 +9733,7 @@ const XP_NEED = [0, 2, 2, 6, 10, 20, 36, 48, 72, Infinity]; // kinh nghiệm đ�
 const MAX_LEVEL = 9, BENCH_SIZE = BENCH.slots, SHOP_SIZE = 5, REROLL_COST = 2, XP_COST = 4, XP_BUY = 4, START_HP = 100;
 const sellPrice = (key, star) => UNIT_DEFS[key].cost * Math.pow(3, star - 1) - (star > 1 ? 1 : 0);
 const game = { hp: START_HP, gold: 6, level: 3, xp: 0, streak: 0, bench: new Array(BENCH_SIZE).fill(null), shop: [], over: false, sel: null, lastSummary: '',
-  rivals: {}, items: [], selItem: -1, lastRewards: null, prepT: 0 };
+  rivals: {}, lastRewards: null, prepT: 0, rewardLog: [] };
 
 const boardAllies = () => units.filter(u => u.team === 'ally');
 const boardCap = () => game.level;
@@ -8951,8 +9786,11 @@ function rivalsDraft(round) {
 function countCopies(key, star) {
   return game.bench.filter(e => e && e.key === key && e.star === star).length + boardAllies().filter(u => u.key === key && u.star === star).length;
 }
-function placeUnit(key, star, c, r, items = []) {
-  const u = new Unit(key, 'ally', c, r, star); units.push(u); u.items = items.slice(); TraitCounter.invalidate();
+/** Đặt tướng phe ta lên ô (c, r). owner: cid (bản sao tướng của người chơi – đồ đọc từ sổ) hoặc mảng itemId (tướng thử nghiệm, không thuộc sổ). */
+function placeUnit(key, star, c, r, owner) {
+  const u = new Unit(key, 'ally', c, r, star); units.push(u);
+  if (typeof owner === 'string') u.cid = owner; else if (Array.isArray(owner)) u.items = owner;
+  TraitCounter.invalidate();
   u.rig.setOutline && u.rig.setOutline(Q().outline);
   return u;
 }
@@ -8967,7 +9805,7 @@ function syncBench() {
     let u;
     if (k >= 0) u = pool.splice(k, 1)[0];
     else { u = new Unit(e.key, 'ally', 0, 0, e.star); u.rig.setOutline && u.rig.setOutline(Q().outline); }
-    u.benchSlot = i; benchUnits[i] = u; u.items = (e.items || []).slice();
+    u.benchSlot = i; benchUnits[i] = u; u.cid = ensureCid(e);
     if (!u.dragging) benchSlotPos(i, u.pos);
   }
   pool.forEach(u => u.dispose());
@@ -8979,13 +9817,14 @@ function freeAllyTile() { for (let r = 3; r >= 0; r--) for (const c of [3, 4, 2,
 /** Gộp 3 bản cùng tướng cùng sao → lên sao. Ưu tiên giữ vị trí của bản đang đứng trên bàn. */
 function mergeAll() {
   let merged = true;
+  const skip = new Set();   // nhóm không nâng sao được lần này (kho đầy) – tránh lặp vô hạn
   while (merged) {
     merged = false;
     const groups = {};
     game.bench.forEach((e, i) => { if (e && e.star < 3) (groups[e.key + '|' + e.star] = groups[e.key + '|' + e.star] || { key: e.key, star: e.star, bench: [], board: [] }).bench.push(i); });
     boardAllies().forEach(u => { if (u.star < 3) (groups[u.key + '|' + u.star] = groups[u.key + '|' + u.star] || { key: u.key, star: u.star, bench: [], board: [] }).board.push(u); });
     for (const g of Object.values(groups)) {
-      if (g.bench.length + g.board.length < 3) continue;
+      if (g.bench.length + g.board.length < 3 || skip.has(g.key + '|' + g.star)) continue;
       const keepBoard = g.board[0] || null;
       let need = 3;
       const take = [];
@@ -8994,20 +9833,25 @@ function mergeAll() {
       let keepBench = -1;
       for (const i of g.bench) { if (need <= 0) break; if (!keepBoard && keepBench < 0) keepBench = i; take.push({ bench: i }); need--; }
       const newStar = g.star + 1;
+      // Pháp bảo (giao dịch nguyên tử): bản chính (trên bàn, không thì bản hàng chờ đầu) GIỮ đồ của nó; ô trống nhận đồ của 2 bản phụ;
+      // dư về kho / ô tạm giữ. Hết chỗ → KHÔNG nâng sao lần này (không mất, không nhân đôi đồ).
+      const cids = take.map(t => (t.board ? t.board.cid || (t.board.cid = newCid()) : ensureCid(game.bench[t.bench])));
+      const primary = keepBoard ? cids[0] : ensureCid(game.bench[keepBench]);
+      const tx = ArtifactEquipment.merge(primary, cids.filter(c => c !== primary));
+      if (!tx.ok) { skip.add(g.key + '|' + g.star); ui.toast('Chưa nâng sao ' + UNIT_DEFS[g.key].name + ': ' + tx.reason); continue; }
+      if (tx.value.toInv) ui.toast(tx.value.toInv + ' pháp bảo dư về kho');
       let spot;
-      const items = [];   // gộp trang bị của các bản; dư quá 3 món thì về túi
       take.forEach(t => {
-        if (t.board) { items.push(...(t.board.items || [])); if (t.board === keepBoard) spot = { ...t.board.homeTile }; removeUnit(t.board); }
-        else { items.push(...(game.bench[t.bench].items || [])); game.bench[t.bench] = null; }
+        if (t.board) { if (t.board === keepBoard) spot = { ...t.board.homeTile }; removeUnit(t.board); }
+        else game.bench[t.bench] = null;
       });
-      const keep = items.slice(0, MAX_ITEMS_PER_UNIT); items.slice(MAX_ITEMS_PER_UNIT).forEach(addItem);
       if (keepBoard) {
-        const u = placeUnit(g.key, newStar, spot.c, spot.r, keep);
+        const u = placeUnit(g.key, newStar, spot.c, spot.r, primary);
         vfx.particles.burst(u.chest(new V3()), COLORS.allyB, 40, 6, 0.8, 0.35, { up: 3, drag: 2 });
         vfx.magicCircle(u.pos, 1.4, COLORS.allyB, COLORS.allyA, { reveal: 0.3, life: 0.8, spin: 3 });
         floatText(u.chest(new V3()), '★'.repeat(newStar), '#ffd166', 1.5, true);
       } else {
-        game.bench[keepBench] = { key: g.key, star: newStar, items: keep };
+        game.bench[keepBench] = { key: g.key, star: newStar, cid: primary };
         const p = benchSlotPos(keepBench, new V3()); p.y = 1;
         vfx.particles.burst(p, COLORS.allyB, 36, 5, 0.8, 0.3, { up: 3, drag: 2 });
         floatText(p, '★'.repeat(newStar), '#ffd166', 1.4, true);
@@ -9031,8 +9875,14 @@ function buyShop(i) {
   const slot = game.bench.indexOf(null);
   if (slot < 0 && countCopies(key, 1) < 2) { ui.toast('Hàng chờ đã đầy – bán bớt hoặc kéo lên bàn'); return; }
   game.gold -= cost; game.shop[i] = null;
-  if (slot >= 0) game.bench[slot] = { key, star: 1, items: [] }; else game.bench.push({ key, star: 1, items: [] });
-  Sfx.chime(); mergeAll(); afterRosterChange();
+  const e = { key, star: 1, cid: newCid() };
+  if (slot >= 0) game.bench[slot] = e; else game.bench.push(e);
+  Sfx.chime(); mergeAll();
+  if (game.bench.length > BENCH_SIZE) {   // không gộp được (kho pháp bảo đầy) → huỷ lần mua, hoàn tiền
+    const x = game.bench.splice(BENCH_SIZE).find(Boolean); game.shop[i] = key; game.gold += cost;
+    if (x) ui.toast('Không mua được: hàng chờ đầy và chưa nâng sao được');
+  }
+  afterRosterChange();
 }
 function reroll() {
   if (battle.phase !== 'prep') return;
@@ -9057,12 +9907,15 @@ function buyXP() {
 function sellSelected() { if (game.sel) sellSrc(game.sel); }
 function sellSrc(sel) {
   if (!sel || battle.phase !== 'prep') return;
-  let key, star, items;
-  if (sel.type === 'bench') { const e = game.bench[sel.i]; if (!e) return; key = e.key; star = e.star; items = e.items || []; game.bench[sel.i] = null; }
-  else { key = sel.unit.key; star = sel.unit.star; items = sel.unit.items || []; removeUnit(sel.unit); }
+  let key, star, cid;
+  if (sel.type === 'bench') { const e = game.bench[sel.i]; if (!e) return; key = e.key; star = e.star; cid = ensureCid(e); }
+  else { key = sel.unit.key; star = sel.unit.star; cid = sel.unit.cid; }
+  // Pháp bảo về kho TRƯỚC (giao dịch nguyên tử); không đủ chỗ cả ô tạm giữ → huỷ bán, không mất đồ.
+  const back = cid ? ArtifactEquipment.returnAll(cid) : { ok: true, value: 0 };
+  if (!back.ok) { ui.toast('Không bán được: ' + back.reason); return; }
+  if (sel.type === 'bench') game.bench[sel.i] = null; else removeUnit(sel.unit);
   const price = sellPrice(key, star); game.gold += price;
-  items.forEach(addItem);   // trang bị trả về túi
-  ui.toast('Đã bán ' + UNIT_DEFS[key].name + ' +' + price + ' linh thạch' + (items.length ? ' · ' + items.length + ' trang bị về túi' : ''));
+  ui.toast('Đã bán ' + UNIT_DEFS[key].name + ' +' + price + ' linh thạch' + (back.value ? ' · ' + back.value + ' pháp bảo về kho' : ''));
   select(null); afterRosterChange();
 }
 function moveToBench(unit, slot) {
@@ -9078,7 +9931,7 @@ function benchToBoard(i, c, r) {
   if (!occ && boardAllies().length >= boardCap()) { ui.toast('Cấp ' + game.level + ' chỉ đặt được ' + boardCap() + ' tu sĩ – mua kinh nghiệm để lên cấp'); return false; }
   game.bench[i] = occ ? entryOf(occ) : null;
   if (occ) removeUnit(occ);
-  const u = placeUnit(e.key, e.star, c, r, e.items || []);
+  const u = placeUnit(e.key, e.star, c, r, ensureCid(e));
   vfx.particles.burst(_v1.set(u.pos.x, 0.3, u.pos.z), COLORS.allyA, 16, 3, 0.4, 0.25, { up: 2 });
   return true;
 }
@@ -9097,22 +9950,25 @@ function showHighlight(t, ok) {
 }
 function afterRosterChange() { applyTraits(true); boardAllies().forEach(u => u.reset(1)); saveGame(); ui.update(); }
 
-/* ---------- Túi trang bị ---------- */
-function addItem(key) { if (game.items.length < MAX_INVENTORY) game.items.push(key); else { game.gold += 2; ui.toast('Túi đầy – ' + ITEMS[key].name + ' đổi thành 2 linh thạch'); } }
-/** Gắn trang bị trong túi (vị trí idx) cho tướng trên bàn ({type:'board', unit}) hoặc hàng chờ ({type:'bench', i}). */
-function equipItem(idx, target) {
-  const key = game.items[idx]; if (!key || !target) return false;
-  const holder = target.type === 'board' ? target.unit : game.bench[target.i];
-  if (!holder) return false;
-  holder.items = holder.items || [];
-  if (holder.items.length >= MAX_ITEMS_PER_UNIT) { ui.toast('Mỗi tướng mang tối đa ' + MAX_ITEMS_PER_UNIT + ' trang bị'); return false; }
-  holder.items.push(key); game.items.splice(idx, 1); game.selItem = -1;
-  const name = UNIT_DEFS[holder.key].short || UNIT_DEFS[holder.key].name;
-  const u = target.type === 'board' ? target.unit : benchUnits[target.i];
-  if (u) { u.items = holder.items.slice(); vfx.particles.burst(u.chest(new V3()), COLORS.allyB, 24, 4, 0.6, 0.3, { up: 2, drag: 2 }); floatText(u.chest(new V3()), '+' + ITEMS[key].short, ITEMS[key].color, 1); }
-  ui.toast('Gắn ' + ITEMS[key].name + ' cho ' + name);
+/* ---------- Trang bị pháp bảo cho tướng: tướng trên bàn ({type:'board', unit}) hoặc hàng chờ ({type:'bench', i}) ---------- */
+const targetCid = t => (!t ? null : t.type === 'board' ? (t.unit && t.unit.team === 'ally' ? t.unit.cid : null) : t.type === 'bench' ? ensureCid(game.bench[t.i]) : null);
+/** Trang bị / chuyển vật phẩm instanceId cho tướng đích. Trả về { ok, reason }. Thông báo + VFX + lưu. */
+function equipArtifact(iid, target) {
+  const cid = targetCid(target);
+  if (!cid) { ui.toast('Chỉ trang bị cho tướng phe ta'); return { ok: false, reason: 'Chỉ trang bị cho tướng phe ta' }; }
+  const res = ArtifactEquipment.equip(iid, cid);
+  if (!res.ok) { ui.toast(res.reason); return res; }
+  const it = ITEM_DB[res.value.rec.itemId], u = target.type === 'board' ? target.unit : benchUnits[target.i];
+  ArtifactVFX.equip(u, it.id);
+  ui.toast((res.value.from ? 'Chuyển ' : 'Trang bị ') + it.name + ' cho ' + ownerName(cid));
   Sfx.chime(); afterRosterChange();
-  return true;
+  return res;
+}
+function unequipArtifact(iid) {
+  const res = ArtifactEquipment.unequip(iid);
+  if (!res.ok) { ui.toast(res.reason); return res; }
+  ui.toast('Đã tháo ' + ITEM_DB[res.value.itemId].name + ' về kho'); afterRosterChange();
+  return res;
 }
 
 /* ---------- Tộc / hệ: xem js/data/traits.js (dữ liệu) và js/combat/traits-engine.js (TraitCounter, TraitEngine) ---------- */
@@ -9151,10 +10007,17 @@ function enemyLineup(round) {
 /** Phiên bản cấu trúc bản lưu. Tăng khi đổi cấu trúc, kèm một bước trong SAVE_MIGRATIONS (vN → vN+1).
  *  Bản lưu CHỈ chứa dữ liệu thuần (số, chuỗi, mảng) – không chứa đối tượng Three.js. Ghi khi đổi đội hình / mua bán / sang vòng, không ghi mỗi khung hình.
  *  Tùy chọn đồ họa lưu riêng (vkkt_quality, vkkt_autoQuality, vkkt_options…) nên đổi ván / bản lưu hỏng không làm mất cài đặt. */
-const SAVE_VERSION = 2;
+const SAVE_VERSION = 3;
 const SAVE_MIGRATIONS = {
   // v1 (V1.0–V1.5 tuần 3) → v2: thêm dấu thời gian và tên bản dựng; các trường cũ giữ nguyên, trường thiếu nhận mặc định khi làm sạch.
-  1: s => Object.assign({}, s, { v: 2, savedAt: s.savedAt || 0, build: s.build || 'V1.5' })
+  1: s => Object.assign({}, s, { v: 2, savedAt: s.savedAt || 0, build: s.build || 'V1.5' }),
+  // v2 (V1.5) → v3 (V1.6 pháp bảo): trang bị cũ dạng tên (6 món, trong túi và trên tướng) giữ ở legacyItems → restoreGame đổi thành
+  // NGUYÊN LIỆU tương ứng trong kho (LEGACY_ITEM_MAP). Tướng nhận mã bản sao (cid). Không bỏ món nào.
+  2: s => {
+    const arr = x => (Array.isArray(x) ? x : []);
+    const legacy = [].concat(arr(s.items), ...arr(s.bench).map(e => arr(e && e.items)), ...arr(s.board).map(b => arr(b && b.items)));
+    return Object.assign({}, s, { v: 3, build: 'V1.6', legacyItems: legacy.filter(k => typeof k === 'string'), inv: null, rewardLog: [] });
+  }
 };
 /** Đọc bản lưu từ chuỗi JSON (hoặc đối tượng). Trả về { status, state?, reason? }:
  *  ok – tải được (đã chuyển phiên bản + làm sạch) · none – chưa có · over – ván đã kết thúc · bad – hỏng · newer – bản lưu của phiên bản mới hơn.
@@ -9164,44 +10027,50 @@ function parseSave(raw) {
   let s = raw;
   if (typeof raw === 'string') { try { s = JSON.parse(raw); } catch (e) { return { status: 'bad', reason: 'JSON hỏng' }; } }
   if (!s || typeof s !== 'object' || Array.isArray(s)) return { status: 'bad', reason: 'không phải đối tượng' };
-  let v = s.v | 0;
+  let v = s.v | 0; const from = v;
   if (v > SAVE_VERSION) return { status: 'newer', reason: 'bản lưu v' + v + ' (bản này đọc tới v' + SAVE_VERSION + ')' };
   if (v < 1) return { status: 'bad', reason: 'thiếu phiên bản' };
   try { while (v < SAVE_VERSION) { s = SAVE_MIGRATIONS[v](s); v = s.v; } } catch (e) { return { status: 'bad', reason: 'chuyển phiên bản lỗi: ' + e.message }; }
   const num = (x, d, lo, hi) => (Number.isFinite(+x) && x !== null && x !== '' ? Math.min(hi, Math.max(lo, Math.floor(+x))) : d);
-  const unit = e => (e && typeof e === 'object' && typeof e.key === 'string' && [1, 2, 3].includes(+e.star) ? { key: e.key, star: +e.star, items: Array.isArray(e.items) ? e.items.filter(k => typeof k === 'string') : [] } : null);
+  const unit = e => (e && typeof e === 'object' && typeof e.key === 'string' && [1, 2, 3].includes(+e.star) ? { key: e.key, star: +e.star, cid: typeof e.cid === 'string' && /^c\d+$/.test(e.cid) ? e.cid : null } : null);
   const st = {
     v: SAVE_VERSION, savedAt: num(s.savedAt, 0, 0, 1e15), build: typeof s.build === 'string' ? s.build : 'V1.5',
     hp: num(s.hp, START_HP, 0, START_HP), gold: num(s.gold, 0, 0, 999), level: num(s.level, 3, 1, MAX_LEVEL), xp: num(s.xp, 0, 0, 999), streak: num(s.streak, 0, -99, 99), round: num(s.round, 1, 1, 999),
     over: !!s.over, bench: Array.isArray(s.bench) ? s.bench.slice(0, BENCH_SIZE).map(unit) : [],
     shop: Array.isArray(s.shop) && s.shop.length === SHOP_SIZE ? s.shop.map(k => (typeof k === 'string' ? k : null)) : null,
     rivals: s.rivals && typeof s.rivals === 'object' && !Array.isArray(s.rivals) ? Object.fromEntries(Object.entries(s.rivals).map(([k, n]) => [k, num(n, 0, 0, 99)])) : {},
-    items: Array.isArray(s.items) ? s.items.filter(k => typeof k === 'string') : [],
+    legacyItems: Array.isArray(s.legacyItems) ? s.legacyItems.filter(k => typeof k === 'string') : [],
+    inv: s.inv && typeof s.inv === 'object' && Array.isArray(s.inv.items) ? { nextId: num(s.inv.nextId, 1, 1, 1e9), items: s.inv.items.filter(Array.isArray) } : null,
+    cidSeq: num(s.cidSeq, 0, 0, 1e9), rewardLog: Array.isArray(s.rewardLog) ? s.rewardLog.map(x => num(x, 0, 0, 999)).filter(Boolean).slice(-60) : [],
     board: Array.isArray(s.board) ? s.board.map(b => { const u = unit(b); return u && Object.assign(u, { c: num(b.c, -1, -1, 99), r: num(b.r, -1, -1, 99) }); }).filter(Boolean) : []
   };
-  if (st.over || st.hp <= 0) return { status: 'over', state: st };
-  return { status: 'ok', state: st };
+  if (st.over || st.hp <= 0) return { status: 'over', state: st, from };
+  return { status: 'ok', state: st, from };
 }
 function snapshotGame(roundOverride) {
-  return { v: SAVE_VERSION, savedAt: Date.now(), build: 'V1.5', hp: game.hp, gold: game.gold, level: game.level, xp: game.xp, streak: game.streak, round: roundOverride || battle.round,
-    bench: game.bench.slice(0, BENCH_SIZE).map(e => (e ? { key: e.key, star: e.star, items: (e.items || []).slice() } : null)), shop: game.shop.slice(), over: game.over,
-    rivals: Object.assign({}, game.rivals), items: game.items.slice(),
-    board: boardAllies().map(u => ({ key: u.key, star: u.star, c: u.homeTile.c, r: u.homeTile.r, items: (u.items || []).slice() })) };
+  return { v: SAVE_VERSION, savedAt: Date.now(), build: 'V1.6', hp: game.hp, gold: game.gold, level: game.level, xp: game.xp, streak: game.streak, round: roundOverride || battle.round,
+    bench: game.bench.slice(0, BENCH_SIZE).map(e => (e ? { key: e.key, star: e.star, cid: ensureCid(e) } : null)), shop: game.shop.slice(), over: game.over,
+    rivals: Object.assign({}, game.rivals), cidSeq, rewardLog: (game.rewardLog || []).slice(),
+    inv: ArtifactInventory.serialize(),   // nguyên liệu + pháp bảo: instanceId, loại, vị trí (kho / tướng + ô)
+    board: boardAllies().map(u => ({ key: u.key, star: u.star, c: u.homeTile.c, r: u.homeTile.r, cid: u.cid || (u.cid = newCid()) })) };
 }
 /** battle.sandbox: trận thử / mô phỏng (CombatTestRunner, BalanceSimulator, bảng Debug) KHÔNG được ghi đè bản lưu thật. */
 function saveGame(roundOverride) { if (!battle.bench && !battle.sandbox) store.set('save', snapshotGame(roundOverride)); }
 const newGameState = () => ({ v: SAVE_VERSION, hp: START_HP, gold: 6, level: 3, xp: 0, streak: 0, round: 1, bench: new Array(BENCH_SIZE).fill(null), shop: null, over: false,
-  rivals: {}, items: [], board: [{ key: 'kiemdong', star: 1, c: 4, r: 3 }, { key: 'thietve', star: 1, c: 3, r: 3 }] });
+  rivals: {}, inv: null, rewardLog: [], board: [{ key: 'kiemdong', star: 1, c: 4, r: 3 }, { key: 'thietve', star: 1, c: 3, r: 3 }] });
 function restoreGame(st, sandbox = false) {
   battle.sandbox = sandbox;   // tải ván (thật hoặc phục hồi sau thử nghiệm) → lưu bình thường trở lại; true = vẫn trong chế độ thử (bảng Debug)
   for (const u of boardAllies()) removeUnit(u);
   if (drag.src) cancelDrag();
-  Object.assign(game, { hp: st.hp, gold: st.gold, level: Math.min(MAX_LEVEL, st.level), xp: st.xp, streak: st.streak, over: !!st.over, sel: null, lastSummary: '', selItem: -1, lastRewards: null });
-  const okItems = a => (Array.isArray(a) ? a.filter(k => ITEMS[k]).slice(0, MAX_ITEMS_PER_UNIT) : []);
-  game.items = Array.isArray(st.items) ? st.items.filter(k => ITEMS[k]).slice(0, MAX_INVENTORY) : [];
+  Object.assign(game, { hp: st.hp, gold: st.gold, level: Math.min(MAX_LEVEL, st.level), xp: st.xp, streak: st.streak, over: !!st.over, sel: null, lastSummary: '', lastRewards: null,
+    rewardLog: (st.rewardLog || []).slice() });
+  if (typeof ArtifactUI !== 'undefined') ArtifactUI.clearSel();
+  // cid: giữ mã trong bản lưu (trùng → cấp mã mới), bộ đếm không lùi
+  cidSeq = st.cidSeq | 0;   // mã > bộ đếm (bản lưu cũ / sửa tay) được takeCid đẩy bộ đếm lên – không bao giờ cấp trùng
+  const usedCid = new Set(), takeCid = c => { if (typeof c === 'string' && !usedCid.has(c)) { usedCid.add(c); const n = +c.slice(1); if (n > cidSeq) cidSeq = n; return c; } const m = newCid(); usedCid.add(m); return m; };
   // Bản lưu cũ (trước V1.5): id tướng đã đổi / gỡ được chuyển sang tướng mới cùng bậc (migrateChampionKey), giữ sao & trang bị.
   game.rivals = {}; for (const k in st.rivals || {}) { const m = migrateChampionKey(k); if (m && st.rivals[k] > 0) game.rivals[m] = (game.rivals[m] || 0) + (st.rivals[k] | 0); }
-  game.bench = (st.bench || []).slice(0, BENCH_SIZE).map(e => { const m = e && migrateChampionKey(e.key); return m && e.star >= 1 && e.star <= 3 ? { key: m, star: e.star, items: okItems(e.items) } : null; });
+  game.bench = (st.bench || []).slice(0, BENCH_SIZE).map(e => { const m = e && migrateChampionKey(e.key); return m && e.star >= 1 && e.star <= 3 ? { key: m, star: e.star, cid: takeCid(e.cid) } : null; });
   while (game.bench.length < BENCH_SIZE) game.bench.push(null);
   // Bản lưu hỏng / cũ: bỏ ô trùng hoặc ngoài nửa bàn phe ta, quân vượt giới hạn cấp → về hàng chờ (đầy thì hoàn linh thạch).
   const used = new Set();
@@ -9209,10 +10078,16 @@ function restoreGame(st, sandbox = false) {
     b = Object.assign({}, b, { key: migrateChampionKey(b.key) });
     if (!b.key || !(b.star >= 1 && b.star <= 3)) return;
     const k = b.c + ',' + b.r, okTile = b.c >= 0 && b.c < 8 && b.r >= 0 && b.r < 4 && !used.has(k);
-    if (okTile && boardAllies().length < game.level) { used.add(k); placeUnit(b.key, b.star, b.c, b.r, okItems(b.items)); return; }
+    const cid = takeCid(b.cid);
+    if (okTile && boardAllies().length < game.level) { used.add(k); placeUnit(b.key, b.star, b.c, b.r, cid); return; }
     const slot = game.bench.indexOf(null);
-    if (slot >= 0) game.bench[slot] = { key: b.key, star: b.star, items: okItems(b.items) }; else { game.gold += sellPrice(b.key, b.star); okItems(b.items).forEach(addItem); }
+    if (slot >= 0) game.bench[slot] = { key: b.key, star: b.star, cid }; else game.gold += sellPrice(b.key, b.star);   // hết chỗ: hoàn tiền, đồ của tướng về kho (load)
   });
+  // Pháp bảo: nạp sổ (làm sạch – chủ không còn / ô sai → về kho) + đổi trang bị cũ (v2) thành nguyên liệu trong kho
+  const invRep = ArtifactInventory.load(st.inv, rosterCids());
+  const legacy = st.legacyItems && st.legacyItems.length ? legacyItemsToInventory([st.legacyItems]) : 0;
+  if (legacy) setTimeout(() => ui.toast(legacy + ' trang bị cũ đã đổi thành nguyên liệu trong Kho pháp bảo'), 700);
+  if (invRep.moved || invRep.dropped) console.warn('[Pháp bảo] tải bản lưu: ' + invRep.moved + ' vật phẩm về kho, bỏ ' + invRep.dropped + ' bản ghi hỏng');
   battle.round = st.round || 1;
   for (const k in game.rivals) { const over = -poolLeft(k); if (over > 0) game.rivals[k] = Math.max(0, game.rivals[k] - over); }
   if (st.shop && st.shop.length === SHOP_SIZE) game.shop = st.shop.map(k => (k ? migrateChampionKey(k) : null)); else rollShop();
@@ -9223,7 +10098,7 @@ function newGame() { restoreGame(newGameState()); ui.toast('Ván mới – mua t
 
 /* ---------- Vòng đấu ---------- */
 function setupRound() {
-  TraitEngine.battleEnd();
+  TraitEngine.battleEnd(); ArtifactPassives.battleEnd();
   timelines.forEach(t => t.cancel()); timelines.length = 0;
   Projectiles.clear(); SimTasks.clear(); DangerZones.clear(); vfx.clear(); floaters.length = 0;
   for (let i = units.length - 1; i >= 0; i--) if (units[i].team === 'enemy') { units[i].dispose(); units.splice(i, 1); }
@@ -9270,17 +10145,19 @@ function startBattle() {
   battle.step = 0; CombatAudit.reset(); combatLog.recent = [];
   for (const u of units) u.atkCd = crand() * 0.4;   // lệch nhịp đánh đầu trận (sau khi đặt seed → giống nhau giữa các lần chạy cùng seed)
   battle.phase = 'fight';
-  TraitEngine.battleStart(); battle.time = 0; battle.loot = { gold: 0, items: [] }; battle.otShown = false; select(null); ui.update();
+  TraitEngine.battleStart(); ArtifactPassives.battleStart(); battle.time = 0; battle.loot = { gold: 0, items: [] }; battle.otShown = false; select(null); ui.update();
   combatCam.tDist = combatCam.defaults.dist;
 }
 function onUnitDeath(u) {
   TraitEvents.emit('onUnitDeath', u);
   vfx.particles.burst(u.chest(new V3()), u.team === 'ally' ? COLORS.allyA : COLORS.enemyA, 24, 5, 0.8, 0.3, { up: 1, drag: 2 });
-  // Yêu thú rơi đồ: Yêu Thú Vương chắc chắn 1 trang bị + 3 linh thạch; Yêu Lang 40% trang bị, còn lại 1 linh thạch.
+  // Yêu thú rơi nguyên liệu (ARTIFACT_REWARDS): Yêu Thú Vương chắc chắn + 3 linh thạch; Yêu Lang 40%, không rơi đồ thì 1 linh thạch.
+  // Đồ rơi chỉ GHI NHẬN (battle.loot) – vào kho đúng 1 lần ở settleRound.
   if (u.def.monster && battle.loot && !battle.bench) {
     const c = u.chest(new V3());
     let dropped = false;
-    if (u.key === 'yeuvuong' || Math.random() < 0.4) { const it = ITEM_KEYS[Math.floor(Math.random() * ITEM_KEYS.length)]; battle.loot.items.push(it); dropped = true; floatText(c, '+' + ITEMS[it].name, ITEMS[it].color, 1.1, true); vfx.particles.burst(c, COLORS.allyB, 40, 5, 0.8, 0.4, { up: 4, drag: 2 }); }
+    const it = ArtifactRewards.dropOnKill(u.key, battle.loot);
+    if (it) { battle.loot.items.push(it); dropped = true; floatText(c, '+' + ITEM_DB[it].name, ITEM_DB[it].color, 1.1, true); vfx.particles.burst(c, COLORS.allyB, 40, 5, 0.8, 0.4, { up: 4, drag: 2 }); }
     const g = u.key === 'yeuvuong' ? 3 : dropped ? 0 : 1;
     if (g) { battle.loot.gold += g; floatText(_v1.set(c.x, c.y + 0.6, c.z), '+' + g + ' linh thạch', '#e9c46a', 0.9); }
   }
@@ -9296,7 +10173,7 @@ function settleRound(win) {
   if (!monster) game.streak = win ? Math.max(1, game.streak + 1) : Math.min(-1, game.streak - 1);
   const streakBonus = monster ? 0 : streakBonusOf(game.streak);
   const loot = monster ? (battle.loot || { gold: 0, items: [] }) : null;
-  if (loot && win && !loot.items.length) loot.items.push(ITEM_KEYS[Math.floor(Math.random() * ITEM_KEYS.length)]);   // thắng vòng yêu thú: ít nhất 1 trang bị
+  if (loot && win && loot.items.length < ARTIFACT_REWARDS.winMin) loot.items.push(ArtifactRewards.roll());   // thắng vòng yêu thú: ít nhất 1 nguyên liệu
   const income = 5 + interest + streakBonus + (win && !monster ? 1 : 0) + (loot ? loot.gold : 0);
   let dmg = 0;
   if (!win) {
@@ -9305,9 +10182,9 @@ function settleRound(win) {
     game.hp = Math.max(0, game.hp - dmg);
   }
   game.gold += income; gainXP(2);
-  if (loot) loot.items.forEach(addItem);
+  if (loot) loot.got = ArtifactRewards.grant(battle.round, loot.items);   // đúng 1 lần mỗi vòng (rewardLog lưu cùng ván)
   game.lastRewards = loot;
-  game.lastSummary = `+${income} linh thạch (cơ bản 5 · lãi ${interest}` + (monster ? ` · yêu thú rơi ${loot.gold})` + (loot.items.length ? ` · nhận ${loot.items.length} trang bị` : '') : ` · chuỗi ${streakBonus}${win ? ' · thắng 1' : ''})`) + (dmg ? ` · mất ${dmg} máu` : '');
+  game.lastSummary = `+${income} linh thạch (cơ bản 5 · lãi ${interest}` + (monster ? ` · yêu thú rơi ${loot.gold})` + (loot.items.length ? ` · nhận ${loot.items.length} nguyên liệu` : '') : ` · chuỗi ${streakBonus}${win ? ' · thắng 1' : ''})`) + (dmg ? ` · mất ${dmg} máu` : '');
   if (game.hp <= 0) game.over = true;
   rivalsDraft(battle.round);
   saveGame(battle.round + 1);
@@ -9409,7 +10286,7 @@ function moveTo(src, t) {
     }
     const e = game.bench[t.i];
     if (!e) { if (!moveToBench(u, t.i)) return false; }
-    else { const tile = { ...u.homeTile }; game.bench[t.i] = entryOf(u); removeUnit(u); placeUnit(e.key, e.star, tile.c, tile.r, e.items || []); }
+    else { const tile = { ...u.homeTile }; game.bench[t.i] = entryOf(u); removeUnit(u); placeUnit(e.key, e.star, tile.c, tile.r, ensureCid(e)); }
     afterRosterChange(); return true;
   }
   if (t.type === 'tile') { if (!benchToBoard(src.i, t.c, t.r)) return false; afterRosterChange(); return true; }
@@ -9495,8 +10372,8 @@ function onTap(x, y) {
   const pk = battle.bench ? null : screenPick(x, y, true);
   const now = performance.now(); if (now - lastTap < 280 && !pk && !game.sel) combatCam.reset(); lastTap = now;
   if (!canEdit()) { if (pk) { if (info.unit === pk.unit) closeUnitInfo(); else showUnitInfo(pk.unit); } else closeUnitInfo(); return; }
+  if (ArtifactUI.selId() && pk) { ArtifactUI.applyToPick(pk); return; }   // đang chọn pháp bảo trong kho / trên tướng → chạm tướng để trang bị / chuyển
   if (pk && pk.type === 'enemy') { select(null); showUnitInfo(pk.unit); return; }
-  if (game.selItem >= 0 && pk) { equipItem(game.selItem, pk.type === 'board' ? { type: 'board', unit: pk.unit } : { type: 'bench', i: pk.i }); return; }   // đang chọn trang bị trong túi
   const sel = game.sel;
   const same = pk && sel && (pk.type === 'board' ? sel.unit === pk.unit : sel.type === 'bench' && sel.i === pk.i);
   if (sel && !same) {
@@ -9555,9 +10432,10 @@ const ui = {
     $('xp-fill').style.transform = 'scaleX(' + (game.level >= MAX_LEVEL ? 1 : game.xp / XP_NEED[game.level]) + ')';
     $('xp-val').textContent = game.level >= MAX_LEVEL ? 'tối đa' : game.xp + '/' + XP_NEED[game.level];
     $('prep-panel').hidden = !prep;
+    if (typeof ArtifactUI !== 'undefined') ArtifactUI.render();   // Kho pháp bảo (js/items/artifact-ui.js)
     $('hint').textContent = prep ? 'Kéo tu sĩ giữa bàn cờ và hàng chờ, kéo vào cửa hàng để bán. Kéo nền để xoay, chụm hai ngón để phóng to.' : 'Kéo để xoay bàn cờ · chụm hai ngón / lăn chuột để phóng to.';
     if (prep) {
-      renderShop(); renderSelActions(); renderItems(); renderOdds();
+      renderShop(); renderSelActions(); renderOdds();
       // Mép trên cửa hàng dịch chuyển (túi trang bị hiện / ẩn…): căn lại khoảng cách camera (không xoay lại góc nhìn) để hàng chờ không bị che.
       if (prepFit.dist && Math.abs($('prep-panel').getBoundingClientRect().top - prepFit.panelTop) > 6) requestAnimationFrame(() => { fitPrepCamera(); combatCam.tDist = prepFit.dist; });
     }
@@ -9589,7 +10467,7 @@ function showDefInfo(key, star = 1) { Object.assign(info, { unit: null, key, sta
  *  cụm nút dưới (để vẫn mua, bán, bắt đầu được khi bảng đang mở). Xem trước từ cửa hàng (u = null) thì đặt phía trên. */
 function placeUnitInfo(u) {
   const el = $('unit-info'), W = window.innerWidth, H = window.innerHeight, st = el.style;
-  st.left = st.right = st.top = st.bottom = ''; st.maxHeight = ''; el.hidden = false;
+  st.left = st.right = st.top = st.bottom = ''; st.maxHeight = ''; st.maxWidth = ''; el.hidden = false;
   const pw = el.offsetWidth;
   // Màn dọc / màn thấp: được phủ tạm lên vùng thông tin trên cùng (bảng có nút ✕); màn lớn thì nằm dưới hàng nút.
   const top = W < H || H < 520 ? 8 : document.querySelector('.top-actions').getBoundingClientRect().bottom + 6;
@@ -9601,14 +10479,18 @@ function placeUnitInfo(u) {
   const floor = (x0, x1) => obstacles.reduce((lim, r) => (r.right > x0 && r.left < x1 ? Math.min(lim, r.top - 8) : lim), H - 10);
   const covers = (x0, x1, y0, y1) => !!u && sx > x0 - 24 && sx < x1 + 24 && sy + 30 > y0 && sy - 70 < y1;   // tướng cao ~ 70 px trên điểm ngực
   if (W > H) {
-    const sides = [{ k: 'left', x0: 12, x1: 12 + pw }, { k: 'right', x0: W - 12 - pw, x1: W - 12 }].map(sd => ({ ...sd, room: floor(sd.x0, sd.x1) - top }));
+    const ri = typeof ArtifactUI !== 'undefined' ? ArtifactUI.rightInset() : 12;   // chừa chỗ Kho pháp bảo bên phải
+    const sides = [{ k: 'left', x0: 12, x1: 12 + pw, inset: 12 }, { k: 'right', x0: W - ri - pw, x1: W - ri, inset: ri }].map(sd => ({ ...sd, room: floor(sd.x0, sd.x1) - top }));
     const fit = sd => !covers(sd.x0, sd.x1, top, top + Math.min(el.scrollHeight, sd.room));
     sides.sort((a, b) => (fit(b) - fit(a)) || (Math.min(b.room, el.scrollHeight) - Math.min(a.room, el.scrollHeight)) || (u ? 0 : a.k === 'right' ? -1 : 1));
     const sd = sides[0];
-    st[sd.k] = '12px'; st.top = top + 'px'; st.maxHeight = Math.max(100, sd.room) + 'px';
+    st[sd.k] = sd.inset + 'px'; st.top = top + 'px'; st.maxHeight = Math.max(100, sd.room) + 'px';
   } else {
-    const x0 = W - 12 - pw, lim = floor(x0, W - 12), maxH = Math.min((lim - top) * 0.55, 340), ph = Math.min(el.scrollHeight, maxH);
-    st.right = '12px'; st.maxHeight = maxH + 'px';
+    // màn dọc: chừa cột Kho pháp bảo bên phải (đang mở) để vẫn chạm được kho khi xem thông tin
+    const ri = typeof ArtifactUI !== 'undefined' ? ArtifactUI.rightInset() : 12;
+    st.maxWidth = Math.max(220, W - ri - 12) + 'px';
+    const pw2 = el.offsetWidth, x0 = W - ri - pw2, lim = floor(x0, W - ri), maxH = Math.min((lim - top) * 0.55, 340), ph = Math.min(el.scrollHeight, maxH);
+    st.right = ri + 'px'; st.maxHeight = maxH + 'px';
     if (covers(x0, W - 12, top, top + ph) && !covers(x0, W - 12, lim - ph, lim)) st.bottom = (H - lim) + 'px'; else st.top = top + 'px';
   }
 }
@@ -9638,8 +10520,7 @@ function renderUnitInfo() {
   if (ts) for (const k in ts) if (ts[k] > 0) tl.push('+' + Math.round(ts[k] * 100) + '% ' + TRAIT_STATS[k]);
   const traitLine = (tl.length ? 'Tộc/hệ: ' + tl.join(' · ') : '') +
     (u && u.fx && u.fx.list.length ? (tl.length ? '\n' : '') + 'Trạng thái: ' + u.fx.describe().map(e => `${e.name}${e.type === 'shield' ? ' ' + Math.round(e.power) : ''} ${e.left.toFixed(1)}s`).join(' · ') : '');
-  const its = u ? u.items || [] : [];
-  $('ui-items').innerHTML = its.map(k => `<span style="--c:${ITEMS[k].color}" title="${ITEMS[k].desc}">${ITEMS[k].name}: ${ITEMS[k].desc}</span>`).join('');
+  if (typeof ArtifactUI !== 'undefined') ArtifactUI.renderUnitSlots(u, enemy, onBench); else $('ui-items').textContent = '';
   $('ui-bars').innerHTML = `<div class="ui-bar hp"><i style="width:${(hp / maxHp * 100).toFixed(1)}%"></i><span>Máu ${Math.round(hp)}/${maxHp}${shield > 0 ? ' · khiên ' + Math.round(shield) : ''}</span></div>` +
     `<div class="ui-bar mana"><i style="width:${(mana / maxMana * 100).toFixed(1)}%"></i><span>Linh lực ${Math.round(mana)}/${maxMana}</span></div>`;
   const range = d.range > 3 ? 'Xa ' + Math.round(d.range / BOARD.tile) + ' ô' : 'Cận';
@@ -9689,43 +10570,6 @@ function renderShop() {
 function renderOdds() {
   const o = SHOP_ODDS[game.level];
   $('odds').innerHTML = `<span>Cấp ${game.level}:</span>` + o.map((p, i) => `<span class="o${i + 1}${p ? '' : ' z'}">◆${i + 1} <b>${p}%</b></span>`).join('');
-}
-/** Túi trang bị: chạm để chọn rồi chạm tướng (trên bàn / hàng chờ) để gắn, hoặc kéo thẳng lên tướng. */
-function renderItems() {
-  const row = $('items-row'), el = $('items'); row.hidden = !game.items.length; el.textContent = '';
-  game.items.forEach((key, idx) => {
-    const it = ITEMS[key], b = document.createElement('button');
-    b.className = 'item' + (game.selItem === idx ? ' sel' : ''); b.style.setProperty('--c', it.color);
-    b.textContent = it.short; b.title = it.name + ': ' + it.desc;
-    b.setAttribute('aria-label', `${it.name} (${it.desc}) – chạm rồi chạm tướng để gắn`);
-    b.addEventListener('pointerdown', e => startItemDrag(e, idx, b));
-    el.appendChild(b);
-  });
-}
-let itemDrag = null;
-function startItemDrag(e, idx, btn) {
-  e.preventDefault();
-  try { btn.setPointerCapture(e.pointerId); } catch (err) { /* bỏ qua */ }
-  itemDrag = { idx, id: e.pointerId, x0: e.clientX, y0: e.clientY, moved: false, ghost: null, touch: e.pointerType !== 'mouse' };
-  const move = ev => {
-    if (!itemDrag || ev.pointerId !== itemDrag.id) return;
-    if (!itemDrag.moved && Math.hypot(ev.clientX - itemDrag.x0, ev.clientY - itemDrag.y0) > 10) {
-      itemDrag.moved = true; itemDrag.ghost = btn.cloneNode(true); itemDrag.ghost.classList.add('item-ghost', 'sel'); document.body.appendChild(itemDrag.ghost); haptic(8);
-    }
-    if (itemDrag.ghost) { itemDrag.ghost.style.left = ev.clientX + 'px'; itemDrag.ghost.style.top = ev.clientY + 'px'; }
-  };
-  const up = ev => {
-    if (!itemDrag || ev.pointerId !== itemDrag.id) return;
-    btn.removeEventListener('pointermove', move); btn.removeEventListener('pointerup', up); btn.removeEventListener('pointercancel', up);
-    const d = itemDrag; itemDrag = null; if (d.ghost) d.ghost.remove();
-    if (!d.moved) { game.selItem = game.selItem === d.idx ? -1 : d.idx; if (game.selItem >= 0) ui.toast('Chạm vào tướng để gắn ' + ITEMS[game.items[d.idx]].name); ui.update(); return; }
-    if (ev.type === 'pointercancel') return;
-    lastPointerTouch = d.touch;
-    const pk = screenPick(ev.clientX, ev.clientY);   // gắn cho tướng dưới điểm thả (trên bàn hoặc hàng chờ)
-    if (pk && pk.type !== 'enemy') equipItem(d.idx, pk.type === 'board' ? { type: 'board', unit: pk.unit } : { type: 'bench', i: pk.i });
-    else ui.toast('Thả trang bị lên một tướng phe ta để gắn');
-  };
-  btn.addEventListener('pointermove', move); btn.addEventListener('pointerup', up); btn.addEventListener('pointercancel', up);
 }
 function renderSelActions() {
   const sel = game.sel, sell = $('btn-sell'), back = $('btn-tobench');
@@ -9902,7 +10746,7 @@ let fxScale = 1;
 /** Ô vuông nhỏ màu theo trang bị, dưới thanh máu. */
 function drawItemDots(items, x, y, s) {
   const w = 7 * s, gap = 2 * s, x0 = x - (items.length * (w + gap) - gap) / 2;
-  items.forEach((k, i) => { g2.fillStyle = 'rgba(0,0,0,0.7)'; g2.fillRect(x0 + i * (w + gap) - 1, y - 1, w + 2, w + 2); g2.fillStyle = ITEMS[k] ? ITEMS[k].color : '#fff'; g2.fillRect(x0 + i * (w + gap), y, w, w); });
+  items.forEach((k, i) => { g2.fillStyle = 'rgba(0,0,0,0.7)'; g2.fillRect(x0 + i * (w + gap) - 1, y - 1, w + 2, w + 2); g2.fillStyle = ITEM_DB[k] ? ITEM_DB[k].color : '#fff'; g2.fillRect(x0 + i * (w + gap), y, w, w); });
 }
 function draw2D(dt) {
   const W = fx2d.width, H = fx2d.height; g2.clearRect(0, 0, W, H);
@@ -9950,6 +10794,305 @@ function draw2D(dt) {
     g2.globalAlpha = 1;
   }
 }
+
+</script>
+<script>/* js/items/artifact-ui.js */
+// Vạn Kiếm Kỳ Trận – Giao diện Kho pháp bảo kiểu TFT (V1.6): dock thu gọn được bên phải, ghép đồ, trang bị, tooltip, bảng 36 công thức.
+//   Android: chạm nguyên liệu 1 → chạm nguyên liệu 2 → xem công thức → Ghép; chạm pháp bảo → chạm tướng để trang bị; chạm tướng xem 3 ô.
+//   Windows: kéo thả (kho → tướng, nguyên liệu → nguyên liệu, ô → ô), rê chuột xem tooltip + chỉ số thay đổi trước khi trang bị.
+// Mọi thay đổi dữ liệu đi qua ArtifactCraftingSystem / ArtifactEquipment (giao dịch nguyên tử) – giao diện chỉ hiển thị.
+// Nạp sau js/16-ui.js. Script thường (không phải module).
+'use strict';
+
+const ArtifactUI = {
+  sel: [],            // instanceId đang chọn (1 pháp bảo / tối đa 1 nguyên liệu chờ ghép)
+  pending: null,      // { a, b } đang chờ xác nhận ghép (2 vật phẩm bị giữ chỗ)
+  collapsed: false, drag: null, tipFor: null, lpTimer: 0,
+  init() {
+    this.collapsed = store.get('artDockCollapsed', false);
+    $('ad-toggle').addEventListener('click', () => {
+      this.collapsed = !this.collapsed; store.set('artDockCollapsed', this.collapsed); this.render(); if (info.unit) placeUnitInfo(info.unit);
+      if (battle.phase === 'prep') requestAnimationFrame(() => { fitPrepCamera(); combatCam.tDist = prepFit.dist; });   // khung camera chừa / trả chỗ cho kho
+    });
+    $('ad-book').addEventListener('click', () => this.openBook());
+    $('btn-book-close').addEventListener('click', () => { $('art-book').hidden = true; });
+    $('art-dock').addEventListener('pointerdown', e => e.stopPropagation());
+    window.addEventListener('resize', () => this.layout());
+    // rê chuột trên bàn khi đang cầm pháp bảo: xem chỉ số thay đổi của tướng dưới con trỏ
+    canvas.addEventListener('pointermove', e => { if (e.pointerType === 'mouse' && !e.buttons && this.selId() && !this.drag) this.hoverPreview(e.clientX, e.clientY); });
+    canvas.addEventListener('pointerleave', () => { if (!this.drag) this.hideTip(); });
+    ArtifactEvents.on(ev => { if (ev === 'craft' || ev === 'equip') this.render(); });
+  },
+  selId() { return this.sel[0] || null; },
+  clearSel() { if (this.pending) this.cancelCraft(); this.sel = []; this.hint(''); this.hideTip(); },
+  /** Chỗ chừa bên phải cho bảng thông tin tướng (px tính từ mép phải). */
+  rightInset() { const d = $('art-dock'); if (d.hidden) return 12; const r = d.getBoundingClientRect(); return Math.max(12, window.innerWidth - r.left + 8); },
+  hint(t) { $('ad-hint').textContent = t || ''; },
+  /* ---------- kho ---------- */
+  render() {
+    const dock = $('art-dock'), prep = battle.phase === 'prep' && !game.over;
+    dock.hidden = !$('intro').hidden || !!battle.bench || battle.phase === 'fight';
+    if (dock.hidden) { this.hideTip(); return; }
+    dock.classList.toggle('collapsed', this.collapsed);
+    $('ad-toggle').setAttribute('aria-expanded', String(!this.collapsed));
+    const inv = ArtifactInventory, n = inv.invCount(true), ov = inv.overflowCount();
+    $('ad-count').textContent = n + '/' + INV_CAP + (ov ? ' +' + ov : '');
+    $('ad-toggle').title = 'Kho pháp bảo: ' + n + '/' + INV_CAP + ' ô' + (ov ? ', ' + ov + ' ở ô tạm giữ' : '') + ' – chạm để ' + (this.collapsed ? 'mở' : 'thu gọn');
+    // bỏ chọn vật phẩm không còn (đã ghép / bán / tải lại)
+    this.sel = this.sel.filter(id => inv.get(id));
+    if (this.collapsed) { this.layout(); return; }
+    const grid = $('ad-grid'); grid.textContent = '';
+    const bySlot = new Map(inv.invList().map(r => [r.slot, r])), last = Math.max(INV_CAP - 1, ...[...bySlot.keys()]);
+    for (let s = 0; s <= last; s++) {
+      const r = bySlot.get(s); if (!r && s >= INV_CAP) continue;
+      const b = document.createElement('button');
+      b.className = 'aslot' + (r ? ' full ' + (isComponent(r.itemId) ? 'comp' : 'art') : '') + (s >= INV_CAP ? ' over' : '') + (r && this.sel.includes(r.instanceId) ? ' sel' : '') + (r && inv.isLocked(r.instanceId) ? ' lock' : '');
+      b.dataset.slot = s;
+      if (r) {
+        const it = ITEM_DB[r.itemId]; b.dataset.iid = r.instanceId;
+        b.style.setProperty('--c', it.color); if (it.color2) b.style.setProperty('--c2', it.color2);
+        b.innerHTML = `<span class="g">${it.glyph}</span><span class="n">${it.name}</span>`;
+        b.setAttribute('aria-label', it.name + (isComponent(r.itemId) ? ' (nguyên liệu)' : ' (pháp bảo)') + (s >= INV_CAP ? ' – ô tạm giữ' : ''));
+      } else b.setAttribute('aria-label', 'Ô trống');
+      b.addEventListener('pointerdown', e => this.slotDown(e, b));
+      b.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse' && r && !this.drag) this.showTip(r.itemId, b.getBoundingClientRect(), null); });
+      b.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse' && !this.drag) this.hideTip(); });
+      b.addEventListener('contextmenu', e => e.preventDefault());
+      grid.appendChild(b);
+    }
+    if (!prep) this.hint('Chỉ ghép / trang bị ở giai đoạn chuẩn bị');
+    else if (!this.sel.length && !this.pending) this.hint(ov ? '⚠ Kho đầy – ' + ov + ' món ở ô tạm giữ, hãy ghép / trang bị' : n ? '' : 'Thắng vòng yêu thú (3, 7, 11…) để nhận nguyên liệu');
+    this.layout();
+  },
+  /** Không đè lên cửa hàng / nút đáy: giới hạn chiều cao theo mép trên của bảng chuẩn bị khi hai bên chồng ngang. */
+  layout() {
+    const dock = $('art-dock'); if (dock.hidden) return;
+    const ta = document.querySelector('.top-actions').getBoundingClientRect();   // dưới cụm FPS / Menu (màn dọc xếp chồng)
+    dock.style.top = Math.round(ta.bottom + 6) + 'px';
+    const r = dock.getBoundingClientRect(), H = window.innerHeight;
+    let floor = H - 8;
+    for (const el of [$('prep-panel'), $('next-dock')]) { if (!el || el.hidden) continue; const q = el.getBoundingClientRect(); if (q.width && q.right > r.left && q.left < r.right) floor = Math.min(floor, q.top - 8); }
+    dock.style.maxHeight = Math.max(80, floor - r.top) + 'px';
+    $('ad-grid').style.maxHeight = Math.max(44, floor - r.top - 40 - ($('ad-hint').offsetHeight || 0)) + 'px';
+  },
+  /* ---------- chạm / kéo một ô kho ---------- */
+  slotDown(e, btn) {
+    e.preventDefault(); e.stopPropagation();
+    const iid = btn.dataset.iid || null, slot = +btn.dataset.slot;
+    try { btn.setPointerCapture(e.pointerId); } catch (err) { /* bỏ qua */ }
+    const d = this.drag = { iid, slot, id: e.pointerId, x0: e.clientX, y0: e.clientY, moved: false, ghost: null, touch: e.pointerType !== 'mouse', long: false, btn };
+    clearTimeout(this.lpTimer);
+    if (iid && d.touch) this.lpTimer = setTimeout(() => { if (this.drag === d && !d.moved) { d.long = true; this.showTip(ArtifactInventory.get(iid).itemId, btn.getBoundingClientRect(), null); haptic(8); } }, 450);
+    const move = ev => {
+      if (ev.pointerId !== d.id) return;
+      if (!d.moved && iid && Math.hypot(ev.clientX - d.x0, ev.clientY - d.y0) > 10) {
+        d.moved = true; clearTimeout(this.lpTimer); this.hideTip();
+        d.ghost = btn.cloneNode(true); d.ghost.classList.add('art-ghost', 'sel'); document.body.appendChild(d.ghost); haptic(8);
+      }
+      if (!d.moved) return;
+      d.ghost.style.left = ev.clientX + 'px'; d.ghost.style.top = ev.clientY + 'px';
+      this.dragOver(ev.clientX, ev.clientY);
+    };
+    const up = ev => {
+      if (ev.pointerId !== d.id) return;
+      btn.removeEventListener('pointermove', move); btn.removeEventListener('pointerup', up); btn.removeEventListener('pointercancel', up);
+      clearTimeout(this.lpTimer); this.drag = null; if (d.ghost) d.ghost.remove();
+      document.querySelectorAll('.aslot.drop').forEach(x => x.classList.remove('drop'));
+      if (ev.type === 'pointercancel') { this.hideTip(); return; }
+      lastPointerTouch = d.touch;
+      if (!d.moved) { if (d.long) { setTimeout(() => this.hideTip(), 1800); return; } this.tap(iid, slot); return; }
+      this.hideTip();
+      this.drop(iid, ev.clientX, ev.clientY);
+    };
+    btn.addEventListener('pointermove', move); btn.addEventListener('pointerup', up); btn.addEventListener('pointercancel', up);
+  },
+  /** Chạm ô kho. */
+  tap(iid, slot) {
+    if (this.pending) this.cancelCraft();
+    if (!iid) { if (this.selId() && ArtifactInventory.get(this.selId()) && ArtifactInventory.get(this.selId()).loc === 'inv') this.moveToSlot(this.selId(), slot); else this.clearSel(); this.render(); return; }
+    const inv = ArtifactInventory, r = inv.get(iid); if (!r) return;
+    if (inv.isLocked(iid)) { ui.toast('Vật phẩm đang chờ xác nhận ghép'); return; }
+    const cur = this.selId() && inv.get(this.selId());
+    if (cur && cur.instanceId === iid) { this.clearSel(); this.render(); return; }
+    if (isComponent(r.itemId) && cur && cur.loc === 'inv' && isComponent(cur.itemId)) { this.openCraft(cur.instanceId, iid); return; }
+    this.sel = [iid];
+    if (isComponent(r.itemId)) {
+      const opts = ArtifactCraftingSystem.optionsFor(r.itemId).filter(o => o.have - (o.with === r.itemId ? 1 : 0) > 0);
+      this.hint('Chọn nguyên liệu thứ 2 để ghép' + (opts.length ? ': ' + opts.map(o => ARTIFACTS[o.result].name).join(', ') : ' (chưa có nguyên liệu ghép được)'));
+      this.showTip(r.itemId, this.slotRect(iid), null, true);
+    } else { this.hint('Chạm (hoặc kéo lên) tướng phe ta để trang bị ' + ITEM_DB[r.itemId].name); this.showTip(r.itemId, this.slotRect(iid), null); }
+    this.render();
+    if (info.unit) renderUnitInfo();
+  },
+  slotRect(iid) { const b = document.querySelector(`.aslot[data-iid="${iid}"]`); return b ? b.getBoundingClientRect() : $('art-dock').getBoundingClientRect(); },
+  moveToSlot(iid, slot) { const r = ArtifactInventory.moveSlot(iid, slot); if (!r.ok) ui.toast(r.reason); else { this.clearSel(); saveGame(); } },
+  /** Kéo qua: ô kho (đích ghép / đổi chỗ) hoặc tướng trên bàn / hàng chờ (xem trước chỉ số). */
+  dragOver(x, y) {
+    document.querySelectorAll('.aslot.drop').forEach(b => b.classList.remove('drop'));
+    const el = document.elementFromPoint(x, y), slot = el && el.closest && el.closest('.aslot');
+    if (slot) { slot.classList.add('drop'); this.hideTip(); return; }
+    this.hoverPreview(x, y, this.drag.iid);
+  },
+  drop(iid, x, y) {
+    const el = document.elementFromPoint(x, y), slot = el && el.closest && el.closest('.aslot');
+    const r = ArtifactInventory.get(iid); if (!r) return;
+    if (slot) {
+      const other = slot.dataset.iid;
+      if (other && other !== iid && isComponent(r.itemId) && isComponent(ArtifactInventory.get(other).itemId)) { this.openCraft(iid, other); return; }
+      if (!other || other !== iid) { if (!other || ArtifactInventory.get(other).loc === 'inv') this.moveToSlot(iid, +slot.dataset.slot); }
+      this.render(); return;
+    }
+    if (el === canvas) {
+      const pk = screenPick(x, y, true);
+      if (pk) { this.sel = [iid]; this.applyToPick(pk); return; }
+    }
+    ui.toast(isArtifact(r.itemId) ? 'Thả pháp bảo lên một tướng phe ta để trang bị' : 'Thả nguyên liệu lên nguyên liệu khác để ghép');
+  },
+  /** Chạm / thả lên tướng khi đang cầm vật phẩm. */
+  applyToPick(pk) {
+    const iid = this.selId(), r = iid && ArtifactInventory.get(iid);
+    if (!r) { this.clearSel(); return; }
+    if (pk.type === 'enemy') { ui.toast('Không thể trang bị cho tướng đối thủ'); return; }
+    if (!isArtifact(r.itemId)) { ui.toast('Chỉ trang bị được pháp bảo hoàn chỉnh – ghép 2 nguyên liệu trước'); return; }
+    const res = equipArtifact(iid, pk.type === 'board' ? { type: 'board', unit: pk.unit } : { type: 'bench', i: pk.i });
+    if (res.ok) { this.clearSel(); this.render(); const u = pk.unit; if (u) showUnitInfo(u); }
+  },
+  /* ---------- ghép ---------- */
+  openCraft(a, b) {
+    const p = ArtifactCraftingSystem.preview(a, b);
+    if (!p.ok) { ui.toast(p.reason); return; }
+    if (battle.phase !== 'prep') { ui.toast('Chỉ ghép ở giai đoạn chuẩn bị'); return; }
+    if (ArtifactInventory.isLocked(a) || ArtifactInventory.isLocked(b)) { ui.toast('Vật phẩm đang chờ xác nhận ghép'); return; }
+    ArtifactInventory.lock([a, b]); this.pending = { a, b }; this.sel = [a, b]; this.hideTip();
+    const A = ARTIFACTS[p.result], box = $('art-craft');
+    box.innerHTML = `<h4 style="color:${A.color}">${A.name}</h4><div class="eq">${COMPONENTS[p.a.itemId].name} + ${COMPONENTS[p.b.itemId].name} → 1 pháp bảo (tiêu hao 2 nguyên liệu)</div>` +
+      `<div class="ps">${statText(A.stats)}</div><div class="ps">Nội tại: ${A.passiveText}</div><div class="eq">Kích hoạt: ${A.trigger} · Giới hạn: ${A.limit}</div>` +
+      `<div class="row"><button class="no" id="ac-no">Huỷ</button><button class="ok" id="ac-ok">Ghép</button></div>`;
+    box.hidden = false;
+    const dr = $('art-dock').getBoundingClientRect(), W = window.innerWidth, H = window.innerHeight;
+    box.style.left = Math.max(8, Math.min(W - box.offsetWidth - 8, dr.left - box.offsetWidth - 8)) + 'px';
+    box.style.top = Math.max(8, Math.min(H - box.offsetHeight - 8, dr.top)) + 'px';
+    $('ac-ok').addEventListener('click', () => this.confirmCraft(), { once: true });
+    $('ac-no').addEventListener('click', () => { this.cancelCraft(); this.render(); }, { once: true });
+    this.hint('Xác nhận ghép ' + A.name);
+    this.render();
+  },
+  confirmCraft() {
+    const p = this.pending; if (!p) return;
+    const res = ArtifactCraftingSystem.craft(p.a, p.b, [p.a, p.b]);   // giao dịch được dùng 2 vật phẩm chính nó giữ chỗ
+    ArtifactInventory.unlock([p.a, p.b]); this.pending = null; $('art-craft').hidden = true;
+    if (!res.ok) { ui.toast('Không ghép được: ' + res.reason); this.sel = []; this.render(); return; }
+    const A = ITEM_DB[res.value.itemId];
+    ui.toast('Ghép thành công: ' + A.name); Sfx.chime();
+    this.sel = []; this.hint('Chạm ' + A.name + ' rồi chạm tướng để trang bị (máy tính: kéo thả)');
+    saveGame(); this.render();
+    const b = document.querySelector(`.aslot[data-iid="${res.value.instanceId}"]`);
+    if (b && b.animate) b.animate([{ transform: 'scale(1.35)', filter: 'brightness(2)' }, { transform: 'scale(1)', filter: 'none' }], { duration: 380, easing: 'ease-out' });
+  },
+  cancelCraft() { const p = this.pending; if (!p) return; ArtifactInventory.unlock([p.a, p.b]); this.pending = null; $('art-craft').hidden = true; this.sel = []; this.hint(''); },
+  /* ---------- tooltip & xem trước chỉ số ---------- */
+  showTip(itemId, rect, extra, recipes) {
+    const it = ITEM_DB[itemId]; if (!it || this.pending) return;
+    const tip = $('art-tip'); tip.style.setProperty('--c', it.color);
+    let html = `<b>${it.name}</b>` + (isComponent(itemId) ? ' · nguyên liệu' : ' · pháp bảo') + '\n' + itemTooltip(itemId).split('\n').slice(1).join('\n');
+    if (recipes) html += '\nGhép với: ' + ArtifactCraftingSystem.optionsFor(itemId).map(o => `${COMPONENTS[o.with].glyph}→${ARTIFACTS[o.result].name}${o.have - (o.with === itemId ? 1 : 0) > 0 ? ' ✓' : ''}`).join(' · ');
+    if (extra) html += '\n' + extra;
+    tip.innerHTML = html; tip.hidden = false;
+    const W = window.innerWidth, H = window.innerHeight, tw = tip.offsetWidth, th = tip.offsetHeight;
+    let x = rect.left - tw - 8; if (x < 8) x = Math.min(W - tw - 8, rect.right + 8);
+    tip.style.left = x + 'px'; tip.style.top = Math.max(8, Math.min(H - th - 8, rect.top)) + 'px';
+  },
+  hideTip() { $('art-tip').hidden = true; },
+  /** Tướng dưới (x, y) + vật phẩm iid → tooltip chỉ số trước / sau khi trang bị. */
+  hoverPreview(x, y, iid = this.selId()) {
+    const r = iid && ArtifactInventory.get(iid); if (!r) return this.hideTip();
+    const pk = screenPick(x, y, true);
+    if (!pk) return this.hideTip();
+    const rect = { left: x + 14, right: x + 14, top: y - 10 };
+    if (pk.type === 'enemy') return this.showTip(r.itemId, rect, '<span class="x">Không trang bị cho tướng đối thủ</span>');
+    if (!isArtifact(r.itemId)) return this.showTip(r.itemId, rect, '<span class="x">Nguyên liệu – ghép thành pháp bảo trước</span>');
+    this.showTip(r.itemId, rect, this.deltaText(pk, r));
+  },
+  /** Chỉ số thay đổi nếu trang bị r cho tướng pk (tính bằng đúng công thức trận, không đổi gì). */
+  deltaText(pk, r) {
+    const cid = pk.type === 'board' ? pk.unit.cid : ensureCid(game.bench[pk.i]), u = pk.unit;
+    if (!cid || !u) return '';
+    const have = ArtifactInventory.itemIdsOf(cid);
+    if (r.loc === 'unit' && r.ownerId === cid) return 'Tướng này đang mang';
+    if (have.length >= MAX_EQUIP) return '<span class="x">' + ownerName(cid) + ' đã đủ ' + MAX_EQUIP + ' pháp bảo</span>';
+    const d = this.preview(u, pk.type === 'bench', have, have.concat([r.itemId]));
+    return `<span class="d">${ownerName(cid)}: ${d || 'không đổi chỉ số (nội tại trong trận)'}</span>`;
+  },
+  preview(u, onBench, before, after) {
+    const active = onBench ? {} : TraitEngine.active;
+    const calc = ids => { const p = Object.create(u); Object.defineProperty(p, 'items', { value: ids }); return Unit.computeStats(u.def, u.star, TraitEngine.computeBonus(p, active)); };
+    const a = calc(before), b = calc(after), out = [];
+    const F = [['maxHp', 'Máu', v => Math.round(v)], ['atk', 'Công', v => Math.round(v)], ['ap', 'Phép', v => Math.round(v)], ['def', 'Giáp', v => Math.round(v)], ['mr', 'Kháng phép', v => Math.round(v)],
+      ['aspd', 'Tốc đánh', v => v.toFixed(2)], ['crit', 'Chí mạng', v => Math.round(v * 100) + '%'], ['critDmg', 'ST chí mạng', v => '×' + v.toFixed(2)], ['mana0', 'Năng lượng đầu', v => Math.round(v)]];
+    for (const [k, n, f] of F) if (Math.abs(a[k] - b[k]) > 1e-6) out.push(`${n} ${f(a[k])}→${f(b[k])}`);
+    const bs = TraitEngine.computeBonus(Object.defineProperty(Object.create(u), 'items', { value: after }), active), b0 = TraitEngine.computeBonus(Object.defineProperty(Object.create(u), 'items', { value: before }), active);
+    if (bs.ls - b0.ls > 1e-6) out.push('Hút máu +' + Math.round((bs.ls - b0.ls) * 100) + '%');
+    if (bs.omni - b0.omni > 1e-6) out.push('Hút máu toàn phần +' + Math.round((bs.omni - b0.omni) * 100) + '%');
+    if (bs.skillDmg - b0.skillDmg > 1e-6) out.push('ST kỹ năng +' + Math.round((bs.skillDmg - b0.skillDmg) * 100) + '%');
+    return out.join(' · ');
+  },
+  /* ---------- 3 ô pháp bảo trong bảng thông tin tướng ---------- */
+  renderUnitSlots(u, enemy, onBench) {
+    const box = $('ui-items');
+    if (!u) { box.textContent = ''; this._slotSig = ''; return; }
+    const recs = u.cid ? ArtifactInventory.ofOwner(u.cid) : (u.items || []).map((id, i) => ({ itemId: id, slot: i, instanceId: null }));
+    const bySlot = new Map(recs.map(r => [r.slot, r])), canEdit = !enemy && battle.phase === 'prep' && !game.over;
+    // bảng thông tin tự làm mới định kỳ: chỉ dựng lại khi nội dung đổi (không làm mất cú chạm đang dở)
+    const sig = [u.id, canEdit, this.sel.join(), ArtifactInventory.ver, JSON.stringify(u.artStats || null)].join('|');
+    if (sig === this._slotSig && box.childElementCount) return;
+    this._slotSig = sig; box.textContent = '';
+    for (let s = 0; s < MAX_EQUIP; s++) {
+      const r = bySlot.get(s), b = document.createElement('button');
+      b.className = 'eqs' + (r ? ' full' : '') + (r && r.instanceId && this.sel.includes(r.instanceId) ? ' sel' : '');
+      if (r) {
+        const it = ITEM_DB[r.itemId], st = u.artStats && u.artStats[recs.indexOf(r)];
+        b.style.setProperty('--c', it.color);
+        b.innerHTML = `${it.name}` + (st && (st.procs || st.dmg || st.heal || st.shield || st.mana) ? `<small>${[st.procs ? st.procs + ' lần' : '', st.dmg ? 'ST ' + Math.round(st.dmg) : '', st.heal ? 'hồi ' + Math.round(st.heal) : '', st.shield ? 'khiên ' + Math.round(st.shield) : '', st.mana ? '+' + Math.round(st.mana) + ' NL' : ''].filter(Boolean).join(' · ')}</small>` : `<small>${it.trigger}</small>`) +
+          (canEdit && r.instanceId ? `<span class="un" role="button" aria-label="Tháo ${it.name} về kho" title="Tháo về kho">↩</span>` : '');
+        b.title = itemTooltip(r.itemId);
+        b.setAttribute('aria-label', it.name + ' – ' + it.passiveText);
+        b.addEventListener('click', ev => {
+          if (!canEdit || !r.instanceId) { this.showTip(r.itemId, b.getBoundingClientRect(), null); setTimeout(() => this.hideTip(), 2200); return; }
+          if (ev.target.classList.contains('un')) { unequipArtifact(r.instanceId); this.clearSel(); renderUnitInfo(); this.render(); return; }
+          if (this.sel.includes(r.instanceId)) this.clearSel(); else { this.sel = [r.instanceId]; this.hint('Chạm tướng khác để chuyển ' + it.name + ' (hoặc ↩ để tháo về kho)'); }
+          renderUnitInfo(); this.render();
+        });
+      } else {
+        b.innerHTML = enemy ? '—' : 'Ô trống<small>' + (canEdit ? 'chạm pháp bảo rồi chạm tướng' : '') + '</small>';
+        b.disabled = enemy;
+        if (canEdit && this.selId()) b.addEventListener('click', () => this.applyToPick(onBench ? { type: 'bench', i: benchUnits.indexOf(u), unit: u } : { type: 'board', unit: u }));
+      }
+      box.appendChild(b);
+    }
+    // xem trước khi đang cầm pháp bảo
+    const cur = this.selId() && ArtifactInventory.get(this.selId());
+    if (canEdit && cur && isArtifact(cur.itemId) && !(cur.loc === 'unit' && cur.ownerId === u.cid)) {
+      const pk = onBench ? { type: 'bench', i: benchUnits.indexOf(u), unit: u } : { type: 'board', unit: u };
+      const p = document.createElement('div'); p.className = 'ui-art-preview'; p.innerHTML = 'Nếu trang bị ' + ITEM_DB[cur.itemId].name + ': ' + this.deltaText(pk, cur).replace(/<[^>]+>/g, '');
+      box.appendChild(p);
+    }
+  },
+  /* ---------- bảng 36 công thức ---------- */
+  openBook() {
+    const t = $('book-table'), K = COMPONENT_KEYS;
+    let h = '<table><tr><th></th>' + K.map(k => `<th style="color:${COMPONENTS[k].color}" title="${COMPONENTS[k].name}">${COMPONENTS[k].glyph}</th>`).join('') + '</tr>';
+    for (let i = 0; i < 8; i++) {
+      h += `<tr><th style="color:${COMPONENTS[K[i]].color}" title="${COMPONENTS[K[i]].name}">${COMPONENTS[K[i]].glyph}</th>`;
+      for (let j = 0; j < 8; j++) { const id = recipeOf(K[i], K[j]), A = ARTIFACTS[id]; h += `<td class="${i === j ? 'diag' : ''}"><button data-art="${id}" style="--c:${A.color}">${A.name}</button></td>`; }
+      h += '</tr>';
+    }
+    t.innerHTML = h + '</table>';
+    t.querySelectorAll('button[data-art]').forEach(b => b.addEventListener('click', () => { const A = ARTIFACTS[b.dataset.art]; $('book-detail').textContent = `#${A.no} ` + itemTooltip(A.id) + '\nNối tiếp sự kiện: ' + A.chain; }));
+    $('book-detail').textContent = 'Hàng = nguyên liệu thứ nhất, cột = nguyên liệu thứ hai (A + B = B + A). ' + Object.values(COMPONENTS).map(c => `${c.glyph} ${c.name}: ${statText(c.stats)}`).join(' · ');
+    $('art-book').hidden = false;
+  }
+};
+ArtifactUI.init();
 
 </script>
 <script>/* js/17-benchmark.js */
@@ -10113,6 +11256,7 @@ function simStep(dt) {
   Projectiles.update(dt);
   SimTasks.update(dt);
   TraitEngine.update(dt);
+  ArtifactPassives.update(dt);   // nội tại pháp bảo theo thời gian (đồng hồ mô phỏng)
   checkBattleEnd();
 }
 /** PerfStats: thời gian khung hình (vòng 600 khung), thời gian cập nhật game / render (ms, trung bình trượt), draw call, tam giác.
@@ -10202,12 +11346,14 @@ renderer.domElement.addEventListener('webglcontextrestored', () => {
 }, false);
 
 (function boot() {
-  const bad = validateChampions();
+  const bad = validateChampions().concat(validateArtifacts());
   if (bad.length) console.error('[Vạn Kiếm] Dữ liệu tướng lỗi:\n' + bad.join('\n'));
   // Bản lưu: chuyển phiên bản cũ + làm sạch (parseSave). Hỏng / của bản mới hơn → SAO LƯU nguyên văn sang vkkt_save_backup
   // trước khi ván mới ghi đè, để không bao giờ mất dữ liệu có thể còn cứu được.
   let raw = null; try { raw = localStorage.getItem('vkkt_save'); } catch (e) { /* bộ nhớ bị chặn */ }
   const ld = parseSave(raw), ok = ld.status === 'ok';
+  // Nâng phiên bản bản lưu (vd v2 → v3 pháp bảo): giữ bản gốc ở vkkt_save_backup_v<cũ> TRƯỚC khi bản mới ghi đè (không ghi đè bản sao đã có)
+  if (ok && ld.from < SAVE_VERSION) { try { const k = 'vkkt_save_backup_v' + ld.from; if (localStorage.getItem(k) === null) localStorage.setItem(k, raw); } catch (e) { /* đầy / bị chặn */ } }
   if (ld.status === 'bad' || ld.status === 'newer') {
     try { localStorage.setItem('vkkt_save_backup', raw); } catch (e) { /* đầy / bị chặn */ }
     console.warn('[Lưu] Không tải được bản lưu (' + ld.reason + ') – đã sao lưu sang vkkt_save_backup, bắt đầu ván mới');
@@ -10234,7 +11380,9 @@ window.__vkkt = { units, battle, timelines, QualityManager, startBattle, forceUl
   PerfStats, appState, CombatRNG, crand, CombatAudit, DamageCalculator, defenseFactor, DAMAGE, BATTLE_RULES, STATUS, applyBurn, SimTasks, DangerZones, NavGrid, Projectiles, checkBattleEnd, STEP, simStep, RARITY, RIG_FACTORIES, GLB_LOADED, replaceChampionRig, applyStun, dealDamage, healUnit, giveShield, applySlow,
   combatLog, ROLES, SKILLS, placeUnit, removeUnit, setupRound, BOARD,
   cameraSettled: () => Math.abs(combatCam.dist - combatCam.tDist) < 0.05 && Math.abs(combatCam.target.z - prepFit.tz) < 0.05 && Math.abs(lens.x - prepFit.shiftX) + Math.abs(lens.y - prepFit.shiftY) < 1,
-  poolLeft, poolOwned, POOL_SIZE, SHOP_POOL, SHOP_ODDS, rollShop, rivalsDraft, ITEMS, equipItem, isMonsterRound, interestOf, streakBonusOf, autoFillBoard };
+  poolLeft, poolOwned, POOL_SIZE, SHOP_POOL, SHOP_ODDS, rollShop, rivalsDraft, isMonsterRound,
+  COMPONENTS, COMPONENT_KEYS, ARTIFACTS, ARTIFACT_LIST, RECIPES, ITEM_DB, recipeOf, validateArtifacts, itemTooltip, LEGACY_ITEM_MAP, PASSIVE_KINDS, ARTIFACT_REWARDS,
+  ArtifactInventory, ArtifactCraftingSystem, ArtifactEquipment, ArtifactPassives, ArtifactRewards, ArtifactStats, ArtifactUI, equipArtifact, unequipArtifact, rosterCids, findOwner, ensureCid, newCid, INV_CAP, MAX_EQUIP, Unit, interestOf, streakBonusOf, autoFillBoard };
 
 </script>
 <script>/* js/combat/test-runner.js */
@@ -10252,14 +11400,17 @@ const CombatTestRunner = {
     battle.sandbox = true;   // không ghi bản lưu thật trong lúc thử (restoreGame / newGame tắt lại)
     const g = game; g.level = cfg.level || 9; g.over = false; battle.bench = false;
     for (const u of boardAllies()) removeUnit(u);
-    (cfg.allies || []).forEach(([k, s, c, r]) => placeUnit(k, s || 1, c, r));
+    (cfg.allies || []).forEach(([k, s, c, r, items]) => placeUnit(k, s || 1, c, r, items || []));   // items: itemId pháp bảo cho tướng thử (không thuộc sổ)
     const orig = window.enemyLineup;
     window.enemyLineup = () => (cfg.enemies || []).map(([k, s, c, r]) => [k, c, r, s || 1]);
+    const enemyItems = (cfg.enemies || []).map(e => e[4] || []);
     battle.round = cfg.round || 1;
     battle.enemyTraits = cfg.enemyTraits !== false;   // mặc định đối xứng: phe địch cũng có tộc/hệ
     try { setupRound(); } finally { window.enemyLineup = orig; }
     // hệ số địch: mặc định 1 (so sánh tướng với tướng), hoặc theo vòng như trong game
     const scale = cfg.enemyScale !== undefined ? cfg.enemyScale : cfg.round ? 0.85 * Math.pow(1.07, cfg.round - 1) : 1;
+    units.filter(u => u.team === 'enemy').forEach((u, i) => { if (enemyItems[i] && enemyItems[i].length) u.items = enemyItems[i]; });
+    if (enemyItems.some(l => l.length)) applyTraits();
     units.forEach(u => { if (u.team === 'enemy') u.reset(scale); });
     battle.seedOverride = cfg.seed !== undefined ? cfg.seed : 1;
     startBattle();
@@ -10447,6 +11598,221 @@ const BalanceSimulator = {
 if (window.__vkkt) window.__vkkt.BalanceSimulator = BalanceSimulator;
 
 </script>
+<script>/* js/items/equipment-test-runner.js */
+// Vạn Kiếm Kỳ Trận – EquipmentTestRunner (V1.6): kiểm thử tự động hệ thống pháp bảo NGAY TRONG GAME (console: EquipmentTestRunner.run()).
+// Chạy trên bản chụp ván (sandbox) rồi khôi phục → không ghi bản lưu thật. Phần giao diện (chuột / cảm ứng) và hồi quy toàn game: tests/equipment.js.
+// Nạp sau js/combat/test-runner.js. Script thường (không phải module).
+'use strict';
+const EquipmentTestRunner = {
+  run(opts = {}) {
+    const snap = snapshotGame(), sb0 = !!battle.sandbox, out = [], t0 = performance.now();
+    const ok = (id, name, pass, detail) => out.push({ id, name, ok: !!pass, detail: detail === undefined ? '' : typeof detail === 'string' ? detail : JSON.stringify(detail) });
+    const I = ArtifactInventory, C = ArtifactCraftingSystem, E = ArtifactEquipment;
+    battle.sandbox = true;
+    const fresh = (board = [['kiemdong', 1, 3, 3], ['thietve', 1, 4, 3]]) => {   // ván thử sạch: kho rỗng, đội cho trước
+      restoreGame(Object.assign(newGameState(), { gold: 200, level: 9, board: board.map(([key, star, c, r]) => ({ key, star, c, r })) }), true);
+    };
+    const total = () => I.recs.size;
+    const sig = () => I.all().map(r => [r.instanceId, r.itemId, r.loc, r.ownerId, r.slot].join(':')).sort().join('|');
+    const addN = list => list.map(k => I.add(k).value.instanceId);
+    try {
+      // ---------- dữ liệu ----------
+      ok(1, 'Có đủ 8 nguyên liệu (ID, tên, mô tả, icon, màu, chỉ số)', COMPONENT_KEYS.length === 8 && COMPONENT_KEYS.every(k => { const c = COMPONENTS[k]; return c.id === k && c.name && c.desc && c.glyph && /^#/.test(c.color) && Object.keys(c.stats).length; }), COMPONENT_KEYS.join(','));
+      ok(2, 'Có đúng 36 công thức, mỗi pháp bảo đủ dữ liệu (ID, tên, 2 nguyên liệu, chỉ số, nội tại có logic, kích hoạt, giới hạn, tooltip, icon, nhóm VFX)',
+        ARTIFACT_LIST.length === 36 && Object.keys(RECIPES).length === 36 && Object.values(ARTIFACTS).every(a => a.id && a.name && a.parts.length === 2 && Object.keys(a.stats).length && PASSIVE_KINDS[a.passive.kind] && a.trigger && a.limit && a.passiveText && a.glyph && COMPONENTS[a.group]),
+        ARTIFACT_LIST.length + ' pháp bảo / ' + Object.keys(RECIPES).length + ' công thức');
+      const dupId = ARTIFACT_LIST.length - new Set(ARTIFACT_LIST.map(r => r[0])).size, dupName = ARTIFACT_LIST.length - new Set(ARTIFACT_LIST.map(r => r[1])).size;
+      const dupRecipe = ARTIFACT_LIST.length - new Set(ARTIFACT_LIST.map(r => recipeKey(r[2], r[3]))).size;
+      ok(3, 'Không trùng công thức / ID / tên; validateArtifacts không lỗi', !dupId && !dupName && !dupRecipe && !validateArtifacts().length, { dupId, dupName, dupRecipe, errors: validateArtifacts() });
+      let sym = 0, pairs = 0; for (const a of COMPONENT_KEYS) for (const b of COMPONENT_KEYS) { pairs++; if (recipeOf(a, b) && recipeOf(a, b) === recipeOf(b, a)) sym++; }
+      ok(4, 'A+B và B+A cho cùng pháp bảo (64 cặp có thứ tự)', sym === 64, sym + '/' + pairs);
+      // ---------- ghép ----------
+      fresh();
+      const [s1, s2] = addN(['sword', 'sword']);
+      const same = C.craft(s1, s1);
+      const aa = C.craft(s1, s2);
+      ok(5, 'Ghép A+A dùng 2 instance khác nhau; cùng 1 instance bị từ chối', !same.ok && aa.ok && aa.value.itemId === 'tru_tien_kiem' && !I.get(s1) && !I.get(s2) && total() === 1, { same: same.reason, result: aa.ok && aa.value.itemId });
+      fresh();
+      const [m1] = addN(['staff']); const ghost = 'it999999';
+      const before6 = sig(), miss = C.craft(m1, ghost);
+      ok(6, 'Không ghép khi thiếu nguyên liệu (instance không tồn tại)', !miss.ok && sig() === before6, miss.reason);
+      // ghép thất bại giữa chừng (sự cố sau khi đã xoá nguyên liệu) → hoàn tác toàn bộ
+      fresh();
+      const [f1, f2] = addN(['bow', 'armor']); const before7 = sig();
+      const crash = I.tx('crash-test', [f1, f2], () => { I._delete(f1); I._delete(f2); throw Object.assign(new Error('sự cố giả lập giữa giao dịch'), { simulated: true }); });
+      const bad1 = C.craft(f1, 'khong-co'), bad2 = C.craft(f1, f1);
+      ok(7, 'Ghép thất bại không mất đồ (sự cố giữa giao dịch → hoàn tác; thiếu / trùng nguyên liệu → không đổi)', !crash.ok && !bad1.ok && !bad2.ok && sig() === before7 && I.get(f1) && I.get(f2), { crash: crash.reason });
+      // ghép thành công: −2 nguyên liệu, +1 pháp bảo; bấm liên tục 6 lần chỉ ra 1
+      fresh();
+      const [g1, g2, g3] = addN(['glove', 'jade', 'sword']); const n0 = total();
+      const spam = [1, 2, 3, 4, 5, 6].map(() => C.craft(g1, g2).ok);
+      const arts = I.all().filter(r => isArtifact(r.itemId));
+      ok(8, 'Ghép thành công không nhân đôi: đúng −2 nguyên liệu +1 pháp bảo, bấm dồn 6 lần chỉ ghép 1', spam.filter(Boolean).length === 1 && total() === n0 - 1 && arts.length === 1 && arts[0].itemId === 'ho_tam_bao_ngoc' && I.get(g3), { spam, total: total() });
+      // giữ chỗ khi đang chờ xác nhận: thao tác khác trên 2 vật phẩm bị từ chối
+      fresh();
+      const [h1, h2] = addN(['cloak', 'cloak']); I.lock([h1, h2]);
+      const locked = C.craft(h1, h2), lockedMove = I.moveSlot(h1, 7), own = C.craft(h1, h2, [h1, h2]); I.unlock([h1, h2]);
+      ok('8b', 'Đang chờ xác nhận ghép: vật phẩm bị giữ chỗ, chỉ giao dịch xác nhận được dùng', !locked.ok && !lockedMove.ok && own.ok, { locked: locked.reason });
+      // ---------- trang bị ----------
+      fresh();
+      const u = boardAllies()[0], v = boardAllies()[1];
+      const ids = [];
+      for (const [a, b] of [['sword', 'bow'], ['armor', 'jade'], ['staff', 'crystal'], ['cloak', 'glove']]) { const [x, y] = addN([a, b]); ids.push(C.craft(x, y).value.instanceId); }
+      const eq = ids.map(id => E.equip(id, u.cid));
+      ok(9, 'Trang bị tối đa 3 món (món thứ 4 bị từ chối, vẫn ở kho)', eq.slice(0, 3).every(r => r.ok) && !eq[3].ok && u.items.length === 3 && I.get(ids[3]).loc === 'inv', eq[3].reason);
+      const mv = E.equip(ids[0], v.cid);
+      const owners = I.all().filter(r => r.instanceId === ids[0]).map(r => r.ownerId);
+      ok(10, 'Một vật phẩm không thuộc hai tướng: trang bị cho tướng khác = CHUYỂN (tướng cũ mất món đó)', mv.ok && owners.length === 1 && owners[0] === v.cid && !u.items.includes(I.get(ids[0]).itemId) && v.items.length === 1 && !I.audit().length, I.audit());
+      const enemy = units.find(x => x.team === 'enemy');
+      const toEnemy = equipArtifact(ids[3], { type: 'board', unit: enemy }), toEnemy2 = E.equip(ids[3], enemy && enemy.cid);
+      ok(11, 'Không trang bị cho tướng địch', !toEnemy.ok && !toEnemy2.ok && I.get(ids[3]).loc === 'inv', toEnemy.reason);
+      battle.phase = 'fight'; const inFight = E.equip(ids[3], v.cid), unFight = E.unequip(ids[1]); battle.phase = 'prep';
+      ok('11b', 'Không đổi đồ trong giao tranh tiêu chuẩn (trang bị / tháo bị từ chối)', !inFight.ok && !unFight.ok, inFight.reason);
+      const inv12 = I.invCount(), n12 = total(), uItems = u.items.length;
+      sellSrc({ type: 'board', unit: u });
+      ok(12, 'Bán tướng hoàn trả vật phẩm về kho (tổng số vật phẩm không đổi)', I.invCount() === inv12 + uItems && total() === n12 && !I.audit().length, { returned: uItems });
+      // ---------- nâng sao ----------
+      fresh([['kiemdong', 1, 3, 3]]);
+      const p0 = boardAllies()[0];
+      const mk = (a, b) => { const [x, y] = addN([a, b]); return C.craft(x, y).value.instanceId; };
+      const pa = [mk('sword', 'sword'), mk('bow', 'bow')]; pa.forEach(id => E.equip(id, p0.cid));
+      game.bench[0] = { key: 'kiemdong', star: 1, cid: newCid() }; game.bench[1] = { key: 'kiemdong', star: 1, cid: newCid() };
+      const b1 = mk('armor', 'armor'), b2 = mk('jade', 'jade'), b3 = mk('glove', 'glove');
+      E.equip(b1, game.bench[0].cid); E.equip(b2, game.bench[1].cid); E.equip(b3, game.bench[1].cid);
+      const n13 = total(), all13 = new Set(I.all().map(r => r.instanceId));
+      mergeAll();
+      const star2 = boardAllies().find(x => x.key === 'kiemdong');
+      const keptPrimary = pa.every(id => I.get(id) && I.get(id).ownerId === star2.cid);
+      ok(13, 'Nâng sao bảo toàn vật phẩm: bản chính giữ đồ, ô trống nhận đồ bản phụ, phần dư về kho, không mất / nhân đôi',
+        star2 && star2.star === 2 && star2.cid === p0.cid && keptPrimary && star2.items.length === 3 && total() === n13 && [...all13].every(id => I.get(id)) && I.invList().length === 2 && !I.audit().length,
+        { star: star2 && star2.star, items: star2 && star2.items, inv: I.invList().map(r => r.itemId) });
+      // nâng sao khi kho + ô tạm giữ đầy → huỷ nâng sao, không mất đồ
+      fresh([['thietve', 1, 3, 3]]);
+      const q0 = boardAllies()[0]; [mk('sword', 'staff'), mk('bow', 'armor')].forEach(id => E.equip(id, q0.cid));
+      game.bench[0] = { key: 'thietve', star: 1, cid: newCid() }; game.bench[1] = { key: 'thietve', star: 1, cid: newCid() };
+      [mk('cloak', 'jade'), mk('glove', 'crystal')].forEach(id => E.equip(id, game.bench[0].cid)); [mk('sword', 'jade')].forEach(id => E.equip(id, game.bench[1].cid));
+      while (I.freeInvSlot(true) >= 0) I.add('jade');
+      const n13b = total(); mergeAll();
+      const still = boardAllies().find(x => x.key === 'thietve');
+      ok('13b', 'Nâng sao khi kho + ô tạm giữ đầy: huỷ nâng sao, không mất đồ', still.star === 1 && game.bench.filter(e => e && e.key === 'thietve').length === 2 && total() === n13b && !I.audit().length, { star: still.star, total: total() });
+      // ---------- lưu / tải ----------
+      fresh();
+      const w = boardAllies()[0]; const z = mk('sword', 'glove'); E.equip(z, w.cid); addN(['staff', 'bow']);
+      game.bench[2] = { key: 'hoa', star: 1, cid: newCid() }; E.equip(mk('jade', 'cloak'), game.bench[2].cid);
+      const s14 = JSON.parse(JSON.stringify(snapshotGame())), sigA = sig();
+      restoreGame(JSON.parse(JSON.stringify(s14)), true); restoreGame(JSON.parse(JSON.stringify(snapshotGame())), true);
+      const sigB = sig();
+      // bản lưu bị sửa: cùng instance 2 lần, một món trên 2 chủ, chủ không tồn tại, nguyên liệu "được trang bị" → làm sạch, không nhân đôi
+      const forged = JSON.parse(JSON.stringify(s14)); const row = forged.inv.items.find(r => r[2] === 'u');
+      forged.inv.items.push(row.slice(), [row[0], row[1], 'u', 'c99999', 1], ['it777', 'sword', 'u', forged.board[0].cid, 2], ['it778', 'khong_co', 'i', null, 3]);
+      const pf = parseSave(JSON.stringify(forged)); restoreGame(pf.state, true);
+      const cnt = id => I.all().filter(r => r.instanceId === id).length;
+      ok(14, 'Lưu và tải không nhân đôi (2 lần lưu/tải giống hệt; bản lưu bị sửa trùng instance / 2 chủ / chủ lạ → mỗi instance 1 nơi)', sigA === sigB && cnt(row[0]) === 1 && I.get('it777') && I.get('it777').loc === 'inv' && !I.get('it778') && !I.audit().length,
+        { same: sigA === sigB, dupLeft: cnt(row[0]), forgedComp: I.get('it777') && I.get('it777').loc });
+      // chuyển bản lưu v2 (trang bị cũ) → nguyên liệu
+      const v2 = { v: 2, hp: 70, gold: 9, level: 5, xp: 0, streak: 0, round: 6, over: false, items: ['kiem', 'ngoa'], rivals: {}, shop: null,
+        bench: [{ key: 'hoa', star: 1, items: ['giap'] }, null, null, null, null, null, null, null, null], board: [{ key: 'kiemdong', star: 2, c: 3, r: 3, items: ['chau', 'phu', 'ngoc'] }] };
+      const p2 = parseSave(JSON.stringify(v2)); restoreGame(p2.state, true);
+      const comps = I.invList().map(r => r.itemId).sort().join(',');
+      ok('14b', 'Bản lưu V1.5 (v2): 6 trang bị cũ → 6 nguyên liệu trong kho, tướng giữ nguyên', p2.status === 'ok' && p2.from === 2 && comps === ['sword', 'bow', 'armor', 'crystal', 'cloak', 'jade'].sort().join(',') && boardAllies().some(x => x.key === 'kiemdong' && x.star === 2), comps);
+      // phần thưởng PvE: đúng 1 lần mỗi vòng
+      fresh(); game.rewardLog = [];
+      const r1 = ArtifactRewards.grant(7, ['sword', 'bow']), r2 = ArtifactRewards.grant(7, ['sword', 'bow']);
+      const s15 = snapshotGame(); restoreGame(JSON.parse(JSON.stringify(s15)), true); const r3 = ArtifactRewards.grant(7, ['jade']);
+      ok('14c', 'Phần thưởng PvE: nhận đúng 1 lần mỗi vòng (gọi lặp / sau khi tải lại không nhận thêm), tối đa ' + ARTIFACT_REWARDS.maxPerRound + ' / vòng',
+        r1.length === 2 && !r2.length && !r3.length && I.invCount() === 2 && ArtifactRewards.grant(11, ['a', 'b', 'c', 'd', 'e'].map(() => 'jade')).length === ARTIFACT_REWARDS.maxPerRound, { r1, r2, r3 });
+      // ---------- nội tại ----------
+      const P = this.passives(); out.push(...P);
+      // ---------- chỉ số không cộng dồn khi vẽ giao diện ----------
+      fresh();
+      const y = boardAllies()[0]; E.equip(mk('sword', 'sword'), y.cid); E.equip(mk('jade', 'jade'), y.cid); afterRosterChange();
+      const st0 = JSON.stringify([y.atk, y.maxHp, y.ap_, y.def_, y.mr_, y.crit_]);
+      for (let i = 0; i < 60; i++) { ui.update(); showUnitInfo(y); renderUnitInfo(); applyTraits(); y.reset(1); }
+      closeUnitInfo();
+      ok(17, 'Không cộng lại chỉ số khi vẽ giao diện (60 lần vẽ + áp tộc/hệ + reset: chỉ số giống hệt; +20 công +300 máu đúng)', JSON.stringify([y.atk, y.maxHp, y.ap_, y.def_, y.mr_, y.crit_]) === st0 && y.atk === 72 && y.maxHp === 600 + 300, st0);
+      // ---------- LOW / ULTRA ----------
+      const fight = q => { QualityManager.set(q, 'test'); return CombatTestRunner.run({ allies: [['kiemdong', 2, 3, 3, ['phap_kiem_loi_dinh', 'tru_tien_kiem']], ['hoa', 2, 3, 1, ['hoa_linh_ho_giap']], ['thietve', 2, 4, 3, ['phan_kich_chi_giap', 'bat_diet_than_giap']]],
+        enemies: [['mabinh', 2, 3, 4, ['phan_kich_chi_giap']], ['linhcung', 2, 4, 6, ['thien_menh_thu_sao', 'lien_kich_thu_sao']], ['thanhmoc', 2, 2, 6, ['thanh_moc_phap_chau']]], seed: 4242, keepState: true }); };
+      const q0l = QualityManager.level, lo = fight('LOW'), procsLo = combatLog.artProcs; nextRound(); const hi = fight('ULTRA'); QualityManager.set(q0l, 'test');
+      ok(18, 'VFX LOW / ULTRA không ảnh hưởng sát thương (cùng seed, có pháp bảo: kết quả giống hệt từng điểm máu)', lo.fingerprint === hi.fingerprint && lo.result === hi.result, { lo: lo.result + '@' + lo.time, hi: hi.result + '@' + hi.time });
+      // ---------- 24 tướng & kinh tế vẫn đúng ----------
+      fresh([]);
+      let bad19 = [];
+      for (const k of CHAMPION_KEYS) {
+        game.bench.fill(null); game.gold = 999; const g0 = game.gold, c = UNIT_DEFS[k].cost;
+        for (let i = 0; i < 3; i++) { game.shop[0] = k; buyShop(0); }
+        const e = game.bench.find(x => x && x.key === k);
+        if (!e || e.star !== 2 || game.gold !== g0 - 3 * c) { bad19.push(k + ':mua/nâng'); continue; }
+        const it = mk('sword', 'armor'); E.equip(it, e.cid);
+        sellSrc({ type: 'bench', i: game.bench.indexOf(e) });
+        if (game.gold !== g0 - 3 * c + sellPrice(k, 2) || !I.get(it) || I.get(it).loc !== 'inv') bad19.push(k + ':bán');
+        I.remove(it);
+      }
+      ok(19, '24 tướng vẫn mua, nâng sao, bán đúng giá; đồ trên tướng được trả về khi bán', !bad19.length, bad19.join(' '));
+      fresh(); const inc = (() => { game.gold = 25; battle.round = 4; game.streak = 0; const g = game.gold; settleRound(true); return game.gold - g; })();
+      ok(21, 'Kinh tế không đổi ở vòng thường: thu nhập = 5 + lãi 2 + thắng 1 (chuỗi 1 → +0)', inc === 8 && !game.rewardLog.includes(4), inc);
+      ok('21b', 'Sổ vật phẩm toàn vẹn sau toàn bộ bài kiểm thử', !I.audit().length, I.audit());
+    } catch (e) {
+      ok('x', 'Không lỗi khi chạy EquipmentTestRunner', false, e.message + ' ' + (e.stack || '').split('\n').slice(0, 3).join(' | '));
+    } finally {
+      restoreGame(snap, sb0);
+    }
+    return { ms: Math.round(performance.now() - t0), pass: out.filter(r => r.ok).length, total: out.length, results: out };
+  },
+  /** Nội tại: điều kiện kích hoạt, giới hạn, không vòng lặp vô hạn (mục 15–16). Mỗi kịch bản dựng trận thử riêng. */
+  passives() {
+    const out = [], ok = (id, name, pass, detail) => out.push({ id, name, ok: !!pass, detail: typeof detail === 'string' ? detail : JSON.stringify(detail) });
+    const setup = (aItems, eItems, a = 'thietve', e = 'thietve') => {   // đối thủ không né (kết quả xác định)
+      CombatTestRunner.run({ allies: [[a, 1, 3, 3, aItems]], enemies: [[e, 1, 3, 4, eItems || []]], seed: 77, keepState: true, maxTime: 0 });
+      const A = units.find(u => u.team === 'ally'), B = units.find(u => u.team === 'enemy');
+      return { A, B };
+    };
+    const procs = (u, i = 0) => (u.artStats && u.artStats[i] ? u.artStats[i].procs : 0);
+    // khiên khi máu thấp: trên ngưỡng không kích hoạt, dưới ngưỡng đúng 1 lần
+    let { A, B } = setup(['ho_tam_bao_ngoc']);
+    dealDamage(B, A, 0, { flat: A.maxHp * 0.3, type: 'true', attack: 1, crit: false }); const above = procs(A);
+    dealDamage(B, A, 0, { flat: A.maxHp * 0.35, type: 'true', attack: 2, crit: false }); const below = procs(A), sh = A.shield;
+    dealDamage(B, A, 0, { flat: 50, type: 'true', attack: 3, crit: false }); const again = procs(A);
+    ok(15, 'Nội tại không kích hoạt khi chưa đủ điều kiện: khiên máu thấp (trên 40% → 0, dưới 40% → 1 lần, không lặp)', above === 0 && below === 1 && sh > 0 && again === 1, { above, below, again, shield: Math.round(sh) });
+    nextRound();
+    // kết liễu: mục tiêu trên 30% máu → không; dưới → có; sét mỗi đòn thứ 3
+    ({ A, B } = setup(['u_minh_thu_sao', 'phap_kiem_loi_dinh'], [], 'kiemdong'));
+    B.hp = B.maxHp = 99999; B.hp = 99999;
+    for (let i = 1; i <= 7; i++) dealDamage(A, B, 1, { attack: 100 + i, crit: false });
+    const exeHigh = procs(A, 0), bolts = procs(A, 1);
+    B.hp = B.maxHp * 0.2; dealDamage(A, B, 1, { attack: 200, crit: false }); const exeLow = procs(A, 0);
+    dealDamage(A, B, 2, { skill: true }); const boltSkill = procs(A, 1);
+    ok('15b', 'Kết liễu chỉ khi mục tiêu dưới 30% máu; sét chỉ ở đòn đánh thứ 3, 6… (kỹ năng / sát thương phụ không đếm)', exeHigh === 0 && exeLow === 1 && bolts === 2 && boltSkill === 2, { exeHigh, exeLow, bolts, boltSkill });
+    nextRound();
+    // giải khống chế 1 lần, Bất Diệt 1 lần
+    ({ A, B } = setup(['huyen_linh_phap_bao', 'bat_diet_than_giap']));
+    const st1 = applyStun(A, 1.5, 'stun', B); A.ccImmune = 0; const st2 = applyStun(A, 1.5, 'stun', B);
+    dealDamage(B, A, 0, { flat: A.maxHp * 5, type: 'true', attack: 1, crit: false }); const alive1 = A.alive && A.hp >= 1;
+    A.fx.setShield(0); dealDamage(B, A, 0, { flat: A.maxHp * 5, type: 'true', attack: 2, crit: false }); const alive2 = A.alive;
+    ok('15c', 'Giải khống chế chỉ lần đầu; Bất Diệt Thần Giáp giữ 1 máu đúng 1 lần mỗi trận', st1 === false && st2 === true && alive1 && !alive2, { st1, st2, alive1, alive2 });
+    nextRound();
+    // vòng lặp: 2 bên đều phản đòn → mỗi đòn thật chỉ phản 1 lần, không phản lại phản đòn
+    ({ A, B } = setup(['phan_kich_chi_giap'], ['phan_kich_chi_giap']));
+    A.hp = A.maxHp = B.hp = B.maxHp = 99999;
+    const d0 = CombatAudit.artDepthBlocked || 0;
+    for (let i = 1; i <= 10; i++) dealDamage(B, A, 1, { attack: 300 + i, crit: false });
+    const reflA = procs(A), reflB = procs(B);
+    ok(16, 'Không có vòng lặp hiệu ứng vô hạn: 2 bên cùng phản đòn – 10 đòn thật → A phản 10 lần, B không phản lại phản đòn, độ sâu ≤ ' + ArtifactPassives.MAX_DEPTH,
+      reflA === 10 && reflB === 0 && ArtifactPassives.depth === 0 && ArtifactPassives.maxDepthSeen <= ArtifactPassives.MAX_DEPTH && (CombatAudit.artDepthBlocked || 0) === d0, { reflA, reflB, maxDepth: ArtifactPassives.maxDepthSeen });
+    nextRound();
+    // trận đầy đủ: nhiều nội tại cùng lúc, phản đòn 2 phía, kết thúc bình thường
+    const r = CombatTestRunner.run({ allies: [['thietve', 2, 3, 3, ['phan_kich_chi_giap', 'tu_linh_bao_giap', 'kim_cang_ho_giap']], ['hoa', 2, 3, 1, ['van_phap_linh_tinh', 'ngu_hanh_phap_an', 'hoa_linh_ho_giap']], ['linhy', 2, 4, 1, ['thanh_moc_phap_chau', 'sinh_menh_linh_chau']]],
+      enemies: [['mabinh', 2, 3, 4, ['phan_kich_chi_giap', 'huyet_kiem']], ['kiemdong', 2, 4, 4, ['phong_anh_kiem', 'thien_sat_kiem', 'tru_tien_kiem']], ['linhcung', 2, 3, 6, ['phong_loi_than_cung', 'lien_kich_thu_sao', 'thien_menh_thu_sao']]], seed: 99, keepState: true });
+    const kinds = Object.keys(combatLog.artByKind || {});
+    ok('16b', 'Trận nhiều nội tại (phản đòn 2 phía, hồi, khiên, thiêu, cộng dồn tốc đánh / chí mạng): kết thúc bình thường, không NaN, cộng dồn không vượt giới hạn',
+      r.result && r.result !== 'draw' && !r.anomalies.length && r.allies.concat(r.enemies).every(u => u.maxAtkMul <= 4.5) && ArtifactPassives.depth === 0, { result: r.result, time: r.time, kinds: kinds.length, anomalies: r.anomalies.slice(0, 3) });
+    nextRound();
+    return out;
+  }
+};
+if (window.__vkkt) window.__vkkt.EquipmentTestRunner = EquipmentTestRunner;
+
+</script>
 <script>/* js/20-debug.js */
 // Vạn Kiếm Kỳ Trận – Bảng Debug cho nhà phát triển (V1.5 FINAL). ẨN MẶC ĐỊNH.
 // Mở: thêm ?debug=1 vào địa chỉ · Ctrl+Shift+D (Windows) · chạm nhanh 5 lần vào ô FPS (Android).
@@ -10467,7 +11833,7 @@ const DebugPanel = {
     el.innerHTML = `<button class="x" data-a="close" aria-label="Đóng bảng Debug">✕</button><h4>Debug</h4><pre id="dbg-stats"></pre>
       <h4>Công cụ (không ghi bản lưu chính)</h4><div class="b">
       <button data-a="fight">Trận thử</button><button data-a="lineup">Đội hình thử</button><button data-a="end">Kết thúc thử</button>
-      <button data-a="reset">Đặt lại vòng</button><button data-a="sim">Mô phỏng 100 trận</button><button data-a="log">Nhật ký kỹ năng</button><button data-a="export">Xuất báo cáo</button></div>
+      <button data-a="reset">Đặt lại vòng</button><button data-a="items">Kho thử (16 nguyên liệu)</button><button data-a="eqtest">Kiểm thử trang bị</button><button data-a="sim">Mô phỏng 100 trận</button><button data-a="log">Nhật ký kỹ năng</button><button data-a="export">Xuất báo cáo</button></div>
       <h4 id="dbg-outh" hidden>Kết quả</h4><pre id="dbg-out"></pre>`;
     document.body.appendChild(el);
     el.addEventListener('click', e => { const b = e.target.closest('button'); if (b) this.act(b.dataset.a); });
@@ -10520,6 +11886,17 @@ ${s.phase} · vòng ${s.round} · bước ${s.step} (${s.time} s) · seed ${s.se
       const t = this.testTeams(); this.setupTest(t);
       if (a === 'fight') { battle.seedOverride = t.seed; startBattle(); battle.seedOverride = null; battle.enemyTraits = false; }
       this.out((a === 'fight' ? 'Trận thử' : 'Đội hình thử') + ' · seed ' + t.seed + '\nTa: ' + t.A.map(u => u[0] + '★' + u[1]).join(' ') + '\nĐịch: ' + t.B.map(u => u[0] + '★' + u[1]).join(' '));
+      return;
+    }
+    if (a === 'items') {   // cấp nguyên liệu thử nghiệm – chỉ trong chế độ thử, "Kết thúc thử" trả lại kho thật
+      if (!this.enterSandbox()) return ui.toast('Đang giao chiến – chờ hết trận');
+      let n = 0; for (const k of COMPONENT_KEYS) for (let i = 0; i < 2; i++) if (ArtifactInventory.add(k, true).ok) n++;
+      ui.update(); this.out('Kho thử: +' + n + ' nguyên liệu (không ghi vào bản lưu chính – bấm "Kết thúc thử" để trả lại kho thật).'); return;
+    }
+    if (a === 'eqtest') {
+      if (battle.phase === 'fight') return ui.toast('Đang giao chiến – chờ hết trận');
+      this.out('Đang chạy EquipmentTestRunner…');
+      setTimeout(() => { const r = EquipmentTestRunner.run(); this.out(`EquipmentTestRunner: ${r.pass}/${r.total} PASS · ${r.ms} ms\n` + r.results.map(x => (x.ok ? 'PASS ' : 'FAIL ') + x.id + ' ' + x.name).join('\n')); }, 30);
       return;
     }
     if (a === 'end') {

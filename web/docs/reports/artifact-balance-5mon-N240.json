@@ -1,0 +1,93 @@
+{
+ "n": 240,
+ "seed": 707,
+ "ms": 58534,
+ "roles": {
+  "tank": 43,
+  "assassin": 29,
+  "mage": 123,
+  "support": 7,
+  "fighter": 38
+ },
+ "base": 0.44166666666666665,
+ "rows": [
+  {
+   "id": "none",
+   "name": "(không đồ)",
+   "kind": "",
+   "winRate": 0.442,
+   "delta": 0,
+   "dealt": 1332.5,
+   "taken": 1253.2,
+   "healed": 157.3,
+   "shielded": 153.1,
+   "procs": 0,
+   "survival": 18.8
+  },
+  {
+   "id": "huyen_linh_phap_bao",
+   "name": "Huyền Linh Pháp Bào",
+   "kind": "cleanseOnce",
+   "winRate": 0.5,
+   "delta": 0.058,
+   "dealt": 1496.7,
+   "taken": 1373.1,
+   "healed": 173.1,
+   "shielded": 169.2,
+   "procs": 0.3,
+   "survival": 20.4
+  },
+  {
+   "id": "ngu_hanh_phap_an",
+   "name": "Ngũ Hành Pháp Ấn",
+   "kind": "shredOnSkill",
+   "winRate": 0.475,
+   "delta": 0.033,
+   "dealt": 1460.2,
+   "taken": 1257.7,
+   "healed": 183.9,
+   "shielded": 181.1,
+   "procs": 5.9,
+   "survival": 19.3
+  },
+  {
+   "id": "tu_linh_than_cung",
+   "name": "Tụ Linh Thần Cung",
+   "kind": "manaOnHit",
+   "winRate": 0.504,
+   "delta": 0.063,
+   "dealt": 1533.7,
+   "taken": 1236.4,
+   "healed": 174.6,
+   "shielded": 184.2,
+   "procs": 13,
+   "survival": 19.1
+  },
+  {
+   "id": "tru_tien_kiem",
+   "name": "Tru Tiên Kiếm",
+   "kind": "rampAtk",
+   "winRate": 0.613,
+   "delta": 0.171,
+   "dealt": 1905.2,
+   "taken": 1141.6,
+   "healed": 160.4,
+   "shielded": 129.1,
+   "procs": 7.2,
+   "survival": 18.2
+  },
+  {
+   "id": "kim_cang_ho_giap",
+   "name": "Kim Cang Hộ Giáp",
+   "kind": "startShield",
+   "winRate": 0.544,
+   "delta": 0.102,
+   "dealt": 1600.7,
+   "taken": 1423,
+   "healed": 156.9,
+   "shielded": 512,
+   "procs": 1,
+   "survival": 22
+  }
+ ]
+}

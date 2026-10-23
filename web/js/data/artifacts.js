@@ -83,7 +83,8 @@ const ARTIFACT_LIST = [
   ['cuu_thien_phap_truong', 'Cửu Thiên Pháp Trượng', 'staff', 'staff',    { skillDmg: 0.15 },          { kind: 'stat' }],
   ['phong_loi_phap_chau', 'Phong Lôi Pháp Châu',    'staff', 'bow',       {},                          { kind: 'aspdOnCast', pct: 0.35, dur: 4 }],
   ['hoa_linh_ho_giap',    'Hỏa Linh Hộ Giáp',       'staff', 'armor',     {},                          { kind: 'burnAura', every: 2, radius: 2.5, power: 0.25 }],
-  ['ngu_hanh_phap_an',    'Ngũ Hành Pháp Ấn',       'staff', 'cloak',     {},                          { kind: 'shredOnSkill', stat: 'mr', pct: 0.3, dur: 5 }],
+  // V1.6: đo giá trị biên (240 cặp trận) chỉ +2,1% → thêm 10 phép, giảm kháng phép 30% → 40%, 5 → 6 giây
+  ['ngu_hanh_phap_an',    'Ngũ Hành Pháp Ấn',       'staff', 'cloak',     { ap: 10 },                  { kind: 'shredOnSkill', stat: 'mr', pct: 0.4, dur: 6 }],
   ['van_phap_linh_tinh',  'Vạn Pháp Linh Tinh',     'staff', 'crystal',   {},                          { kind: 'manaAfterCast', amount: 20 }],
   ['thanh_moc_phap_chau', 'Thanh Mộc Pháp Châu',    'staff', 'jade',      {},                          { kind: 'healOnCast', pct: 0.12, who: 'weakest', cd: 2 }],
   ['thien_menh_phap_an',  'Thiên Mệnh Pháp Ấn',     'staff', 'glove',     { skillDmg: 0.1, critDmg: 0.2 }, { kind: 'stat' }],
@@ -98,7 +99,8 @@ const ARTIFACT_LIST = [
   ['tu_linh_bao_giap',    'Tụ Linh Bảo Giáp',       'armor', 'crystal',   {},                          { kind: 'manaOnDamaged', amount: 3, cd: 0.5 }],
   ['kim_cang_ho_giap',    'Kim Cang Hộ Giáp',       'armor', 'jade',      {},                          { kind: 'startShield', pct: 0.25, dur: 6 }],
   ['phan_kich_chi_giap',  'Phản Kích Chi Giáp',     'armor', 'glove',     {},                          { kind: 'thorns', pct: 0.2 }],
-  ['huyen_linh_phap_bao', 'Huyền Linh Pháp Bào',    'cloak', 'cloak',     {},                          { kind: 'cleanseOnce', immune: 1 }],
+  // V1.6: đo giá trị biên (240 cặp trận) chỉ +0,4% (giải khống chế ~0,3 lần / trận, chỉ có kháng phép) → thêm 200 máu
+  ['huyen_linh_phap_bao', 'Huyền Linh Pháp Bào',    'cloak', 'cloak',     { hp: 200 },                 { kind: 'cleanseOnce', immune: 1 }],
   ['linh_khi_phap_bao',   'Linh Khí Pháp Bào',      'cloak', 'crystal',   {},                          { kind: 'teamManaStart', amount: 15 }],
   ['bang_tam_ngoc',       'Băng Tâm Ngọc',          'cloak', 'jade',      {},                          { kind: 'regen', pct: 0.01 }],
   ['u_minh_thu_sao',      'U Minh Thủ Sáo',         'cloak', 'glove',     {},                          { kind: 'execute', below: 0.3, pct: 0.3 }],

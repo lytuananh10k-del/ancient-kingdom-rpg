@@ -74,7 +74,10 @@ function fitPrepCamera() {
   const PTS_FULL = [[9.3, 0, -11.9], [-9.3, 0, -11.9], [9.3, 0, 6.9], [-9.3, 0, 6.9], [4, 2.4, 5.8], [-4, 2.4, 5.8]];
   let cx = 0, cy = 0, pts = PTS_ALLY;
   // Vùng trống: hoặc nằm dưới cột thông tin bên trái (màn dọc), hoặc bên phải nó (màn ngang) – thử cả hai, lấy hình to hơn.
-  const rects = [{ l: 6, r: W - 6, t: Math.max(ta, lc.bottom + 6), b: bottom }, { l: lc.right + 8, r: W - 6, t: ta, b: bottom }];
+  // Kho pháp bảo (dock phải, V1.6): vùng trống không được lấn dưới dock (chỉ khi dock chồng theo chiều dọc với vùng đó)
+  const dk = document.getElementById('art-dock'), dr = dk && !dk.hidden ? dk.getBoundingClientRect() : null;
+  const right = (t, b) => (dr && dr.width && dr.bottom > t && dr.top < b ? Math.min(W - 6, dr.left - 6) : W - 6);
+  const rects = [{ l: 6, r: right(Math.max(ta, lc.bottom + 6), bottom), t: Math.max(ta, lc.bottom + 6), b: bottom }, { l: lc.right + 8, r: right(ta, bottom), t: ta, b: bottom }];
   const search = () => {
   let best = null;
   for (const R of rects) {
