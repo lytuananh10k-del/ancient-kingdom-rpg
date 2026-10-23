@@ -12,9 +12,9 @@ const TRAIT_EVENTS = ['onBattleStart', 'onAttack', 'onHit', 'onDamageTaken', 'on
 const TraitEvents = {
   h: {},
   on(ev, fn) { if (!this.h[ev]) throw new Error('Sự kiện tộc/hệ lạ: ' + ev); this.h[ev].push(fn); return fn; },
-  emit(ev, a, b, c, d) {
+  emit(ev, a, b, c, d, e) {
     const L = this.h[ev];
-    for (let i = 0; i < L.length; i++) { try { L[i](a, b, c, d); } catch (e) { console.error('[Tộc/hệ ' + ev + ']', e); } }
+    for (let i = 0; i < L.length; i++) { try { L[i](a, b, c, d, e); } catch (e) { console.error('[Tộc/hệ ' + ev + ']', e); } }
   },
   clear() { for (const k of TRAIT_EVENTS) this.h[k].length = 0; },
   size() { let n = 0; for (const k of TRAIT_EVENTS) n += this.h[k].length; return n; }
@@ -69,7 +69,7 @@ const TraitEngine = {
     const b = defaultBonus(), s = this.layerFor(u, active);
     b.atk = 1 + s.atk; b.hp = 1 + s.hp; b.defMul = 1 + s.def; b.aspd = 1 + s.aspd; b.skill = 1 + s.skill;
     b.omni = s.omni; b.manaGain = 1 + s.mana; b.heal = 1 + s.heal; b.traitStats = s;
-    for (const it of u.items || []) if (ITEMS[it]) ITEMS[it].apply(b);
+    ArtifactStats.apply(b, u.items);   // lớp trang bị (pháp bảo): cộng thẳng / % cộng dồn – js/items/artifact-system.js
     return b;
   },
   /** Áp lớp tộc/hệ cho mọi tướng theo đội hình hiện tại (giai đoạn chuẩn bị & lúc vào trận). announce: hiệu ứng khi mốc mới bật. */

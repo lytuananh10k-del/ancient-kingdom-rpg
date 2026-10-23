@@ -111,8 +111,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .ui-stats dd { white-space: nowrap; }
 @media (max-height: 520px) and (orientation: landscape) {   /* màn ngang thấp: 2 cột cho bảng thấp hơn */
   #unit-info { width: min(440px, 58vw); display: grid; grid-template-columns: 1fr 1fr; column-gap: 10px;
-    grid-template-areas: "head head" "tags tags" "bars skill" "stats skill" "foot foot"; align-content: start; }
-  #unit-info .ui-head { grid-area: head; } #ui-tags { grid-area: tags; } #ui-bars { grid-area: bars; } #ui-stats { grid-area: stats; } #ui-foot { grid-area: foot; }
+    grid-template-areas: "head head" "tags tags" "items items" "bars skill" "stats skill" "foot foot"; align-content: start; }
+  #unit-info .ui-head { grid-area: head; } #ui-tags { grid-area: tags; } #ui-items { grid-area: items; } #ui-bars { grid-area: bars; } #ui-stats { grid-area: stats; } #ui-foot { grid-area: foot; }
   #unit-info .ui-skill { grid-area: skill; border-top: 0; padding-top: 0; border-left: 1px solid var(--panel-line); padding-left: 8px; }
   #unit-info .ui-mana { float: none; display: block; }
 }
@@ -198,21 +198,12 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 #odds { display: flex; flex-wrap: wrap; gap: 2px 10px; font-size: 0.66rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 #odds b { font-weight: 700; } #odds .o1 { color: #a8c0bb; } #odds .o2 { color: #7cc4ff; } #odds .o3 { color: #c9a0ff; } #odds .o4 { color: #f0b44a; } #odds .o5 { color: #ff7a5a; }
 #odds .z { opacity: 0.4; }
-#items-row { display: flex; align-items: center; gap: 6px; }
-#items-row[hidden] { display: none; }
-#items-row .lbl { font-size: 0.68rem; color: var(--muted); }
-#items { display: flex; flex-wrap: wrap; gap: 4px; }
-.item { min-width: 40px; min-height: 32px; padding: 2px 7px; border-radius: 8px; border: 1px solid var(--c); background: rgba(0,0,0,0.35); color: var(--c); font-size: 0.72rem; font-weight: 700; touch-action: none; }
-.item.sel { background: var(--c); color: #111; }
-.item-ghost { position: fixed; z-index: 30; pointer-events: none; transform: translate(-50%, -120%); }
 .timer { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 0.85rem; color: var(--paper); background: rgba(255,255,255,0.08); border-radius: 6px; padding: 1px 6px; }
 .timer.low { color: #ffb3a6; background: rgba(226,85,63,0.25); }
 .timer.ot { color: #ffd166; }
 .monster-tag { font-size: 0.7rem; color: #9fffa0; border: 1px solid rgba(127,224,138,0.5); border-radius: 999px; padding: 0 6px; margin-left: 6px; vertical-align: middle; font-family: var(--font-ui); }
 .econ .int { color: var(--muted); }
 .econ .int b { color: var(--gold); }
-.ui-items { display: flex; flex-wrap: wrap; gap: 4px; margin: 0 0 6px; }
-.ui-items span { font-size: 0.68rem; padding: 1px 6px; border-radius: 6px; border: 1px solid var(--c); color: var(--c); }
 .shop-actions { display: flex; gap: 5px; flex-wrap: wrap; }
 .sbtn { min-height: 40px; flex: 1 1 auto; background: rgba(255,255,255,0.06); border: 1px solid var(--panel-line); border-radius: 8px; padding: 8px 10px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; }
 .sbtn:disabled { opacity: 0.45; cursor: default; }
@@ -263,6 +254,57 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 #toast { position: fixed; left: 50%; top: 27%; transform: translateX(-50%); z-index: 7; pointer-events: none;
   background: var(--panel); border: 1px solid var(--panel-line); border-radius: 10px; padding: 8px 14px; font-size: 0.85rem; max-width: 90vw; text-align: center; }
 
+/* ---------- Kho pháp bảo (V1.6): dock bên phải, thu gọn được; ô 44 px (chạm được trên Android) ---------- */
+#art-dock { position: fixed; z-index: 6; right: max(10px, env(safe-area-inset-right, 0px)); top: calc(env(safe-area-inset-top, 0px) + 56px); width: 104px; box-sizing: border-box;
+  background: var(--panel); border: 1px solid var(--panel-line); border-radius: 12px; padding: 4px; display: flex; flex-direction: column; gap: 4px; pointer-events: auto; touch-action: none; }
+#art-dock.collapsed { width: auto; }
+#art-dock.collapsed #ad-grid, #art-dock.collapsed #ad-hint { display: none; }
+#art-dock .ad-head { display: flex; gap: 4px; }
+#ad-toggle { flex: 1; min-height: 32px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--panel-line); font-size: 0.72rem; font-weight: 700; color: var(--gold); white-space: nowrap; padding: 0 6px; }
+#ad-toggle b { color: var(--paper); font-weight: 600; }
+#ad-book { min-width: 30px; min-height: 32px; padding: 0; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--panel-line); font-size: 0.8rem; }
+#art-dock.collapsed #ad-book { display: none; }
+#ad-grid { display: grid; grid-template-columns: repeat(2, 44px); gap: 4px; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; }
+.aslot { position: relative; width: 44px; height: 44px; border-radius: 9px; border: 1px dashed rgba(196,220,214,0.18); background: rgba(0,0,0,0.25); padding: 0; touch-action: none;
+  display: grid; place-items: center; font-family: "Noto Serif SC", "Noto Serif", serif; line-height: 1; }
+.aslot.full { border: 1px solid var(--c); background: color-mix(in srgb, var(--c) 18%, rgba(0,0,0,0.55)); color: var(--c); }
+.aslot.comp .g { font-size: 1.15rem; font-weight: 700; }
+.aslot.art { border-width: 2px; border-color: var(--c); box-shadow: inset 0 0 0 1px var(--c2), 0 0 8px color-mix(in srgb, var(--c) 40%, transparent); }
+.aslot.art .g { font-size: 0.82rem; font-weight: 700; letter-spacing: -0.05em; background: linear-gradient(90deg, var(--c), var(--c2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.aslot .n { position: absolute; left: 2px; right: 2px; bottom: 1px; font: 600 0.5rem/1.1 var(--font-ui); color: var(--paper); opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.aslot.over { border-color: var(--cinnabar) !important; }
+.aslot.over::after { content: 'tạm'; position: absolute; top: 1px; right: 2px; font: 700 0.48rem var(--font-ui); color: var(--cinnabar); }
+.aslot.sel { outline: 2px solid var(--gold); outline-offset: 1px; }
+.aslot.lock { opacity: 0.55; }
+.aslot.drop { outline: 2px dashed var(--jade); }
+#ad-hint { font-size: 0.6rem; line-height: 1.3; color: var(--muted); padding: 0 2px; }
+#ad-hint:empty { display: none; }
+.art-ghost { position: fixed; z-index: 30; pointer-events: none; transform: translate(-50%, -120%); }
+#art-tip { position: fixed; z-index: 12; width: min(270px, calc(100vw - 16px)); background: rgba(14, 20, 24, 0.97); border: 1px solid var(--c, var(--panel-line)); border-radius: 10px;
+  padding: 8px 10px; font-size: 0.74rem; line-height: 1.4; white-space: pre-line; pointer-events: none; }
+#art-tip b { color: var(--c, var(--gold)); font-size: 0.82rem; }
+#art-tip .d { color: var(--jade); }
+#art-tip .x { color: var(--cinnabar); }
+#art-craft { position: fixed; z-index: 13; width: min(300px, calc(100vw - 20px)); background: rgba(10, 16, 22, 0.97); border: 1px solid var(--gold); border-radius: 12px; padding: 10px 12px; font-size: 0.78rem; line-height: 1.4; pointer-events: auto; }
+#art-craft h4 { margin: 0 0 4px; font-family: var(--font-display); font-size: 1.15rem; color: var(--gold); }
+#art-craft .eq { color: var(--muted); font-size: 0.72rem; }
+#art-craft .ps { margin: 6px 0; color: var(--paper); }
+#art-craft .row { display: flex; gap: 6px; margin-top: 8px; }
+#art-craft .row button { flex: 1; min-height: 40px; border-radius: 9px; font-weight: 700; border: 1px solid var(--panel-line); background: rgba(255,255,255,0.06); }
+#art-craft .row .ok { background: var(--gold); color: #1a1408; border-color: var(--gold); }
+#art-book table { border-collapse: collapse; font-size: 0.62rem; margin-top: 6px; }
+#art-book th, #art-book td { border: 1px solid var(--panel-line); padding: 2px; text-align: center; }
+#art-book th { font-family: "Noto Serif SC", serif; font-size: 0.85rem; }
+#art-book td button { width: 100%; min-height: 30px; font-size: 0.58rem; line-height: 1.15; color: var(--c); padding: 1px; }
+#art-book td.diag { background: rgba(255,255,255,0.04); }
+#art-book .detail { margin-top: 8px; white-space: pre-line; font-size: 0.76rem; line-height: 1.45; min-height: 3em; }
+.ui-items { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin: 0 0 6px; }
+.ui-items .eqs { position: relative; min-height: 38px; border-radius: 8px; border: 1px dashed var(--panel-line); background: rgba(0,0,0,0.25); font-size: 0.6rem; line-height: 1.15; padding: 3px 4px; text-align: left; color: var(--muted); }
+.ui-items .eqs.full { border: 1px solid var(--c); color: var(--c); background: color-mix(in srgb, var(--c) 14%, rgba(0,0,0,0.4)); }
+.ui-items .eqs.sel { outline: 2px solid var(--gold); }
+.ui-items .eqs small { display: block; color: var(--muted); font-size: 0.55rem; }
+.ui-items .eqs .un { position: absolute; top: 1px; right: 2px; width: 18px; height: 18px; border-radius: 5px; font-size: 0.6rem; background: rgba(255,255,255,0.08); color: var(--paper); }
+.ui-art-preview { grid-column: 1 / -1; font-size: 0.64rem; color: var(--jade); }
 /* ---------- Bảng cài đặt ---------- */
 .sheet {
   position: fixed; z-index: 20; right: max(10px, env(safe-area-inset-right, 0px)); top: calc(env(safe-area-inset-top, 0px) + 58px);
@@ -355,15 +397,31 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
   </div>
   <div class="ui-tags" id="ui-tags"></div>
   <div class="ui-bars" id="ui-bars"></div>
+  <div class="ui-items" id="ui-items" aria-label="3 ô pháp bảo"></div>
   <dl class="ui-stats" id="ui-stats"></dl>
-  <div class="ui-items" id="ui-items"></div>
   <div class="ui-skill"><b id="ui-skill-name"></b><span class="ui-mana" id="ui-skill-mana"></span><p id="ui-skill-desc"></p></div>
   <div class="ui-foot" id="ui-foot"></div>
 </aside>
 
+<aside id="art-dock" aria-label="Kho pháp bảo">
+  <div class="ad-head">
+    <button id="ad-toggle" aria-expanded="true" aria-controls="ad-grid" title="Thu gọn / mở Kho pháp bảo" aria-label="Kho pháp bảo – thu gọn / mở">法 <b id="ad-count">0/10</b></button>
+    <button id="ad-book" aria-controls="art-book" title="Xem 36 công thức ghép" aria-label="Xem 36 công thức ghép">📜</button>
+  </div>
+  <div id="ad-grid" role="list" aria-label="Nguyên liệu và pháp bảo trong kho"></div>
+  <div id="ad-hint" aria-live="polite"></div>
+</aside>
+<div id="art-tip" hidden role="tooltip"></div>
+<div id="art-craft" hidden role="dialog" aria-label="Xác nhận ghép pháp bảo"></div>
+<section class="sheet" id="art-book" hidden aria-label="Bảng công thức pháp bảo">
+  <div class="sheet-head"><h2>36 công thức pháp bảo</h2><button class="close" id="btn-book-close" aria-label="Đóng bảng công thức">✕</button></div>
+  <p class="note">Ghép 2 nguyên liệu (không phân biệt thứ tự) trong kho để tạo pháp bảo. Chạm một ô để xem chỉ số và nội tại.</p>
+  <div id="book-table"></div>
+  <div class="detail" id="book-detail"></div>
+</section>
+
 <div class="hud-bottom">
   <div id="prep-panel">
-    <div id="items-row" hidden><span class="lbl">Túi</span><div id="items" aria-label="Túi trang bị – chạm hoặc kéo lên tướng để gắn"></div></div>
     <div id="shop" aria-label="Cửa hàng tu sĩ"></div>
     <div id="odds" aria-label="Tỉ lệ xuất hiện theo bậc ở cấp hiện tại"></div>
     <div class="shop-actions">
@@ -463,10 +521,14 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 <script src="js/combat/skill-executor.js"></script>
 <script src="js/data/skills.js"></script>
 <script src="js/data/traits.js"></script>
+<script src="js/data/artifacts.js"></script>
 <script src="js/combat/traits-engine.js"></script>
+<script src="js/items/artifact-system.js"></script>
+<script src="js/items/artifact-passives.js"></script>
 <script src="js/14-game.js"></script>
 <script src="js/15-input.js"></script>
 <script src="js/16-ui.js"></script>
+<script src="js/items/artifact-ui.js"></script>
 <script src="js/17-benchmark.js"></script>
 <script src="js/18-glb-import.js"></script>
 <script src="js/19-main.js"></script>

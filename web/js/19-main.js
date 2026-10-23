@@ -25,6 +25,7 @@ function simStep(dt) {
   Projectiles.update(dt);
   SimTasks.update(dt);
   TraitEngine.update(dt);
+  ArtifactPassives.update(dt);   // nội tại pháp bảo theo thời gian (đồng hồ mô phỏng)
   checkBattleEnd();
 }
 /** PerfStats: thời gian khung hình (vòng 600 khung), thời gian cập nhật game / render (ms, trung bình trượt), draw call, tam giác.
@@ -114,12 +115,14 @@ renderer.domElement.addEventListener('webglcontextrestored', () => {
 }, false);
 
 (function boot() {
-  const bad = validateChampions();
+  const bad = validateChampions().concat(validateArtifacts());
   if (bad.length) console.error('[Vạn Kiếm] Dữ liệu tướng lỗi:\n' + bad.join('\n'));
   // Bản lưu: chuyển phiên bản cũ + làm sạch (parseSave). Hỏng / của bản mới hơn → SAO LƯU nguyên văn sang vkkt_save_backup
   // trước khi ván mới ghi đè, để không bao giờ mất dữ liệu có thể còn cứu được.
   let raw = null; try { raw = localStorage.getItem('vkkt_save'); } catch (e) { /* bộ nhớ bị chặn */ }
   const ld = parseSave(raw), ok = ld.status === 'ok';
+  // Nâng phiên bản bản lưu (vd v2 → v3 pháp bảo): giữ bản gốc ở vkkt_save_backup_v<cũ> TRƯỚC khi bản mới ghi đè (không ghi đè bản sao đã có)
+  if (ok && ld.from < SAVE_VERSION) { try { const k = 'vkkt_save_backup_v' + ld.from; if (localStorage.getItem(k) === null) localStorage.setItem(k, raw); } catch (e) { /* đầy / bị chặn */ } }
   if (ld.status === 'bad' || ld.status === 'newer') {
     try { localStorage.setItem('vkkt_save_backup', raw); } catch (e) { /* đầy / bị chặn */ }
     console.warn('[Lưu] Không tải được bản lưu (' + ld.reason + ') – đã sao lưu sang vkkt_save_backup, bắt đầu ván mới');
@@ -146,4 +149,6 @@ window.__vkkt = { units, battle, timelines, QualityManager, startBattle, forceUl
   PerfStats, appState, CombatRNG, crand, CombatAudit, DamageCalculator, defenseFactor, DAMAGE, BATTLE_RULES, STATUS, applyBurn, SimTasks, DangerZones, NavGrid, Projectiles, checkBattleEnd, STEP, simStep, RARITY, RIG_FACTORIES, GLB_LOADED, replaceChampionRig, applyStun, dealDamage, healUnit, giveShield, applySlow,
   combatLog, ROLES, SKILLS, placeUnit, removeUnit, setupRound, BOARD,
   cameraSettled: () => Math.abs(combatCam.dist - combatCam.tDist) < 0.05 && Math.abs(combatCam.target.z - prepFit.tz) < 0.05 && Math.abs(lens.x - prepFit.shiftX) + Math.abs(lens.y - prepFit.shiftY) < 1,
-  poolLeft, poolOwned, POOL_SIZE, SHOP_POOL, SHOP_ODDS, rollShop, rivalsDraft, ITEMS, equipItem, isMonsterRound, interestOf, streakBonusOf, autoFillBoard };
+  poolLeft, poolOwned, POOL_SIZE, SHOP_POOL, SHOP_ODDS, rollShop, rivalsDraft, isMonsterRound,
+  COMPONENTS, COMPONENT_KEYS, ARTIFACTS, ARTIFACT_LIST, RECIPES, ITEM_DB, recipeOf, validateArtifacts, itemTooltip, LEGACY_ITEM_MAP, PASSIVE_KINDS, ARTIFACT_REWARDS,
+  ArtifactInventory, ArtifactCraftingSystem, ArtifactEquipment, ArtifactPassives, ArtifactRewards, ArtifactStats, ArtifactUI, equipArtifact, unequipArtifact, rosterCids, findOwner, ensureCid, newCid, INV_CAP, MAX_EQUIP, Unit, interestOf, streakBonusOf, autoFillBoard };

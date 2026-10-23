@@ -8,20 +8,14 @@
 /* ---------- Tộc / hệ ---------- */
 /* TRAITS: xem js/data/traits.js */
 /** Hệ số cộng thêm của 1 tướng (đều trung tính). Lớp tộc/hệ: atk, hp, defMul, aspd, skill, omni, manaGain, heal (TraitEngine.computeBonus);
- *  trang bị nhân / cộng tiếp lên trên (atk, def phẳng, hpAdd phẳng, aspd, skill, mana0, ls). */
-const defaultBonus = () => ({ atk: 1, hp: 1, hpAdd: 0, skill: 1, mana0: 0, ls: 0, aspd: 1, def: 0, defMul: 1, omni: 0, manaGain: 1, heal: 1, traitStats: null });
+ *  lớp trang bị (ArtifactStats.apply) cộng thẳng: atkAdd, apAdd, def, mr, hpAdd, mana0; cộng % : aspd, crit, critDmg, ls, omni, skillDmg. */
+const defaultBonus = () => ({ atk: 1, hp: 1, hpAdd: 0, skill: 1, mana0: 0, ls: 0, aspd: 1, def: 0, defMul: 1, omni: 0, manaGain: 1, heal: 1, traitStats: null,
+  atkAdd: 0, apAdd: 0, mr: 0, crit: 0, critDmg: 0, skillDmg: 1, equip: null });
 
-/* ---------- Trang bị (rơi ở vòng yêu thú; tối đa 3 món mỗi tướng, gắn rồi không tháo – bán tướng thì trả về túi) ---------- */
-const ITEMS = {
-  kiem: { name: 'Thanh Phong Kiếm', short: 'Kiếm', color: '#ff9a6a', desc: '+18% công', apply: b => { b.atk *= 1.18; } },
-  giap: { name: 'Huyền Thiết Giáp', short: 'Giáp', color: '#b8c4cc', desc: '+25 giáp', apply: b => { b.def += 25; } },
-  chau: { name: 'Tụ Linh Châu', short: 'Châu', color: '#9fc7ff', desc: '+20 linh lực đầu trận, tuyệt kỹ +10%', apply: b => { b.mana0 += 20; b.skill *= 1.1; } },
-  phu: { name: 'Hộ Mệnh Phù', short: 'Phù', color: '#9ff0d0', desc: '+250 máu', apply: b => { b.hpAdd += 250; } },
-  ngoa: { name: 'Phong Hành Ngoa', short: 'Ngoa', color: '#e9e3a0', desc: '+18% tốc đánh', apply: b => { b.aspd *= 1.18; } },
-  ngoc: { name: 'Huyết Ngọc', short: 'Ngọc', color: '#ff7a8a', desc: '+15% hút máu', apply: b => { b.ls += 0.15; } }
-};
-const ITEM_KEYS = Object.keys(ITEMS), MAX_ITEMS_PER_UNIT = 3, MAX_INVENTORY = 10;
-const entryOf = u => ({ key: u.key, star: u.star, items: (u.items || []).slice() });
+/* ---------- Trang bị: hệ thống Pháp bảo V1.6 – dữ liệu js/data/artifacts.js, sổ / ghép / trang bị js/items/artifact-system.js ---------- */
+const MAX_ITEMS_PER_UNIT = MAX_EQUIP;
+/** Mục hàng chờ của một tướng: { key, star, cid } – đồ KHÔNG chép theo, nằm trong sổ ArtifactInventory theo cid. */
+const entryOf = u => ({ key: u.key, star: u.star, cid: u.cid || newCid() });
 
 /* ---------- Kinh tế & cửa hàng ---------- */
 /** Tướng bán ở cửa hàng theo bậc – lấy thẳng từ danh sách 24 tướng (js/data/champions.js). */
@@ -36,7 +30,7 @@ const XP_NEED = [0, 2, 2, 6, 10, 20, 36, 48, 72, Infinity]; // kinh nghiệm đ�
 const MAX_LEVEL = 9, BENCH_SIZE = BENCH.slots, SHOP_SIZE = 5, REROLL_COST = 2, XP_COST = 4, XP_BUY = 4, START_HP = 100;
 const sellPrice = (key, star) => UNIT_DEFS[key].cost * Math.pow(3, star - 1) - (star > 1 ? 1 : 0);
 const game = { hp: START_HP, gold: 6, level: 3, xp: 0, streak: 0, bench: new Array(BENCH_SIZE).fill(null), shop: [], over: false, sel: null, lastSummary: '',
-  rivals: {}, items: [], selItem: -1, lastRewards: null, prepT: 0 };
+  rivals: {}, lastRewards: null, prepT: 0, rewardLog: [] };
 
 const boardAllies = () => units.filter(u => u.team === 'ally');
 const boardCap = () => game.level;
@@ -89,8 +83,11 @@ function rivalsDraft(round) {
 function countCopies(key, star) {
   return game.bench.filter(e => e && e.key === key && e.star === star).length + boardAllies().filter(u => u.key === key && u.star === star).length;
 }
-function placeUnit(key, star, c, r, items = []) {
-  const u = new Unit(key, 'ally', c, r, star); units.push(u); u.items = items.slice(); TraitCounter.invalidate();
+/** Đặt tướng phe ta lên ô (c, r). owner: cid (bản sao tướng của người chơi – đồ đọc từ sổ) hoặc mảng itemId (tướng thử nghiệm, không thuộc sổ). */
+function placeUnit(key, star, c, r, owner) {
+  const u = new Unit(key, 'ally', c, r, star); units.push(u);
+  if (typeof owner === 'string') u.cid = owner; else if (Array.isArray(owner)) u.items = owner;
+  TraitCounter.invalidate();
   u.rig.setOutline && u.rig.setOutline(Q().outline);
   return u;
 }
@@ -105,7 +102,7 @@ function syncBench() {
     let u;
     if (k >= 0) u = pool.splice(k, 1)[0];
     else { u = new Unit(e.key, 'ally', 0, 0, e.star); u.rig.setOutline && u.rig.setOutline(Q().outline); }
-    u.benchSlot = i; benchUnits[i] = u; u.items = (e.items || []).slice();
+    u.benchSlot = i; benchUnits[i] = u; u.cid = ensureCid(e);
     if (!u.dragging) benchSlotPos(i, u.pos);
   }
   pool.forEach(u => u.dispose());
@@ -117,13 +114,14 @@ function freeAllyTile() { for (let r = 3; r >= 0; r--) for (const c of [3, 4, 2,
 /** Gộp 3 bản cùng tướng cùng sao → lên sao. Ưu tiên giữ vị trí của bản đang đứng trên bàn. */
 function mergeAll() {
   let merged = true;
+  const skip = new Set();   // nhóm không nâng sao được lần này (kho đầy) – tránh lặp vô hạn
   while (merged) {
     merged = false;
     const groups = {};
     game.bench.forEach((e, i) => { if (e && e.star < 3) (groups[e.key + '|' + e.star] = groups[e.key + '|' + e.star] || { key: e.key, star: e.star, bench: [], board: [] }).bench.push(i); });
     boardAllies().forEach(u => { if (u.star < 3) (groups[u.key + '|' + u.star] = groups[u.key + '|' + u.star] || { key: u.key, star: u.star, bench: [], board: [] }).board.push(u); });
     for (const g of Object.values(groups)) {
-      if (g.bench.length + g.board.length < 3) continue;
+      if (g.bench.length + g.board.length < 3 || skip.has(g.key + '|' + g.star)) continue;
       const keepBoard = g.board[0] || null;
       let need = 3;
       const take = [];
@@ -132,20 +130,25 @@ function mergeAll() {
       let keepBench = -1;
       for (const i of g.bench) { if (need <= 0) break; if (!keepBoard && keepBench < 0) keepBench = i; take.push({ bench: i }); need--; }
       const newStar = g.star + 1;
+      // Pháp bảo (giao dịch nguyên tử): bản chính (trên bàn, không thì bản hàng chờ đầu) GIỮ đồ của nó; ô trống nhận đồ của 2 bản phụ;
+      // dư về kho / ô tạm giữ. Hết chỗ → KHÔNG nâng sao lần này (không mất, không nhân đôi đồ).
+      const cids = take.map(t => (t.board ? t.board.cid || (t.board.cid = newCid()) : ensureCid(game.bench[t.bench])));
+      const primary = keepBoard ? cids[0] : ensureCid(game.bench[keepBench]);
+      const tx = ArtifactEquipment.merge(primary, cids.filter(c => c !== primary));
+      if (!tx.ok) { skip.add(g.key + '|' + g.star); ui.toast('Chưa nâng sao ' + UNIT_DEFS[g.key].name + ': ' + tx.reason); continue; }
+      if (tx.value.toInv) ui.toast(tx.value.toInv + ' pháp bảo dư về kho');
       let spot;
-      const items = [];   // gộp trang bị của các bản; dư quá 3 món thì về túi
       take.forEach(t => {
-        if (t.board) { items.push(...(t.board.items || [])); if (t.board === keepBoard) spot = { ...t.board.homeTile }; removeUnit(t.board); }
-        else { items.push(...(game.bench[t.bench].items || [])); game.bench[t.bench] = null; }
+        if (t.board) { if (t.board === keepBoard) spot = { ...t.board.homeTile }; removeUnit(t.board); }
+        else game.bench[t.bench] = null;
       });
-      const keep = items.slice(0, MAX_ITEMS_PER_UNIT); items.slice(MAX_ITEMS_PER_UNIT).forEach(addItem);
       if (keepBoard) {
-        const u = placeUnit(g.key, newStar, spot.c, spot.r, keep);
+        const u = placeUnit(g.key, newStar, spot.c, spot.r, primary);
         vfx.particles.burst(u.chest(new V3()), COLORS.allyB, 40, 6, 0.8, 0.35, { up: 3, drag: 2 });
         vfx.magicCircle(u.pos, 1.4, COLORS.allyB, COLORS.allyA, { reveal: 0.3, life: 0.8, spin: 3 });
         floatText(u.chest(new V3()), '★'.repeat(newStar), '#ffd166', 1.5, true);
       } else {
-        game.bench[keepBench] = { key: g.key, star: newStar, items: keep };
+        game.bench[keepBench] = { key: g.key, star: newStar, cid: primary };
         const p = benchSlotPos(keepBench, new V3()); p.y = 1;
         vfx.particles.burst(p, COLORS.allyB, 36, 5, 0.8, 0.3, { up: 3, drag: 2 });
         floatText(p, '★'.repeat(newStar), '#ffd166', 1.4, true);
@@ -169,8 +172,14 @@ function buyShop(i) {
   const slot = game.bench.indexOf(null);
   if (slot < 0 && countCopies(key, 1) < 2) { ui.toast('Hàng chờ đã đầy – bán bớt hoặc kéo lên bàn'); return; }
   game.gold -= cost; game.shop[i] = null;
-  if (slot >= 0) game.bench[slot] = { key, star: 1, items: [] }; else game.bench.push({ key, star: 1, items: [] });
-  Sfx.chime(); mergeAll(); afterRosterChange();
+  const e = { key, star: 1, cid: newCid() };
+  if (slot >= 0) game.bench[slot] = e; else game.bench.push(e);
+  Sfx.chime(); mergeAll();
+  if (game.bench.length > BENCH_SIZE) {   // không gộp được (kho pháp bảo đầy) → huỷ lần mua, hoàn tiền
+    const x = game.bench.splice(BENCH_SIZE).find(Boolean); game.shop[i] = key; game.gold += cost;
+    if (x) ui.toast('Không mua được: hàng chờ đầy và chưa nâng sao được');
+  }
+  afterRosterChange();
 }
 function reroll() {
   if (battle.phase !== 'prep') return;
@@ -195,12 +204,15 @@ function buyXP() {
 function sellSelected() { if (game.sel) sellSrc(game.sel); }
 function sellSrc(sel) {
   if (!sel || battle.phase !== 'prep') return;
-  let key, star, items;
-  if (sel.type === 'bench') { const e = game.bench[sel.i]; if (!e) return; key = e.key; star = e.star; items = e.items || []; game.bench[sel.i] = null; }
-  else { key = sel.unit.key; star = sel.unit.star; items = sel.unit.items || []; removeUnit(sel.unit); }
+  let key, star, cid;
+  if (sel.type === 'bench') { const e = game.bench[sel.i]; if (!e) return; key = e.key; star = e.star; cid = ensureCid(e); }
+  else { key = sel.unit.key; star = sel.unit.star; cid = sel.unit.cid; }
+  // Pháp bảo về kho TRƯỚC (giao dịch nguyên tử); không đủ chỗ cả ô tạm giữ → huỷ bán, không mất đồ.
+  const back = cid ? ArtifactEquipment.returnAll(cid) : { ok: true, value: 0 };
+  if (!back.ok) { ui.toast('Không bán được: ' + back.reason); return; }
+  if (sel.type === 'bench') game.bench[sel.i] = null; else removeUnit(sel.unit);
   const price = sellPrice(key, star); game.gold += price;
-  items.forEach(addItem);   // trang bị trả về túi
-  ui.toast('Đã bán ' + UNIT_DEFS[key].name + ' +' + price + ' linh thạch' + (items.length ? ' · ' + items.length + ' trang bị về túi' : ''));
+  ui.toast('Đã bán ' + UNIT_DEFS[key].name + ' +' + price + ' linh thạch' + (back.value ? ' · ' + back.value + ' pháp bảo về kho' : ''));
   select(null); afterRosterChange();
 }
 function moveToBench(unit, slot) {
@@ -216,7 +228,7 @@ function benchToBoard(i, c, r) {
   if (!occ && boardAllies().length >= boardCap()) { ui.toast('Cấp ' + game.level + ' chỉ đặt được ' + boardCap() + ' tu sĩ – mua kinh nghiệm để lên cấp'); return false; }
   game.bench[i] = occ ? entryOf(occ) : null;
   if (occ) removeUnit(occ);
-  const u = placeUnit(e.key, e.star, c, r, e.items || []);
+  const u = placeUnit(e.key, e.star, c, r, ensureCid(e));
   vfx.particles.burst(_v1.set(u.pos.x, 0.3, u.pos.z), COLORS.allyA, 16, 3, 0.4, 0.25, { up: 2 });
   return true;
 }
@@ -235,22 +247,25 @@ function showHighlight(t, ok) {
 }
 function afterRosterChange() { applyTraits(true); boardAllies().forEach(u => u.reset(1)); saveGame(); ui.update(); }
 
-/* ---------- Túi trang bị ---------- */
-function addItem(key) { if (game.items.length < MAX_INVENTORY) game.items.push(key); else { game.gold += 2; ui.toast('Túi đầy – ' + ITEMS[key].name + ' đổi thành 2 linh thạch'); } }
-/** Gắn trang bị trong túi (vị trí idx) cho tướng trên bàn ({type:'board', unit}) hoặc hàng chờ ({type:'bench', i}). */
-function equipItem(idx, target) {
-  const key = game.items[idx]; if (!key || !target) return false;
-  const holder = target.type === 'board' ? target.unit : game.bench[target.i];
-  if (!holder) return false;
-  holder.items = holder.items || [];
-  if (holder.items.length >= MAX_ITEMS_PER_UNIT) { ui.toast('Mỗi tướng mang tối đa ' + MAX_ITEMS_PER_UNIT + ' trang bị'); return false; }
-  holder.items.push(key); game.items.splice(idx, 1); game.selItem = -1;
-  const name = UNIT_DEFS[holder.key].short || UNIT_DEFS[holder.key].name;
-  const u = target.type === 'board' ? target.unit : benchUnits[target.i];
-  if (u) { u.items = holder.items.slice(); vfx.particles.burst(u.chest(new V3()), COLORS.allyB, 24, 4, 0.6, 0.3, { up: 2, drag: 2 }); floatText(u.chest(new V3()), '+' + ITEMS[key].short, ITEMS[key].color, 1); }
-  ui.toast('Gắn ' + ITEMS[key].name + ' cho ' + name);
+/* ---------- Trang bị pháp bảo cho tướng: tướng trên bàn ({type:'board', unit}) hoặc hàng chờ ({type:'bench', i}) ---------- */
+const targetCid = t => (!t ? null : t.type === 'board' ? (t.unit && t.unit.team === 'ally' ? t.unit.cid : null) : t.type === 'bench' ? ensureCid(game.bench[t.i]) : null);
+/** Trang bị / chuyển vật phẩm instanceId cho tướng đích. Trả về { ok, reason }. Thông báo + VFX + lưu. */
+function equipArtifact(iid, target) {
+  const cid = targetCid(target);
+  if (!cid) { ui.toast('Chỉ trang bị cho tướng phe ta'); return { ok: false, reason: 'Chỉ trang bị cho tướng phe ta' }; }
+  const res = ArtifactEquipment.equip(iid, cid);
+  if (!res.ok) { ui.toast(res.reason); return res; }
+  const it = ITEM_DB[res.value.rec.itemId], u = target.type === 'board' ? target.unit : benchUnits[target.i];
+  ArtifactVFX.equip(u, it.id);
+  ui.toast((res.value.from ? 'Chuyển ' : 'Trang bị ') + it.name + ' cho ' + ownerName(cid));
   Sfx.chime(); afterRosterChange();
-  return true;
+  return res;
+}
+function unequipArtifact(iid) {
+  const res = ArtifactEquipment.unequip(iid);
+  if (!res.ok) { ui.toast(res.reason); return res; }
+  ui.toast('Đã tháo ' + ITEM_DB[res.value.itemId].name + ' về kho'); afterRosterChange();
+  return res;
 }
 
 /* ---------- Tộc / hệ: xem js/data/traits.js (dữ liệu) và js/combat/traits-engine.js (TraitCounter, TraitEngine) ---------- */
@@ -289,10 +304,16 @@ function enemyLineup(round) {
 /** Phiên bản cấu trúc bản lưu. Tăng khi đổi cấu trúc, kèm một bước trong SAVE_MIGRATIONS (vN → vN+1).
  *  Bản lưu CHỈ chứa dữ liệu thuần (số, chuỗi, mảng) – không chứa đối tượng Three.js. Ghi khi đổi đội hình / mua bán / sang vòng, không ghi mỗi khung hình.
  *  Tùy chọn đồ họa lưu riêng (vkkt_quality, vkkt_autoQuality, vkkt_options…) nên đổi ván / bản lưu hỏng không làm mất cài đặt. */
-const SAVE_VERSION = 2;
+const SAVE_VERSION = 3;
 const SAVE_MIGRATIONS = {
   // v1 (V1.0–V1.5 tuần 3) → v2: thêm dấu thời gian và tên bản dựng; các trường cũ giữ nguyên, trường thiếu nhận mặc định khi làm sạch.
-  1: s => Object.assign({}, s, { v: 2, savedAt: s.savedAt || 0, build: s.build || 'V1.5' })
+  1: s => Object.assign({}, s, { v: 2, savedAt: s.savedAt || 0, build: s.build || 'V1.5' }),
+  // v2 (V1.5) → v3 (V1.6 pháp bảo): trang bị cũ dạng tên (6 món, trong túi và trên tướng) giữ ở legacyItems → restoreGame đổi thành
+  // NGUYÊN LIỆU tương ứng trong kho (LEGACY_ITEM_MAP). Tướng nhận mã bản sao (cid). Không bỏ món nào.
+  2: s => {
+    const legacy = [].concat(s.items || [], ...(s.bench || []).map(e => (e && e.items) || []), ...(s.board || []).map(b => (b && b.items) || []));
+    return Object.assign({}, s, { v: 3, build: 'V1.6', legacyItems: legacy.filter(k => typeof k === 'string'), inv: null, rewardLog: [] });
+  }
 };
 /** Đọc bản lưu từ chuỗi JSON (hoặc đối tượng). Trả về { status, state?, reason? }:
  *  ok – tải được (đã chuyển phiên bản + làm sạch) · none – chưa có · over – ván đã kết thúc · bad – hỏng · newer – bản lưu của phiên bản mới hơn.
@@ -302,44 +323,50 @@ function parseSave(raw) {
   let s = raw;
   if (typeof raw === 'string') { try { s = JSON.parse(raw); } catch (e) { return { status: 'bad', reason: 'JSON hỏng' }; } }
   if (!s || typeof s !== 'object' || Array.isArray(s)) return { status: 'bad', reason: 'không phải đối tượng' };
-  let v = s.v | 0;
+  let v = s.v | 0; const from = v;
   if (v > SAVE_VERSION) return { status: 'newer', reason: 'bản lưu v' + v + ' (bản này đọc tới v' + SAVE_VERSION + ')' };
   if (v < 1) return { status: 'bad', reason: 'thiếu phiên bản' };
   try { while (v < SAVE_VERSION) { s = SAVE_MIGRATIONS[v](s); v = s.v; } } catch (e) { return { status: 'bad', reason: 'chuyển phiên bản lỗi: ' + e.message }; }
   const num = (x, d, lo, hi) => (Number.isFinite(+x) && x !== null && x !== '' ? Math.min(hi, Math.max(lo, Math.floor(+x))) : d);
-  const unit = e => (e && typeof e === 'object' && typeof e.key === 'string' && [1, 2, 3].includes(+e.star) ? { key: e.key, star: +e.star, items: Array.isArray(e.items) ? e.items.filter(k => typeof k === 'string') : [] } : null);
+  const unit = e => (e && typeof e === 'object' && typeof e.key === 'string' && [1, 2, 3].includes(+e.star) ? { key: e.key, star: +e.star, cid: typeof e.cid === 'string' && /^c\d+$/.test(e.cid) ? e.cid : null } : null);
   const st = {
     v: SAVE_VERSION, savedAt: num(s.savedAt, 0, 0, 1e15), build: typeof s.build === 'string' ? s.build : 'V1.5',
     hp: num(s.hp, START_HP, 0, START_HP), gold: num(s.gold, 0, 0, 999), level: num(s.level, 3, 1, MAX_LEVEL), xp: num(s.xp, 0, 0, 999), streak: num(s.streak, 0, -99, 99), round: num(s.round, 1, 1, 999),
     over: !!s.over, bench: Array.isArray(s.bench) ? s.bench.slice(0, BENCH_SIZE).map(unit) : [],
     shop: Array.isArray(s.shop) && s.shop.length === SHOP_SIZE ? s.shop.map(k => (typeof k === 'string' ? k : null)) : null,
     rivals: s.rivals && typeof s.rivals === 'object' && !Array.isArray(s.rivals) ? Object.fromEntries(Object.entries(s.rivals).map(([k, n]) => [k, num(n, 0, 0, 99)])) : {},
-    items: Array.isArray(s.items) ? s.items.filter(k => typeof k === 'string') : [],
+    legacyItems: Array.isArray(s.legacyItems) ? s.legacyItems.filter(k => typeof k === 'string') : [],
+    inv: s.inv && typeof s.inv === 'object' && Array.isArray(s.inv.items) ? { nextId: num(s.inv.nextId, 1, 1, 1e9), items: s.inv.items.filter(Array.isArray) } : null,
+    cidSeq: num(s.cidSeq, 0, 0, 1e9), rewardLog: Array.isArray(s.rewardLog) ? s.rewardLog.map(x => num(x, 0, 0, 999)).filter(Boolean).slice(-60) : [],
     board: Array.isArray(s.board) ? s.board.map(b => { const u = unit(b); return u && Object.assign(u, { c: num(b.c, -1, -1, 99), r: num(b.r, -1, -1, 99) }); }).filter(Boolean) : []
   };
-  if (st.over || st.hp <= 0) return { status: 'over', state: st };
-  return { status: 'ok', state: st };
+  if (st.over || st.hp <= 0) return { status: 'over', state: st, from };
+  return { status: 'ok', state: st, from };
 }
 function snapshotGame(roundOverride) {
-  return { v: SAVE_VERSION, savedAt: Date.now(), build: 'V1.5', hp: game.hp, gold: game.gold, level: game.level, xp: game.xp, streak: game.streak, round: roundOverride || battle.round,
-    bench: game.bench.slice(0, BENCH_SIZE).map(e => (e ? { key: e.key, star: e.star, items: (e.items || []).slice() } : null)), shop: game.shop.slice(), over: game.over,
-    rivals: Object.assign({}, game.rivals), items: game.items.slice(),
-    board: boardAllies().map(u => ({ key: u.key, star: u.star, c: u.homeTile.c, r: u.homeTile.r, items: (u.items || []).slice() })) };
+  return { v: SAVE_VERSION, savedAt: Date.now(), build: 'V1.6', hp: game.hp, gold: game.gold, level: game.level, xp: game.xp, streak: game.streak, round: roundOverride || battle.round,
+    bench: game.bench.slice(0, BENCH_SIZE).map(e => (e ? { key: e.key, star: e.star, cid: ensureCid(e) } : null)), shop: game.shop.slice(), over: game.over,
+    rivals: Object.assign({}, game.rivals), cidSeq, rewardLog: (game.rewardLog || []).slice(),
+    inv: ArtifactInventory.serialize(),   // nguyên liệu + pháp bảo: instanceId, loại, vị trí (kho / tướng + ô)
+    board: boardAllies().map(u => ({ key: u.key, star: u.star, c: u.homeTile.c, r: u.homeTile.r, cid: u.cid || (u.cid = newCid()) })) };
 }
 /** battle.sandbox: trận thử / mô phỏng (CombatTestRunner, BalanceSimulator, bảng Debug) KHÔNG được ghi đè bản lưu thật. */
 function saveGame(roundOverride) { if (!battle.bench && !battle.sandbox) store.set('save', snapshotGame(roundOverride)); }
 const newGameState = () => ({ v: SAVE_VERSION, hp: START_HP, gold: 6, level: 3, xp: 0, streak: 0, round: 1, bench: new Array(BENCH_SIZE).fill(null), shop: null, over: false,
-  rivals: {}, items: [], board: [{ key: 'kiemdong', star: 1, c: 4, r: 3 }, { key: 'thietve', star: 1, c: 3, r: 3 }] });
+  rivals: {}, inv: null, rewardLog: [], board: [{ key: 'kiemdong', star: 1, c: 4, r: 3 }, { key: 'thietve', star: 1, c: 3, r: 3 }] });
 function restoreGame(st, sandbox = false) {
   battle.sandbox = sandbox;   // tải ván (thật hoặc phục hồi sau thử nghiệm) → lưu bình thường trở lại; true = vẫn trong chế độ thử (bảng Debug)
   for (const u of boardAllies()) removeUnit(u);
   if (drag.src) cancelDrag();
-  Object.assign(game, { hp: st.hp, gold: st.gold, level: Math.min(MAX_LEVEL, st.level), xp: st.xp, streak: st.streak, over: !!st.over, sel: null, lastSummary: '', selItem: -1, lastRewards: null });
-  const okItems = a => (Array.isArray(a) ? a.filter(k => ITEMS[k]).slice(0, MAX_ITEMS_PER_UNIT) : []);
-  game.items = Array.isArray(st.items) ? st.items.filter(k => ITEMS[k]).slice(0, MAX_INVENTORY) : [];
+  Object.assign(game, { hp: st.hp, gold: st.gold, level: Math.min(MAX_LEVEL, st.level), xp: st.xp, streak: st.streak, over: !!st.over, sel: null, lastSummary: '', lastRewards: null,
+    rewardLog: (st.rewardLog || []).slice() });
+  if (typeof ArtifactUI !== 'undefined') ArtifactUI.clearSel();
+  // cid: giữ mã trong bản lưu (trùng → cấp mã mới), bộ đếm không lùi
+  cidSeq = Math.max(cidSeq, st.cidSeq | 0);
+  const usedCid = new Set(), takeCid = c => { if (typeof c === 'string' && !usedCid.has(c)) { usedCid.add(c); const n = +c.slice(1); if (n > cidSeq) cidSeq = n; return c; } const m = newCid(); usedCid.add(m); return m; };
   // Bản lưu cũ (trước V1.5): id tướng đã đổi / gỡ được chuyển sang tướng mới cùng bậc (migrateChampionKey), giữ sao & trang bị.
   game.rivals = {}; for (const k in st.rivals || {}) { const m = migrateChampionKey(k); if (m && st.rivals[k] > 0) game.rivals[m] = (game.rivals[m] || 0) + (st.rivals[k] | 0); }
-  game.bench = (st.bench || []).slice(0, BENCH_SIZE).map(e => { const m = e && migrateChampionKey(e.key); return m && e.star >= 1 && e.star <= 3 ? { key: m, star: e.star, items: okItems(e.items) } : null; });
+  game.bench = (st.bench || []).slice(0, BENCH_SIZE).map(e => { const m = e && migrateChampionKey(e.key); return m && e.star >= 1 && e.star <= 3 ? { key: m, star: e.star, cid: takeCid(e.cid) } : null; });
   while (game.bench.length < BENCH_SIZE) game.bench.push(null);
   // Bản lưu hỏng / cũ: bỏ ô trùng hoặc ngoài nửa bàn phe ta, quân vượt giới hạn cấp → về hàng chờ (đầy thì hoàn linh thạch).
   const used = new Set();
@@ -347,10 +374,16 @@ function restoreGame(st, sandbox = false) {
     b = Object.assign({}, b, { key: migrateChampionKey(b.key) });
     if (!b.key || !(b.star >= 1 && b.star <= 3)) return;
     const k = b.c + ',' + b.r, okTile = b.c >= 0 && b.c < 8 && b.r >= 0 && b.r < 4 && !used.has(k);
-    if (okTile && boardAllies().length < game.level) { used.add(k); placeUnit(b.key, b.star, b.c, b.r, okItems(b.items)); return; }
+    const cid = takeCid(b.cid);
+    if (okTile && boardAllies().length < game.level) { used.add(k); placeUnit(b.key, b.star, b.c, b.r, cid); return; }
     const slot = game.bench.indexOf(null);
-    if (slot >= 0) game.bench[slot] = { key: b.key, star: b.star, items: okItems(b.items) }; else { game.gold += sellPrice(b.key, b.star); okItems(b.items).forEach(addItem); }
+    if (slot >= 0) game.bench[slot] = { key: b.key, star: b.star, cid }; else game.gold += sellPrice(b.key, b.star);   // hết chỗ: hoàn tiền, đồ của tướng về kho (load)
   });
+  // Pháp bảo: nạp sổ (làm sạch – chủ không còn / ô sai → về kho) + đổi trang bị cũ (v2) thành nguyên liệu trong kho
+  const invRep = ArtifactInventory.load(st.inv, rosterCids());
+  const legacy = st.legacyItems && st.legacyItems.length ? legacyItemsToInventory([st.legacyItems]) : 0;
+  if (legacy) setTimeout(() => ui.toast(legacy + ' trang bị cũ đã đổi thành nguyên liệu trong Kho pháp bảo'), 700);
+  if (invRep.moved || invRep.dropped) console.warn('[Pháp bảo] tải bản lưu: ' + invRep.moved + ' vật phẩm về kho, bỏ ' + invRep.dropped + ' bản ghi hỏng');
   battle.round = st.round || 1;
   for (const k in game.rivals) { const over = -poolLeft(k); if (over > 0) game.rivals[k] = Math.max(0, game.rivals[k] - over); }
   if (st.shop && st.shop.length === SHOP_SIZE) game.shop = st.shop.map(k => (k ? migrateChampionKey(k) : null)); else rollShop();
@@ -361,7 +394,7 @@ function newGame() { restoreGame(newGameState()); ui.toast('Ván mới – mua t
 
 /* ---------- Vòng đấu ---------- */
 function setupRound() {
-  TraitEngine.battleEnd();
+  TraitEngine.battleEnd(); ArtifactPassives.battleEnd();
   timelines.forEach(t => t.cancel()); timelines.length = 0;
   Projectiles.clear(); SimTasks.clear(); DangerZones.clear(); vfx.clear(); floaters.length = 0;
   for (let i = units.length - 1; i >= 0; i--) if (units[i].team === 'enemy') { units[i].dispose(); units.splice(i, 1); }
@@ -408,17 +441,19 @@ function startBattle() {
   battle.step = 0; CombatAudit.reset(); combatLog.recent = [];
   for (const u of units) u.atkCd = crand() * 0.4;   // lệch nhịp đánh đầu trận (sau khi đặt seed → giống nhau giữa các lần chạy cùng seed)
   battle.phase = 'fight';
-  TraitEngine.battleStart(); battle.time = 0; battle.loot = { gold: 0, items: [] }; battle.otShown = false; select(null); ui.update();
+  TraitEngine.battleStart(); ArtifactPassives.battleStart(); battle.time = 0; battle.loot = { gold: 0, items: [] }; battle.otShown = false; select(null); ui.update();
   combatCam.tDist = combatCam.defaults.dist;
 }
 function onUnitDeath(u) {
   TraitEvents.emit('onUnitDeath', u);
   vfx.particles.burst(u.chest(new V3()), u.team === 'ally' ? COLORS.allyA : COLORS.enemyA, 24, 5, 0.8, 0.3, { up: 1, drag: 2 });
-  // Yêu thú rơi đồ: Yêu Thú Vương chắc chắn 1 trang bị + 3 linh thạch; Yêu Lang 40% trang bị, còn lại 1 linh thạch.
+  // Yêu thú rơi nguyên liệu (ARTIFACT_REWARDS): Yêu Thú Vương chắc chắn + 3 linh thạch; Yêu Lang 40%, không rơi đồ thì 1 linh thạch.
+  // Đồ rơi chỉ GHI NHẬN (battle.loot) – vào kho đúng 1 lần ở settleRound.
   if (u.def.monster && battle.loot && !battle.bench) {
     const c = u.chest(new V3());
     let dropped = false;
-    if (u.key === 'yeuvuong' || Math.random() < 0.4) { const it = ITEM_KEYS[Math.floor(Math.random() * ITEM_KEYS.length)]; battle.loot.items.push(it); dropped = true; floatText(c, '+' + ITEMS[it].name, ITEMS[it].color, 1.1, true); vfx.particles.burst(c, COLORS.allyB, 40, 5, 0.8, 0.4, { up: 4, drag: 2 }); }
+    const it = ArtifactRewards.dropOnKill(u.key, battle.loot);
+    if (it) { battle.loot.items.push(it); dropped = true; floatText(c, '+' + ITEM_DB[it].name, ITEM_DB[it].color, 1.1, true); vfx.particles.burst(c, COLORS.allyB, 40, 5, 0.8, 0.4, { up: 4, drag: 2 }); }
     const g = u.key === 'yeuvuong' ? 3 : dropped ? 0 : 1;
     if (g) { battle.loot.gold += g; floatText(_v1.set(c.x, c.y + 0.6, c.z), '+' + g + ' linh thạch', '#e9c46a', 0.9); }
   }
@@ -434,7 +469,7 @@ function settleRound(win) {
   if (!monster) game.streak = win ? Math.max(1, game.streak + 1) : Math.min(-1, game.streak - 1);
   const streakBonus = monster ? 0 : streakBonusOf(game.streak);
   const loot = monster ? (battle.loot || { gold: 0, items: [] }) : null;
-  if (loot && win && !loot.items.length) loot.items.push(ITEM_KEYS[Math.floor(Math.random() * ITEM_KEYS.length)]);   // thắng vòng yêu thú: ít nhất 1 trang bị
+  if (loot && win && loot.items.length < ARTIFACT_REWARDS.winMin) loot.items.push(ArtifactRewards.roll());   // thắng vòng yêu thú: ít nhất 1 nguyên liệu
   const income = 5 + interest + streakBonus + (win && !monster ? 1 : 0) + (loot ? loot.gold : 0);
   let dmg = 0;
   if (!win) {
@@ -443,9 +478,9 @@ function settleRound(win) {
     game.hp = Math.max(0, game.hp - dmg);
   }
   game.gold += income; gainXP(2);
-  if (loot) loot.items.forEach(addItem);
+  if (loot) loot.got = ArtifactRewards.grant(battle.round, loot.items);   // đúng 1 lần mỗi vòng (rewardLog lưu cùng ván)
   game.lastRewards = loot;
-  game.lastSummary = `+${income} linh thạch (cơ bản 5 · lãi ${interest}` + (monster ? ` · yêu thú rơi ${loot.gold})` + (loot.items.length ? ` · nhận ${loot.items.length} trang bị` : '') : ` · chuỗi ${streakBonus}${win ? ' · thắng 1' : ''})`) + (dmg ? ` · mất ${dmg} máu` : '');
+  game.lastSummary = `+${income} linh thạch (cơ bản 5 · lãi ${interest}` + (monster ? ` · yêu thú rơi ${loot.gold})` + (loot.items.length ? ` · nhận ${loot.items.length} nguyên liệu` : '') : ` · chuỗi ${streakBonus}${win ? ' · thắng 1' : ''})`) + (dmg ? ` · mất ${dmg} máu` : '');
   if (game.hp <= 0) game.over = true;
   rivalsDraft(battle.round);
   saveGame(battle.round + 1);

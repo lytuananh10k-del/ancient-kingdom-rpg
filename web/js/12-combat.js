@@ -38,6 +38,7 @@ const combatLog = { dodges: 0, crits: 0, stuns: 0, resisted: 0, kites: 0, unstuc
 function applyStun(u, dur, kind = 'stun', src) {
   if (!u || !u.alive || dur <= 0) return false;
   if (u.ccImmune > 0) { combatLog.resisted++; floatText(u.chest(_v2.clone()), 'Kháng', '#c9d6df', 0.75); return false; }
+  if (u.art && ArtifactPassives.onCC(u)) return false;   // Huyền Linh Pháp Bào: miễn khống chế lần đầu
   const d = dur * (1 - u.tenacity());
   const freeze = kind === 'freeze';
   if (u.status.stun <= 0 || (freeze && u.status.frozen <= 0)) floatText(u.chest(_v2.clone()), freeze ? 'Đóng băng' : 'Choáng', freeze ? '#cfeeff' : '#ffe08a', 0.8);
@@ -66,10 +67,11 @@ const DamageCalculator = {
   /** Sát thương sau phòng thủ & giảm sát thương nhận (chưa trừ lá chắn). Dùng RNG có seed (CombatRNG). */
   compute(src, dst, mult, opts) {
     const type = this.typeOf(src, opts);
-    const crit = opts.crit !== undefined ? opts.crit : opts.flat === undefined && !opts.dot && crand() < src.def.crit;
+    const crit = opts.crit !== undefined ? opts.crit : opts.flat === undefined && !opts.dot && crand() < (src.critNow ? src.critNow() : src.def.crit);
     let raw = opts.flat !== undefined ? opts.flat : (src.atkNow ? src.atkNow() : src.atk) * mult * (1 + (crand() * 2 - 1) * DAMAGE.variance);
-    if (crit) raw *= src.def.critDmg;
-    if (opts.skill && src.apNow) raw *= src.apNow() / 100;   // sức mạnh phép thuật (AP): sao × tộc/hệ × trang bị
+    if (crit) raw *= src.critDmg_ || src.def.critDmg;
+    if (opts.skill && src.apNow) raw *= src.apNow() / 100;   // sức mạnh phép thuật (AP): sao × tộc/hệ + trang bị
+    if (opts.skill && !opts.proc && src.bonus && src.bonus.skillDmg) raw *= src.bonus.skillDmg;   // pháp bảo: + sát thương kỹ năng
     const f = this.factor(dst, type, opts.pen);
     let dmg = raw * f * overtimeMul() * (dst.fx ? dst.fx.mul('dmgTaken') : 1);
     if (!Number.isFinite(dmg)) dmg = 0;
@@ -97,6 +99,7 @@ function dealDamage(src, dst, mult, opts = {}) {
   const absorbed = dst.fx ? dst.fx.absorb(dmg) : 0;
   if (absorbed > 0) { dmg -= absorbed; if (dst.shieldFx) { dst.shieldFx.hit(); if (dst.shield <= 0) { dst.shieldFx.shatter(); dst.shieldFx = null; } } }
   dst.hp = Math.max(0, dst.hp - dmg);
+  if (dst.hp <= 0 && dst.art) ArtifactPassives.onLethal(dst);   // Bất Diệt Thần Giáp: giữ 1 máu (1 lần / trận)
   if (opts.attack) { const k = src.id + ':' + opts.attack; if (CombatAudit.hitKeys.has(k)) CombatAudit.doubleHits++; else CombatAudit.hitKeys.add(k); }
   if (!Number.isFinite(dst.hp) || !Number.isFinite(dmg)) CombatAudit.nonFinite++;
   if (src.cs) { const hit = dmg + absorbed; src.cs.dealt += hit; src.cs[r.type] += hit; if (hit > src.cs.maxHit) { src.cs.maxHit = hit; src.cs.maxHitRatio = hit / Math.max(1, src.atkNow ? src.atkNow() : src.atk); } }
@@ -131,7 +134,7 @@ function dealDamage(src, dst, mult, opts = {}) {
   if (opts.burn && dst.hp > 0) applyBurn(dst, src, opts.burn);
   if (dst.hp <= 0) { if (src.cs) src.cs.kills++; if (dst.cs) dst.cs.deathT = battle.time; dst.fsm.set('dead'); onUnitDeath(dst); }
   // Sự kiện cho tộc/hệ – phát SAU khi xử lý chết để hiệu ứng phụ (nổ Pháp Tu) không làm một tướng chết hai lần.
-  TraitEvents.emit('onHit', src, dst, dmg, opts);
+  TraitEvents.emit('onHit', src, dst, dmg, opts, crit);
   TraitEvents.emit('onDamageTaken', dst, src, dmg, opts);
   return dmg;
 }

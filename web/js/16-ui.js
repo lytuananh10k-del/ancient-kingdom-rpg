@@ -32,9 +32,10 @@ const ui = {
     $('xp-fill').style.transform = 'scaleX(' + (game.level >= MAX_LEVEL ? 1 : game.xp / XP_NEED[game.level]) + ')';
     $('xp-val').textContent = game.level >= MAX_LEVEL ? 'tối đa' : game.xp + '/' + XP_NEED[game.level];
     $('prep-panel').hidden = !prep;
+    if (typeof ArtifactUI !== 'undefined') ArtifactUI.render();   // Kho pháp bảo (js/items/artifact-ui.js)
     $('hint').textContent = prep ? 'Kéo tu sĩ giữa bàn cờ và hàng chờ, kéo vào cửa hàng để bán. Kéo nền để xoay, chụm hai ngón để phóng to.' : 'Kéo để xoay bàn cờ · chụm hai ngón / lăn chuột để phóng to.';
     if (prep) {
-      renderShop(); renderSelActions(); renderItems(); renderOdds();
+      renderShop(); renderSelActions(); renderOdds();
       // Mép trên cửa hàng dịch chuyển (túi trang bị hiện / ẩn…): căn lại khoảng cách camera (không xoay lại góc nhìn) để hàng chờ không bị che.
       if (prepFit.dist && Math.abs($('prep-panel').getBoundingClientRect().top - prepFit.panelTop) > 6) requestAnimationFrame(() => { fitPrepCamera(); combatCam.tDist = prepFit.dist; });
     }
@@ -78,11 +79,12 @@ function placeUnitInfo(u) {
   const floor = (x0, x1) => obstacles.reduce((lim, r) => (r.right > x0 && r.left < x1 ? Math.min(lim, r.top - 8) : lim), H - 10);
   const covers = (x0, x1, y0, y1) => !!u && sx > x0 - 24 && sx < x1 + 24 && sy + 30 > y0 && sy - 70 < y1;   // tướng cao ~ 70 px trên điểm ngực
   if (W > H) {
-    const sides = [{ k: 'left', x0: 12, x1: 12 + pw }, { k: 'right', x0: W - 12 - pw, x1: W - 12 }].map(sd => ({ ...sd, room: floor(sd.x0, sd.x1) - top }));
+    const ri = typeof ArtifactUI !== 'undefined' ? ArtifactUI.rightInset() : 12;   // chừa chỗ Kho pháp bảo bên phải
+    const sides = [{ k: 'left', x0: 12, x1: 12 + pw, inset: 12 }, { k: 'right', x0: W - ri - pw, x1: W - ri, inset: ri }].map(sd => ({ ...sd, room: floor(sd.x0, sd.x1) - top }));
     const fit = sd => !covers(sd.x0, sd.x1, top, top + Math.min(el.scrollHeight, sd.room));
     sides.sort((a, b) => (fit(b) - fit(a)) || (Math.min(b.room, el.scrollHeight) - Math.min(a.room, el.scrollHeight)) || (u ? 0 : a.k === 'right' ? -1 : 1));
     const sd = sides[0];
-    st[sd.k] = '12px'; st.top = top + 'px'; st.maxHeight = Math.max(100, sd.room) + 'px';
+    st[sd.k] = sd.inset + 'px'; st.top = top + 'px'; st.maxHeight = Math.max(100, sd.room) + 'px';
   } else {
     const x0 = W - 12 - pw, lim = floor(x0, W - 12), maxH = Math.min((lim - top) * 0.55, 340), ph = Math.min(el.scrollHeight, maxH);
     st.right = '12px'; st.maxHeight = maxH + 'px';
@@ -115,8 +117,7 @@ function renderUnitInfo() {
   if (ts) for (const k in ts) if (ts[k] > 0) tl.push('+' + Math.round(ts[k] * 100) + '% ' + TRAIT_STATS[k]);
   const traitLine = (tl.length ? 'Tộc/hệ: ' + tl.join(' · ') : '') +
     (u && u.fx && u.fx.list.length ? (tl.length ? '\n' : '') + 'Trạng thái: ' + u.fx.describe().map(e => `${e.name}${e.type === 'shield' ? ' ' + Math.round(e.power) : ''} ${e.left.toFixed(1)}s`).join(' · ') : '');
-  const its = u ? u.items || [] : [];
-  $('ui-items').innerHTML = its.map(k => `<span style="--c:${ITEMS[k].color}" title="${ITEMS[k].desc}">${ITEMS[k].name}: ${ITEMS[k].desc}</span>`).join('');
+  if (typeof ArtifactUI !== 'undefined') ArtifactUI.renderUnitSlots(u, enemy, onBench); else $('ui-items').textContent = '';
   $('ui-bars').innerHTML = `<div class="ui-bar hp"><i style="width:${(hp / maxHp * 100).toFixed(1)}%"></i><span>Máu ${Math.round(hp)}/${maxHp}${shield > 0 ? ' · khiên ' + Math.round(shield) : ''}</span></div>` +
     `<div class="ui-bar mana"><i style="width:${(mana / maxMana * 100).toFixed(1)}%"></i><span>Linh lực ${Math.round(mana)}/${maxMana}</span></div>`;
   const range = d.range > 3 ? 'Xa ' + Math.round(d.range / BOARD.tile) + ' ô' : 'Cận';
@@ -166,43 +167,6 @@ function renderShop() {
 function renderOdds() {
   const o = SHOP_ODDS[game.level];
   $('odds').innerHTML = `<span>Cấp ${game.level}:</span>` + o.map((p, i) => `<span class="o${i + 1}${p ? '' : ' z'}">◆${i + 1} <b>${p}%</b></span>`).join('');
-}
-/** Túi trang bị: chạm để chọn rồi chạm tướng (trên bàn / hàng chờ) để gắn, hoặc kéo thẳng lên tướng. */
-function renderItems() {
-  const row = $('items-row'), el = $('items'); row.hidden = !game.items.length; el.textContent = '';
-  game.items.forEach((key, idx) => {
-    const it = ITEMS[key], b = document.createElement('button');
-    b.className = 'item' + (game.selItem === idx ? ' sel' : ''); b.style.setProperty('--c', it.color);
-    b.textContent = it.short; b.title = it.name + ': ' + it.desc;
-    b.setAttribute('aria-label', `${it.name} (${it.desc}) – chạm rồi chạm tướng để gắn`);
-    b.addEventListener('pointerdown', e => startItemDrag(e, idx, b));
-    el.appendChild(b);
-  });
-}
-let itemDrag = null;
-function startItemDrag(e, idx, btn) {
-  e.preventDefault();
-  try { btn.setPointerCapture(e.pointerId); } catch (err) { /* bỏ qua */ }
-  itemDrag = { idx, id: e.pointerId, x0: e.clientX, y0: e.clientY, moved: false, ghost: null, touch: e.pointerType !== 'mouse' };
-  const move = ev => {
-    if (!itemDrag || ev.pointerId !== itemDrag.id) return;
-    if (!itemDrag.moved && Math.hypot(ev.clientX - itemDrag.x0, ev.clientY - itemDrag.y0) > 10) {
-      itemDrag.moved = true; itemDrag.ghost = btn.cloneNode(true); itemDrag.ghost.classList.add('item-ghost', 'sel'); document.body.appendChild(itemDrag.ghost); haptic(8);
-    }
-    if (itemDrag.ghost) { itemDrag.ghost.style.left = ev.clientX + 'px'; itemDrag.ghost.style.top = ev.clientY + 'px'; }
-  };
-  const up = ev => {
-    if (!itemDrag || ev.pointerId !== itemDrag.id) return;
-    btn.removeEventListener('pointermove', move); btn.removeEventListener('pointerup', up); btn.removeEventListener('pointercancel', up);
-    const d = itemDrag; itemDrag = null; if (d.ghost) d.ghost.remove();
-    if (!d.moved) { game.selItem = game.selItem === d.idx ? -1 : d.idx; if (game.selItem >= 0) ui.toast('Chạm vào tướng để gắn ' + ITEMS[game.items[d.idx]].name); ui.update(); return; }
-    if (ev.type === 'pointercancel') return;
-    lastPointerTouch = d.touch;
-    const pk = screenPick(ev.clientX, ev.clientY);   // gắn cho tướng dưới điểm thả (trên bàn hoặc hàng chờ)
-    if (pk && pk.type !== 'enemy') equipItem(d.idx, pk.type === 'board' ? { type: 'board', unit: pk.unit } : { type: 'bench', i: pk.i });
-    else ui.toast('Thả trang bị lên một tướng phe ta để gắn');
-  };
-  btn.addEventListener('pointermove', move); btn.addEventListener('pointerup', up); btn.addEventListener('pointercancel', up);
 }
 function renderSelActions() {
   const sel = game.sel, sell = $('btn-sell'), back = $('btn-tobench');
@@ -379,7 +343,7 @@ let fxScale = 1;
 /** Ô vuông nhỏ màu theo trang bị, dưới thanh máu. */
 function drawItemDots(items, x, y, s) {
   const w = 7 * s, gap = 2 * s, x0 = x - (items.length * (w + gap) - gap) / 2;
-  items.forEach((k, i) => { g2.fillStyle = 'rgba(0,0,0,0.7)'; g2.fillRect(x0 + i * (w + gap) - 1, y - 1, w + 2, w + 2); g2.fillStyle = ITEMS[k] ? ITEMS[k].color : '#fff'; g2.fillRect(x0 + i * (w + gap), y, w, w); });
+  items.forEach((k, i) => { g2.fillStyle = 'rgba(0,0,0,0.7)'; g2.fillRect(x0 + i * (w + gap) - 1, y - 1, w + 2, w + 2); g2.fillStyle = ITEM_DB[k] ? ITEM_DB[k].color : '#fff'; g2.fillRect(x0 + i * (w + gap), y, w, w); });
 }
 function draw2D(dt) {
   const W = fx2d.width, H = fx2d.height; g2.clearRect(0, 0, W, H);

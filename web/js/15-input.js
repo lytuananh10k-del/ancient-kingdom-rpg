@@ -75,7 +75,7 @@ function moveTo(src, t) {
     }
     const e = game.bench[t.i];
     if (!e) { if (!moveToBench(u, t.i)) return false; }
-    else { const tile = { ...u.homeTile }; game.bench[t.i] = entryOf(u); removeUnit(u); placeUnit(e.key, e.star, tile.c, tile.r, e.items || []); }
+    else { const tile = { ...u.homeTile }; game.bench[t.i] = entryOf(u); removeUnit(u); placeUnit(e.key, e.star, tile.c, tile.r, ensureCid(e)); }
     afterRosterChange(); return true;
   }
   if (t.type === 'tile') { if (!benchToBoard(src.i, t.c, t.r)) return false; afterRosterChange(); return true; }
@@ -161,8 +161,8 @@ function onTap(x, y) {
   const pk = battle.bench ? null : screenPick(x, y, true);
   const now = performance.now(); if (now - lastTap < 280 && !pk && !game.sel) combatCam.reset(); lastTap = now;
   if (!canEdit()) { if (pk) { if (info.unit === pk.unit) closeUnitInfo(); else showUnitInfo(pk.unit); } else closeUnitInfo(); return; }
+  if (ArtifactUI.selId() && pk) { ArtifactUI.applyToPick(pk); return; }   // đang chọn pháp bảo trong kho / trên tướng → chạm tướng để trang bị / chuyển
   if (pk && pk.type === 'enemy') { select(null); showUnitInfo(pk.unit); return; }
-  if (game.selItem >= 0 && pk) { equipItem(game.selItem, pk.type === 'board' ? { type: 'board', unit: pk.unit } : { type: 'bench', i: pk.i }); return; }   // đang chọn trang bị trong túi
   const sel = game.sel;
   const same = pk && sel && (pk.type === 'board' ? sel.unit === pk.unit : sel.type === 'bench' && sel.i === pk.i);
   if (sel && !same) {

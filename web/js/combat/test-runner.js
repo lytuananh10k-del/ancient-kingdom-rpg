@@ -12,14 +12,17 @@ const CombatTestRunner = {
     battle.sandbox = true;   // không ghi bản lưu thật trong lúc thử (restoreGame / newGame tắt lại)
     const g = game; g.level = cfg.level || 9; g.over = false; battle.bench = false;
     for (const u of boardAllies()) removeUnit(u);
-    (cfg.allies || []).forEach(([k, s, c, r]) => placeUnit(k, s || 1, c, r));
+    (cfg.allies || []).forEach(([k, s, c, r, items]) => placeUnit(k, s || 1, c, r, items || []));   // items: itemId pháp bảo cho tướng thử (không thuộc sổ)
     const orig = window.enemyLineup;
     window.enemyLineup = () => (cfg.enemies || []).map(([k, s, c, r]) => [k, c, r, s || 1]);
+    const enemyItems = (cfg.enemies || []).map(e => e[4] || []);
     battle.round = cfg.round || 1;
     battle.enemyTraits = cfg.enemyTraits !== false;   // mặc định đối xứng: phe địch cũng có tộc/hệ
     try { setupRound(); } finally { window.enemyLineup = orig; }
     // hệ số địch: mặc định 1 (so sánh tướng với tướng), hoặc theo vòng như trong game
     const scale = cfg.enemyScale !== undefined ? cfg.enemyScale : cfg.round ? 0.85 * Math.pow(1.07, cfg.round - 1) : 1;
+    units.filter(u => u.team === 'enemy').forEach((u, i) => { if (enemyItems[i] && enemyItems[i].length) u.items = enemyItems[i]; });
+    if (enemyItems.some(l => l.length)) applyTraits();
     units.forEach(u => { if (u.team === 'enemy') u.reset(scale); });
     battle.seedOverride = cfg.seed !== undefined ? cfg.seed : 1;
     startBattle();

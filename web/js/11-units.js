@@ -56,6 +56,24 @@ class Unit {
     this.reset(1);
   }
   get alive() { return this.hp > 0; }
+  /** Pháp bảo đang mang (itemId theo ô 0–2). Tướng phe ta có cid: đọc thẳng từ sổ ArtifactInventory (một vật phẩm chỉ ở một nơi).
+   *  Tướng thử nghiệm (CombatTestRunner, BalanceSimulator – không có cid): danh sách gán trực tiếp, không thuộc sổ. */
+  get items() { return this.cid ? ArtifactInventory.itemIdsOf(this.cid) : (this._items || EMPTY_ITEMS); }
+  set items(v) { this._items = Array.isArray(v) ? v.filter(id => ITEM_DB[id]).slice(0, MAX_EQUIP) : []; }
+  /** Chỉ số trận (không gồm hiệu ứng tạm thời) từ gốc × sao × tộc/hệ + trang bị. Hàm thuần – dùng cho reset và xem trước khi trang bị. */
+  static computeStats(d, s, b, scale = 1) {
+    return {
+      maxHp: Math.round(d.hp * scale * STAR.hp[s] * b.hp + (b.hpAdd || 0)),
+      atk: Math.round((d.atk * scale * STAR.atk[s] * b.atk + (b.atkAdd || 0)) * 10) / 10,
+      def: Math.round(d.def * Math.sqrt(scale) * (b.defMul || 1) + b.def),
+      mr: Math.round((d.mr || 0) * Math.sqrt(scale) + (b.mr || 0)),
+      ap: Math.round(((d.ap || 100) * (STAR.skill[s] || 1) * b.skill + (b.apAdd || 0)) * 10) / 10,   // AP = 100 × sao × (tộc/hệ) + trang bị
+      mana0: Math.min(d.mana, d.mana0 + b.mana0),
+      crit: Math.min(1, (d.crit || 0) + (b.crit || 0)), critDmg: (d.critDmg || 1.5) + (b.critDmg || 0),
+      aspd: d.aspd * b.aspd
+    };
+  }
+  critNow() { return Math.min(1, (this.crit_ !== undefined ? this.crit_ : this.def.crit) + (this.critStack || 0)); }
   modelScale() { return STAR.scale[this.star] * ((this.def.model && this.def.model.scale) || 1); }
   /* Chỉ số hiện hành = chỉ số trận (gốc × sao × tộc/hệ → trang bị, tính 1 lần ở reset) × trạng thái tạm thời (StatusEffectManager) × nội tại.
    * Giáp / kháng phép có thể âm khi bị giảm quá 0 – DamageCalculator xử lý riêng (defenseFactor), không chia cho 0. */
@@ -72,20 +90,18 @@ class Unit {
   /** Bảng chỉ số chuẩn hoá (giao diện, bài kiểm thử, bảng cân bằng). */
   statsNow() {
     return { hp: this.hp, maxHp: this.maxHp, atk: this.atkNow(), ap: this.apNow(), armor: this.defNow(), mr: this.mrNow(), aspd: this.aspdNow(), range: this.def.range,
-      speed: this.speedNow(), mana: this.mana, maxMana: this.maxMana, crit: this.def.crit, critDmg: this.def.critDmg,
+      speed: this.speedNow(), mana: this.mana, maxMana: this.maxMana, crit: this.critNow(), critDmg: this.critDmg_ || this.def.critDmg,
       lifesteal: (this.bonus.ls || 0) + this.fx.sum('ls'), omnivamp: this.bonus.omni || 0, tenacity: this.tenacity(), shield: this.shield };
   }
   /** Điểm phóng đạn: tính từ vị trí logic + hướng mặt (KHÔNG đọc tư thế animation) → cùng kết quả ở mọi FPS / tốc độ. */
   launchPoint(out = new V3()) { const f = 0.6; return out.set(this.pos.x + Math.sin(this.yaw) * f, 1.45, this.pos.z + Math.cos(this.yaw) * f); }
   reset(scale) {
     const d = this.def, b = this.bonus, s = this.star;
-    // Gốc → × sao → × (1 + Σ% tộc/hệ) → trang bị (phẳng). Làm tròn: máu & giáp số nguyên, công 1 chữ số thập phân. Không sửa UNIT_DEFS.
-    this.maxHp = Math.round(d.hp * scale * STAR.hp[s] * b.hp + (b.hpAdd || 0)); this.hp = this.maxHp;
-    this.atk = Math.round(d.atk * scale * STAR.atk[s] * b.atk * 10) / 10;
-    this.def_ = Math.round(d.def * Math.sqrt(scale) * (b.defMul || 1) + b.def);
-    this.mr_ = Math.round((d.mr || 0) * Math.sqrt(scale));
-    this.ap_ = Math.round((d.ap || 100) * (STAR.skill[s] || 1) * b.skill * 10) / 10;   // AP = 100 × sao × (tộc/hệ + trang bị)
-    this.mana = Math.min(d.mana, d.mana0 + b.mana0); this.maxMana = d.mana; this.shield = 0;
+    // Gốc → × sao → × (1 + Σ% tộc/hệ) → + trang bị (cộng thẳng / % cộng dồn) – Unit.computeStats. Làm tròn: máu & giáp số nguyên, công 1 chữ số thập phân.
+    const S = Unit.computeStats(d, s, b, scale);
+    this.maxHp = S.maxHp; this.hp = this.maxHp; this.atk = S.atk; this.def_ = S.def; this.mr_ = S.mr; this.ap_ = S.ap;
+    this.crit_ = S.crit; this.critDmg_ = S.critDmg; this.critStack = 0;
+    this.mana = S.mana0; this.maxMana = d.mana; this.shield = 0;
     this.status = { stun: 0, frozen: 0, burn: 0 };
     this.fx.clear();
     this.target = null; this.retarget = 0; this.atkCd = crand() * 0.4; this.attackIdx = 0; this.attackSeq = 0; this.dashCd = 0; this.nav = null; this.searchT = 0;
