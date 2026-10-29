@@ -4,6 +4,9 @@ Game nhập vai hành động 3D thế giới mở, đề tài tu tiên phương
 
 > Repo trước đây chứa bản 2D pixel "Vương Quốc Cổ Đại". Từ giờ repo dùng cho dự án 3D này.
 
+> **Bản HTML5 chơi ngay trên trình duyệt:** thư mục [`web/`](web/README.md) – *Vạn Kiếm Kỳ Trận: Phiêu Lưu* (V2.0), nhập vai hành động tu tiên 3D màn ngang,
+> chơi đơn ngoại tuyến (Android / Windows). Tệp 1-file: `web/dist/Van_Kiem_Ky_Tran_Phieu_Luu_V2.0.html`. Báo cáo: [`web/docs/V2.0-REPORT.md`](web/docs/V2.0-REPORT.md).
+
 | Tài liệu | Nội dung |
 |---|---|
 | [docs/GDD.md](docs/GDD.md) | Thiết kế tổng thể: 10 khu vực, cảnh giới, chiến đấu, kỹ năng, kiến trúc, lộ trình 6 giai đoạn |

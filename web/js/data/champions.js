@@ -1,6 +1,6 @@
 // Vạn Kiếm Kỳ Trận – Dữ liệu tướng (V1.5): 24 tướng 5 bậc, phe địch, cấu hình nâng sao, vai trò, mô hình & animation.
-// Script thường (không phải module): nạp trước js/11-units.js. Thêm tướng mới: thêm 1 mục vào CHAMPIONS (+ LOOKS nếu cần ngoại hình riêng)
-// và 1 kỹ năng (js/data/skills.js hoặc js/13-skills.js) – validateChampions() báo thiếu trường khi khởi động.
+// Script thường (không phải module): nạp trước js/rpg/*. Phiêu Lưu V2.0 dùng lại LOOKS (ngoại hình nhân vật thủ tục) và tên 24 tướng
+// cho ngoại hình người chơi, NPC, người chơi ảo, quái hình người và boss; chỉ số bản cờ giữ nguyên để tham chiếu (bản cờ: tag v1.6-autochess).
 'use strict';
 
 /* ---------- Ngoại hình nhân vật thủ tục (CharacterRig) ---------- */

@@ -1,0 +1,241 @@
+{
+ "when": "2026-10-29T07:52:21.853Z",
+ "sect": "kiem",
+ "pass": 58,
+ "total": 58,
+ "results": [
+  {
+   "ok": true,
+   "msg": "chưa có bản lưu: chỉ có nút Tạo nhân vật"
+  },
+  {
+   "ok": true,
+   "msg": "nhân vật đúng tông môn, xuất hiện ở sơn môn"
+  },
+  {
+   "ok": true,
+   "msg": "HUD hiện, sơn môn có 6 NPC / vật tương tác"
+  },
+  {
+   "ok": true,
+   "msg": "tên người chơi được thoát ký tự HTML (không chèn mã)"
+  },
+  {
+   "ok": true,
+   "msg": "giữ D: chạy sang phải"
+  },
+  {
+   "ok": true,
+   "msg": "giữ ←: chạy sang trái, quay mặt trái"
+  },
+  {
+   "ok": true,
+   "msg": "Space: nhảy lên khỏi mặt đất"
+  },
+  {
+   "ok": true,
+   "msg": "rơi xuống đáp lại mặt đất"
+  },
+  {
+   "ok": true,
+   "msg": "nhấn nhảy lần 2: bay; giữ ↑ lên cao"
+  },
+  {
+   "ok": true,
+   "msg": "bay tốn linh lực"
+  },
+  {
+   "ok": true,
+   "msg": "giữ ↓: hạ xuống, chạm đất thì thôi bay"
+  },
+  {
+   "ok": true,
+   "msg": "phím E cạnh Sư Phụ: mở hội thoại"
+  },
+  {
+   "ok": true,
+   "msg": "hoàn thành \"Bái kiến sư phụ\": +200 linh thạch, nhận Hộ Giáp"
+  },
+  {
+   "ok": true,
+   "msg": "Túi đồ: chọn Hộ Giáp → Trang bị → giáp tăng"
+  },
+  {
+   "ok": true,
+   "msg": "Tháo trang bị: về túi"
+  },
+  {
+   "ok": true,
+   "msg": "đi ra mép phải: sang bản đồ 1, có quái"
+  },
+  {
+   "ok": true,
+   "msg": "giữ J: đánh trúng quái (sinh lực quái giảm)"
+  },
+  {
+   "ok": true,
+   "msg": "gây sát thương: nhận tu vi + linh căn"
+  },
+  {
+   "ok": true,
+   "msg": "kỹ năng ô K: tốn linh lực, có hồi chiêu, không dùng lại khi đang hồi"
+  },
+  {
+   "ok": true,
+   "msg": "giữ nút đánh có mục tiêu: tự tiến tới và hạ ≥ 5 quái"
+  },
+  {
+   "ok": true,
+   "msg": "nhiệm vụ \"Thử tay\" (5 quái) tự hoàn thành"
+  },
+  {
+   "ok": true,
+   "msg": "quái rơi linh thạch, tự hút về khi lại gần"
+  },
+  {
+   "ok": true,
+   "msg": "15/15 kỹ năng thi triển được"
+  },
+  {
+   "ok": true,
+   "msg": "mọi kỹ năng gây sát thương đều trúng quái đứng trước mặt"
+  },
+  {
+   "ok": true,
+   "msg": "Bất Diệt Kim Thân: biến thân to hơn, công +50%"
+  },
+  {
+   "ok": true,
+   "msg": "Kim Cang Bất Hoại: khiên + giảm 30% sát thương"
+  },
+  {
+   "ok": true,
+   "msg": "đứng cạnh Linh Đan Thụ: có thể tương tác"
+  },
+  {
+   "ok": true,
+   "msg": "Thu hoạch: 3 linh đan vào túi, cây còn 0"
+  },
+  {
+   "ok": true,
+   "msg": "nhiệm vụ \"Linh Đan Thụ\" hoàn thành"
+  },
+  {
+   "ok": true,
+   "msg": "phím H / nút 丹: dùng linh đan hồi sinh lực + linh lực"
+  },
+  {
+   "ok": true,
+   "msg": "Nhân vật: dùng linh căn +1 Sinh lực → sinh lực tối đa tăng"
+  },
+  {
+   "ok": true,
+   "msg": "nhiệm vụ \"Khai mở linh căn\" hoàn thành"
+  },
+  {
+   "ok": true,
+   "msg": "Linh Thương: mua Hồi Huyết Đan −30 linh thạch, +1 trong túi"
+  },
+  {
+   "ok": true,
+   "msg": "Linh Thương / Bán: liệt kê đồ bán được"
+  },
+  {
+   "ok": true,
+   "msg": "Luyện Khí: Linh Kiếm + Sinh Mệnh Ngọc = Kiếm Hồn Ngọc (công thức bản cờ)"
+  },
+  {
+   "ok": true,
+   "msg": "nguyên liệu bị trừ đúng 2 món"
+  },
+  {
+   "ok": true,
+   "msg": "trang bị pháp bảo: cộng công + hút máu toàn phần (đổi từ chỉ số bản cờ)"
+  },
+  {
+   "ok": true,
+   "msg": "Cường hoá: trừ linh thạch, báo thành công / thất bại"
+  },
+  {
+   "ok": true,
+   "msg": "Truyền Tống Sứ: Ma Uyên khoá khi chưa đủ cảnh giới"
+  },
+  {
+   "ok": true,
+   "msg": "Truyền tống tới sơn môn tông môn khác"
+  },
+  {
+   "ok": true,
+   "msg": "đủ 3.000 tu vi: đột phá Trúc Cơ, chỉ số tăng, hồi đầy, có thông báo"
+  },
+  {
+   "ok": true,
+   "msg": "cổng tới Hỗn Độn Hư Không chặn khi chưa Nguyên Anh (đẩy lùi, không chuyển bản đồ)"
+  },
+  {
+   "ok": true,
+   "msg": "boss xuất hiện khi tới giờ, dùng chiêu và gây sát thương"
+  },
+  {
+   "ok": true,
+   "msg": "hạ boss: đếm boss, hẹn giờ xuất hiện lại"
+  },
+  {
+   "ok": true,
+   "msg": "kênh chat thông báo boss bị tiêu diệt"
+  },
+  {
+   "ok": true,
+   "msg": "về sơn môn để tới Tế Đàn"
+  },
+  {
+   "ok": true,
+   "msg": "bảng điều ước không đóng được (phải chọn 1 điều)"
+  },
+  {
+   "ok": true,
+   "msg": "ước \"Phú khả địch quốc\": nhận linh thạch, 7 viên biến mất, rồng rời đi"
+  },
+  {
+   "ok": true,
+   "msg": "hết sinh lực: tử trận, hiện bảng hồi sinh"
+  },
+  {
+   "ok": true,
+   "msg": "Về sơn môn: sống lại đầy sinh lực ở sơn môn"
+  },
+  {
+   "ok": true,
+   "msg": "mọi bảng / tab / NPC / 16 trạng thái nhiệm vụ mở được, có nội dung"
+  },
+  {
+   "ok": true,
+   "msg": "tải lại: nút Tiếp tục ghi tên + cảnh giới"
+  },
+  {
+   "ok": true,
+   "msg": "mọi trường lưu khôi phục đúng (tu vi, linh thạch, túi, nhiệm vụ, trang bị, pháp bảo, bản đồ, linh căn, kỹ năng)"
+  },
+  {
+   "ok": true,
+   "msg": "JSON hỏng / phiên bản mới hơn: nhận diện, không đọc bừa"
+  },
+  {
+   "ok": true,
+   "msg": "trường sai kiểu / âm / vật phẩm lạ bị làm sạch, uid trùng được đánh lại"
+  },
+  {
+   "ok": true,
+   "msg": "kỹ năng tông môn khác bị bỏ, cấp kỹ năng bị chặn trần, Long Châu lọc trùng / sai"
+  },
+  {
+   "ok": true,
+   "msg": "mở game với bản lưu hỏng: sao lưu nguyên văn sang vkkt_rpg_save_backup, không có nút Tiếp tục"
+  },
+  {
+   "ok": true,
+   "msg": "không có lỗi console / pageerror"
+  }
+ ],
+ "errors": []
+}

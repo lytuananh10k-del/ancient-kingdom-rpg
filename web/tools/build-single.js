@@ -1,13 +1,13 @@
 // Đóng gói thành MỘT tệp HTML chạy độc lập (kể cả không mạng): nhúng mọi js/*.js theo đúng thứ tự trong index.html
 // và nhúng luôn three.js r128 + GLTFLoader + SkeletonUtils (MIT) nếu tìm thấy gói three@0.128.0 (node_modules hoặc THREE_DIR).
 // Không thấy gói three → giữ thẻ CDN (cần mạng lần đầu). Phông Google Fonts vẫn tải qua mạng, mất mạng thì dùng phông hệ thống.
-// Chạy:  cd web && node tools/build-single.js      → dist/Van_Kiem_Ky_Tran_V1.6.html
+// Chạy:  cd web && node tools/build-single.js      → dist/Van_Kiem_Ky_Tran_Phieu_Luu_V2.0.html
 'use strict';
 const fs = require('fs');
 const path = require('path');
 
 const WEB = path.resolve(__dirname, '..');
-const OUT = path.join(WEB, 'dist', 'Van_Kiem_Ky_Tran_V1.6.html');
+const OUT = path.join(WEB, 'dist', 'Van_Kiem_Ky_Tran_Phieu_Luu_V2.0.html');
 const THREE_DIR = process.env.THREE_DIR || (() => { try { return path.dirname(require.resolve('three/package.json', { paths: [WEB] })); } catch (e) { return null; } })();
 const CDN = {
   'three.min.js': 'build/three.min.js',
@@ -37,7 +37,7 @@ const head = `<!doctype html>
 <meta name="theme-color" content="#0b0d12">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="description" content="Vạn Kiếm Kỳ Trận V1.6 – cờ nhân phẩm tu tiên 3D (Three.js) – hệ thống pháp bảo">
+<meta name="description" content="Vạn Kiếm Kỳ Trận – Phiêu Lưu V2.0: nhập vai hành động tu tiên 3D màn ngang (Three.js), chơi đơn ngoại tuyến">
 `;
 // index.html là phần thân dùng cho Artifact (title + style + nội dung); tách title / style / link lên <head>
 const headTags = [], body = html.replace(/^(<title>[^]*?<\/title>|<link[^>]*>|<style>[^]*?<\/style>)\s*/gm, m => { headTags.push(m.trim()); return ''; });

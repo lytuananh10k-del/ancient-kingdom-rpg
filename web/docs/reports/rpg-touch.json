@@ -1,0 +1,193 @@
+{
+ "when": "2026-10-29T07:50:17.527Z",
+ "views": [
+  "844x390",
+  "400x820",
+  "1280x720"
+ ],
+ "pass": 45,
+ "total": 45,
+ "results": [
+  {
+   "ok": true,
+   "msg": "chạm: chọn Võ Tông + ngoại hình thứ 2, tạo nhân vật"
+  },
+  {
+   "ok": true,
+   "msg": "thiết bị cảm ứng: hiện cần ảo + nút chiêu"
+  },
+  {
+   "ok": true,
+   "msg": "kéo cần ảo phải / trái: nhân vật chạy theo, quay mặt"
+  },
+  {
+   "ok": true,
+   "msg": "thả cần ảo: dừng lại"
+  },
+  {
+   "ok": true,
+   "msg": "chạm ⇑ hai lần: nhảy rồi bay"
+  },
+  {
+   "ok": true,
+   "msg": "giữ ⇓: hạ xuống đất"
+  },
+  {
+   "ok": true,
+   "msg": "nút \"Nói chuyện\" hiện cạnh NPC, chạm mở hội thoại"
+  },
+  {
+   "ok": true,
+   "msg": "bảng hội thoại nằm gọn trong màn hình"
+  },
+  {
+   "ok": true,
+   "msg": "chạm vào quái trên màn: chọn làm mục tiêu"
+  },
+  {
+   "ok": true,
+   "msg": "giữ nút ⚔: tự tiến tới mục tiêu và đánh trúng"
+  },
+  {
+   "ok": true,
+   "msg": "chạm nút kỹ năng: thi triển (tốn linh lực)"
+  },
+  {
+   "ok": true,
+   "msg": "nút ảo không chồng lên nhau hay lên HUD / cần ảo"
+  },
+  {
+   "ok": true,
+   "msg": "mọi nút + HUD nằm trong màn hình"
+  },
+  {
+   "ok": true,
+   "msg": "nút ảo đủ lớn cho ngón tay (≥ 36 px)"
+  },
+  {
+   "ok": true,
+   "msg": "không lỗi console"
+  },
+  {
+   "ok": true,
+   "msg": "chạm: chọn Võ Tông + ngoại hình thứ 2, tạo nhân vật"
+  },
+  {
+   "ok": true,
+   "msg": "thiết bị cảm ứng: hiện cần ảo + nút chiêu"
+  },
+  {
+   "ok": true,
+   "msg": "kéo cần ảo phải / trái: nhân vật chạy theo, quay mặt"
+  },
+  {
+   "ok": true,
+   "msg": "thả cần ảo: dừng lại"
+  },
+  {
+   "ok": true,
+   "msg": "chạm ⇑ hai lần: nhảy rồi bay"
+  },
+  {
+   "ok": true,
+   "msg": "giữ ⇓: hạ xuống đất"
+  },
+  {
+   "ok": true,
+   "msg": "nút \"Nói chuyện\" hiện cạnh NPC, chạm mở hội thoại"
+  },
+  {
+   "ok": true,
+   "msg": "bảng hội thoại nằm gọn trong màn hình"
+  },
+  {
+   "ok": true,
+   "msg": "chạm vào quái trên màn: chọn làm mục tiêu"
+  },
+  {
+   "ok": true,
+   "msg": "giữ nút ⚔: tự tiến tới mục tiêu và đánh trúng"
+  },
+  {
+   "ok": true,
+   "msg": "chạm nút kỹ năng: thi triển (tốn linh lực)"
+  },
+  {
+   "ok": true,
+   "msg": "nút ảo không chồng lên nhau hay lên HUD / cần ảo"
+  },
+  {
+   "ok": true,
+   "msg": "mọi nút + HUD nằm trong màn hình"
+  },
+  {
+   "ok": true,
+   "msg": "nút ảo đủ lớn cho ngón tay (≥ 36 px)"
+  },
+  {
+   "ok": true,
+   "msg": "không lỗi console"
+  },
+  {
+   "ok": true,
+   "msg": "chạm: chọn Võ Tông + ngoại hình thứ 2, tạo nhân vật"
+  },
+  {
+   "ok": true,
+   "msg": "thiết bị cảm ứng: hiện cần ảo + nút chiêu"
+  },
+  {
+   "ok": true,
+   "msg": "kéo cần ảo phải / trái: nhân vật chạy theo, quay mặt"
+  },
+  {
+   "ok": true,
+   "msg": "thả cần ảo: dừng lại"
+  },
+  {
+   "ok": true,
+   "msg": "chạm ⇑ hai lần: nhảy rồi bay"
+  },
+  {
+   "ok": true,
+   "msg": "giữ ⇓: hạ xuống đất"
+  },
+  {
+   "ok": true,
+   "msg": "nút \"Nói chuyện\" hiện cạnh NPC, chạm mở hội thoại"
+  },
+  {
+   "ok": true,
+   "msg": "bảng hội thoại nằm gọn trong màn hình"
+  },
+  {
+   "ok": true,
+   "msg": "chạm vào quái trên màn: chọn làm mục tiêu"
+  },
+  {
+   "ok": true,
+   "msg": "giữ nút ⚔: tự tiến tới mục tiêu và đánh trúng"
+  },
+  {
+   "ok": true,
+   "msg": "chạm nút kỹ năng: thi triển (tốn linh lực)"
+  },
+  {
+   "ok": true,
+   "msg": "nút ảo không chồng lên nhau hay lên HUD / cần ảo"
+  },
+  {
+   "ok": true,
+   "msg": "mọi nút + HUD nằm trong màn hình"
+  },
+  {
+   "ok": true,
+   "msg": "nút ảo đủ lớn cho ngón tay (≥ 36 px)"
+  },
+  {
+   "ok": true,
+   "msg": "không lỗi console"
+  }
+ ],
+ "note": "Giả lập cảm ứng Playwright (Chromium headless, SwiftShader) – không phải thiết bị thật"
+}

@@ -227,12 +227,13 @@ const ShaderLibrary = {
 
   sky() {
     return new THREE.ShaderMaterial({
-      uniforms: { uTime: { value: 0 } },
+      // uTop / uMid / uLow: màu trời theo vùng (phiêu lưu đổi theo biome; mặc định = màu Vân Đài cũ)
+      uniforms: { uTime: { value: 0 }, uTop: { value: new THREE.Color(0.10, 0.17, 0.30) }, uMid: { value: new THREE.Color(0.46, 0.55, 0.66) }, uLow: { value: new THREE.Color(0.86, 0.74, 0.60) } },
       vertexShader: `varying vec3 vDir; void main(){ vDir = normalize(position); vec4 p = projectionMatrix * modelViewMatrix * vec4(position, 1.0); gl_Position = p.xyww; }`,
-      fragmentShader: `uniform float uTime; varying vec3 vDir;
+      fragmentShader: `uniform float uTime; uniform vec3 uTop, uMid, uLow; varying vec3 vDir;
         ${GLSL_NOISE}
         void main(){ float y = vDir.y;
-          vec3 top = vec3(0.10, 0.17, 0.30), mid = vec3(0.46, 0.55, 0.66), low = vec3(0.86, 0.74, 0.60);
+          vec3 top = uTop, mid = uMid, low = uLow;
           vec3 col = mix(low, mid, smoothstep(-0.05, 0.25, y)); col = mix(col, top, smoothstep(0.25, 0.9, y));
           vec3 sunDir = normalize(vec3(-0.45, 0.28, 0.85)); float s = max(dot(vDir, sunDir), 0.0);
           col += vec3(1.0, 0.82, 0.55) * (pow(s, 600.0) * 3.0 + pow(s, 12.0) * 0.35);
